@@ -61,7 +61,7 @@ export function EReader({
 
   // Funktion zum Markieren von Charakternamen im Text
   const highlightCharacters = (text: string) => {
-    if (!isCharacterHighlightingEnabled) return text;
+    if (!areCharactersVisible) return text;
     
     const foundCharacters = findCharactersInText(text);
     if (foundCharacters.length === 0) return text;
@@ -81,8 +81,13 @@ export function EReader({
       const className = `character-name${isSelected ? ' selected-for-comparison' : ''}`;
       
       const regex = new RegExp(`\\b${match.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'gi');
+      
+      const styleAttributes = isCharacterHighlightingEnabled 
+        ? `style="background-color: ${character.color}20; border-color: ${character.color}; color: ${character.color};"` 
+        : '';
+      
       highlightedText = highlightedText.replace(regex, (matched) => 
-        `<span class="${className}" data-character-id="${character.id}" data-character-name="${character.name}" data-character-color="${character.color}" style="background-color: ${character.color}20; border-color: ${character.color}; color: ${character.color};">${matched}</span>`
+        `<span class="${className}" data-character-id="${character.id}" data-character-name="${character.name}" data-character-color="${character.color}" ${styleAttributes}>${matched}</span>`
       );
     });
 
