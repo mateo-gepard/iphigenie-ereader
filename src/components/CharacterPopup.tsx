@@ -20,12 +20,19 @@ export function CharacterPopup({
 }: CharacterPopupProps) {
   const [showRelationship, setShowRelationship] = useState(false);
   const [relationshipText, setRelationshipText] = useState('');
+  const [isLoadingRelationship, setIsLoadingRelationship] = useState(false);
 
-  const handleComparisonClick = () => {
+  const handleComparisonClick = async () => {
     if (selectedForComparison && selectedForComparison.id !== character.id) {
-      const relationship = getCharacterRelationship(character.id, selectedForComparison.id);
-      setRelationshipText(relationship);
+      setIsLoadingRelationship(true);
       setShowRelationship(true);
+      
+      // Simuliere kurze Verzögerung für glatte Animation
+      setTimeout(() => {
+        const relationship = getCharacterRelationship(character.id, selectedForComparison.id);
+        setRelationshipText(relationship);
+        setIsLoadingRelationship(false);
+      }, 800);
     } else {
       onSelectForComparison(character);
     }
@@ -101,17 +108,29 @@ export function CharacterPopup({
             <>
               <div className="character-section">
                 <h4>🔗 Charakterbeziehung</h4>
-                <div className="relationship-content">
-                  {relationshipText.split('\n').map((line, index) => (
-                    <p key={index}>{line}</p>
-                  ))}
-                </div>
+                {isLoadingRelationship ? (
+                  <div className="relationship-loading">
+                    <div className="loading-spinner-small"></div>
+                    <p>✨ Beziehungsanalyse wird geladen...</p>
+                    <small>Charakterverbindungen werden analysiert</small>
+                  </div>
+                ) : (
+                  <div className="relationship-content">
+                    {relationshipText.split('\n').map((line, index) => (
+                      <p key={index}>{line}</p>
+                    ))}
+                  </div>
+                )}
               </div>
 
               <div className="character-popup-actions">
                 <button 
                   className="back-button"
-                  onClick={() => setShowRelationship(false)}
+                  onClick={() => {
+                    setShowRelationship(false);
+                    setIsLoadingRelationship(false);
+                    setRelationshipText('');
+                  }}
                 >
                   ← Zurück zu {character.name}
                 </button>
