@@ -145,4 +145,43 @@ Antworte ausschließlich im vorgegebenen JSON-Format.`;
     const key = `${actNumber}-${sceneNumber}`;
     return contexts[key] || 'Allgemeiner dramatischer Kontext von Goethes klassischem Drama';
   }
+
+  static async answerCustomQuestion(selectedText: string, question: string): Promise<string> {
+    try {
+      const completion = await openai.chat.completions.create({
+        model: "gpt-3.5-turbo",
+        messages: [
+          {
+            role: "system",
+            content: `Du bist ein Germanistik-Professor mit Expertise in Goethes "Iphigenie auf Tauris". 
+            Beantworte Fragen zum ausgewählten Text präzise und wissenschaftlich fundiert.
+            
+            ANTWORT-RICHTLINIEN:
+            - Beziehe dich direkt auf den ausgewählten Text
+            - Verwende literaturwissenschaftliche Terminologie
+            - Erkläre verständlich für Schüler/Studenten
+            - Gib konkrete Textbelege
+            - Berücksichtige den dramatischen Kontext`
+          },
+          {
+            role: "user",
+            content: `AUSGEWÄHLTER TEXT:
+"${selectedText}"
+
+FRAGE:
+${question}
+
+Bitte beantworte die Frage bezogen auf diesen Textausschnitt aus Goethes "Iphigenie auf Tauris".`
+          }
+        ],
+        max_tokens: 800,
+        temperature: 0.7
+      });
+
+      return completion.choices[0]?.message?.content || 'Entschuldigung, ich konnte keine Antwort generieren.';
+    } catch (error) {
+      console.error('Fehler beim Beantworten der Frage:', error);
+      throw new Error('Die Frage konnte nicht beantwortet werden.');
+    }
+  }
 }

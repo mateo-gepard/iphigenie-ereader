@@ -1,4 +1,6 @@
+import { useState, useEffect } from 'react';
 import type { ExplanationResponse } from '../types';
+import { OpenAIService } from '../services/openaiService';
 import './ExplanationPanel.css';
 
 interface ExplanationPanelProps {
@@ -8,6 +10,31 @@ interface ExplanationPanelProps {
 }
 
 export function ExplanationPanel({ selectedText, explanation, isLoading }: ExplanationPanelProps) {
+  const [customQuestion, setCustomQuestion] = useState('');
+  const [customAnswer, setCustomAnswer] = useState('');
+  const [isAnswering, setIsAnswering] = useState(false);
+
+  // Reset custom question when new text is selected
+  useEffect(() => {
+    setCustomQuestion('');
+    setCustomAnswer('');
+  }, [selectedText]);
+
+  const handleQuestionSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!customQuestion.trim() || !selectedText) return;
+
+    setIsAnswering(true);
+    try {
+      const answer = await OpenAIService.answerCustomQuestion(selectedText, customQuestion);
+      setCustomAnswer(answer);
+    } catch (error) {
+      setCustomAnswer('Entschuldigung, die Frage konnte nicht beantwortet werden.');
+    } finally {
+      setIsAnswering(false);
+    }
+  };
+
   if (!selectedText) {
     return (
       <div className="explanation-panel empty">
@@ -77,6 +104,59 @@ export function ExplanationPanel({ selectedText, explanation, isLoading }: Expla
                   <li key={index} className="tag theme">{theme}</li>
                 ))}
               </ul>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Custom Question Section */}
+      {selectedText && (explanation || !isLoading) && (
+        <div className="custom-question-section">
+          <h4>❓ Eigene Frage zum Text</h4>
+          <form onSubmit={handleQuestionSubmit} className="question-form">
+            <div className="input-group">
+              <textarea
+                value={customQuestion}
+                onChange={(e) => setCustomQuestion(e.target.value)}
+                placeholder="Stellen Sie hier Ihre Frage zum ausgewählten Text..."
+                className="question-input"
+                rows={3}
+                disabled={isAnswering}
+              />
+              <button
+                type="submit"
+                disabled={!customQuestion.trim() || isAnswering}
+                className="ask-button"
+              >
+                {isAnswering ? (
+                  <>
+                    <span className="spinner"></span>
+                    Analysiere...
+                  </>
+                ) : (
+                  <>
+                    🤖 Fragen
+                  </>
+                )}
+              </button>
+            </div>
+          </form>
+
+          {customAnswer && (
+            <div className="custom-answer">
+              <h5>💡 Antwort:</h5>
+              <div className="answer-content">
+                {customAnswer}
+              </div>
+              <button 
+                onClick={() => {
+                  setCustomAnswer('');
+                  setCustomQuestion('');
+                }}
+                className="clear-button"
+              >
+                Neue Frage stellen
+              </button>
             </div>
           )}
         </div>
