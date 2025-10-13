@@ -16,7 +16,5 @@
       "dest": "/index.html"
     }
   ],
-  "env": {
-    "VITE_OPENAI_API_KEY": "@openai_api_key"
-  }
+  "buildCommand": "npm run build"
 }
