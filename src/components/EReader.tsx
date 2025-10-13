@@ -7,7 +7,16 @@ import './EReader.css';
 
 interface EReaderProps {
   text: IphigenieText;
-  onTextSelection: (text: string, explanation: ExplanationResponse | null, loading: boolean) => void;
+  onTextSelection: (
+    text: string, 
+    explanation: ExplanationResponse | null, 
+    loading: boolean,
+    context?: {
+      type: 'verse' | 'stanza' | 'scene';
+      actNumber?: number;
+      sceneNumber?: number;
+    }
+  ) => void;
   onCharacterSelection: (character: Character) => void;
   onCharacterComparison: (character: Character) => void;
   characterForComparison: Character | null;
@@ -38,7 +47,14 @@ export function EReader({
 
     setSelectedVerseId(verse.id);
     setSelectedStanzaId('');
-    onTextSelection(verse.text, null, true);
+    
+    const contextInfo = {
+      type: 'verse' as const,
+      actNumber,
+      sceneNumber
+    };
+    
+    onTextSelection(verse.text, null, true, contextInfo);
 
     try {
       const explanation = await OpenAIService.getExplanation({
@@ -47,7 +63,7 @@ export function EReader({
         actNumber,
         sceneNumber
       });
-      onTextSelection(verse.text, explanation, false);
+      onTextSelection(verse.text, explanation, false, contextInfo);
     } catch (error) {
       console.error('Fehler beim Laden der Erklärung:', error);
       onTextSelection(verse.text, null, false);
@@ -105,9 +121,15 @@ export function EReader({
 
     const stanzaText = stanza.verses.map((v: any) => v.text).join('\n');
     
+    const contextInfo = {
+      type: 'stanza' as const,
+      actNumber,
+      sceneNumber
+    };
+    
     setSelectedStanzaId(stanza.id);
     setSelectedVerseId('');
-    onTextSelection(stanzaText, null, true);
+    onTextSelection(stanzaText, null, true, contextInfo);
 
     try {
       const explanation = await OpenAIService.getExplanation({
@@ -116,10 +138,10 @@ export function EReader({
         actNumber,
         sceneNumber
       });
-      onTextSelection(stanzaText, explanation, false);
+      onTextSelection(stanzaText, explanation, false, contextInfo);
     } catch (error) {
       console.error('Fehler beim Laden der Erklärung:', error);
-      onTextSelection(stanzaText, null, false);
+      onTextSelection(stanzaText, null, false, contextInfo);
     }
   };
 

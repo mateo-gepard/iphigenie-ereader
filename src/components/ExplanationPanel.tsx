@@ -26,6 +26,8 @@ interface ExplanationPanelProps {
   characterForComparison: Character | null;
   onCharacterComparisonSelect: (character: Character) => void;
   areCharacterExplanationsVisible: boolean;
+  canRegenerate: boolean;
+  onRegenerate: () => Promise<void>;
 }
 
 export function ExplanationPanel({ 
@@ -35,7 +37,9 @@ export function ExplanationPanel({
   selectedCharacter, 
   characterForComparison, 
   onCharacterComparisonSelect,
-  areCharacterExplanationsVisible
+  areCharacterExplanationsVisible,
+  canRegenerate,
+  onRegenerate
 }: ExplanationPanelProps) {
   const [customQuestion, setCustomQuestion] = useState('');
   const [customAnswer, setCustomAnswer] = useState('');
@@ -164,12 +168,48 @@ export function ExplanationPanel({
         <div className="explanation-content">
           {explanation.fromCache && (
             <div className="cache-indicator">
-              <span className="cache-badge">💾 Aus Cache geladen</span>
+              <div className="cache-info-row">
+                <span className="cache-badge">
+                  {explanation.cacheSource === 'global' ? '🌍 Global Cache' : '� Lokaler Cache'}
+                  {explanation.usageCount && ` (${explanation.usageCount}x verwendet)`}
+                </span>
+                {canRegenerate && (
+                  <button 
+                    className="regenerate-btn"
+                    onClick={onRegenerate}
+                    title="Neue Analyse generieren"
+                  >
+                    🔄 Neu generieren
+                  </button>
+                )}
+              </div>
+              {explanation.generatedAt && (
+                <div className="cache-timestamp">
+                  Erstellt: {new Date(explanation.generatedAt).toLocaleDateString('de-DE', {
+                    year: 'numeric',
+                    month: 'short',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                  })}
+                </div>
+              )}
             </div>
           )}
           
           <div className="explanation-section">
-            <h4>📚 Erklärung</h4>
+            <div className="section-header">
+              <h4>📚 Erklärung</h4>
+              {canRegenerate && (
+                <button 
+                  className="regenerate-btn small"
+                  onClick={onRegenerate}
+                  title={explanation.fromCache ? "Neue Analyse generieren (überschreibt Cache)" : "Alternative Analyse generieren"}
+                >
+                  {explanation.fromCache ? '🔄' : '🎲'} 
+                </button>
+              )}
+            </div>
             <p>{explanation.explanation}</p>
           </div>
 

@@ -37,6 +37,7 @@ export interface ExplanationRequest {
   context: 'verse' | 'stanza' | 'scene';
   actNumber?: number;
   sceneNumber?: number;
+  forceRegenerate?: boolean;
 }
 
 export interface LiteraryDevice {
@@ -55,4 +56,7 @@ export interface ExplanationResponse {
   characterAnalysis?: string;
   dramaticFunction?: string;
   fromCache?: boolean;
+  cacheSource?: 'global' | 'local' | 'none';
+  generatedAt?: string;
+  usageCount?: number;
 }

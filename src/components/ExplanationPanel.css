@@ -376,8 +376,17 @@
 /* Cache Indicator */
 .cache-indicator {
   margin-bottom: 1rem;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 0.75rem;
+}
+
+.cache-info-row {
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
 }
 
 .cache-badge {
@@ -391,6 +400,55 @@
   align-items: center;
   gap: 0.25rem;
   animation: fadeInSlide 0.5s ease-out;
+}
+
+.cache-timestamp {
+  font-size: 0.7rem;
+  color: #64748b;
+  font-style: italic;
+}
+
+/* Regenerate Button */
+.regenerate-btn {
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  color: white;
+  border: none;
+  padding: 0.4rem 0.8rem;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-weight: 500;
+}
+
+.regenerate-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+}
+
+.regenerate-btn:active {
+  transform: translateY(0);
+}
+
+.regenerate-btn.small {
+  padding: 0.2rem 0.4rem;
+  font-size: 0.9rem;
+  border-radius: 4px;
+}
+
+/* Section Header */
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.section-header h4 {
+  margin: 0;
 }
 
 @keyframes fadeInSlide {

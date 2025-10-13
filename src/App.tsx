@@ -4,6 +4,7 @@ import { ExplanationPanel } from './components/ExplanationPanel';
 import { iphigenieText } from './data/iphigenieText';
 import type { ExplanationResponse } from './types';
 import type { Character } from './data/characters';
+import { OpenAIService } from './services/openaiService';
 import './App.css';
 
 function App() {
@@ -16,11 +17,39 @@ function App() {
   const [areCharactersVisible, setAreCharactersVisible] = useState(true);
   const [isCharacterHighlightingEnabled, setIsCharacterHighlightingEnabled] = useState(true);
   const [areCharacterExplanationsVisible, setAreCharacterExplanationsVisible] = useState(true);
+  const [canRegenerate, setCanRegenerate] = useState(false);
+  const [currentContext, setCurrentContext] = useState<{
+    context: 'verse' | 'stanza' | 'scene';
+    actNumber?: number;
+    sceneNumber?: number;
+  } | null>(null);
 
-  const handleTextSelection = (text: string, explanation: ExplanationResponse | null, loading: boolean) => {
+  const handleTextSelection = (
+    text: string, 
+    explanation: ExplanationResponse | null, 
+    loading: boolean,
+    context?: {
+      type: 'verse' | 'stanza' | 'scene';
+      actNumber?: number;
+      sceneNumber?: number;
+    }
+  ) => {
     setSelectedText(text);
     setExplanation(explanation);
     setIsLoading(loading);
+    
+    // Speichere Kontext für Regenerierung
+    if (context) {
+      setCurrentContext({
+        context: context.type,
+        actNumber: context.actNumber,
+        sceneNumber: context.sceneNumber
+      });
+    }
+    
+    // Zeige Regenerierung-Option nur für Erklärungen (nicht für Loading-States)
+    setCanRegenerate(!!explanation && !loading);
+    
     // Automatisch Erklärungen anzeigen wenn neuer Text ausgewählt wird
     if (explanation && !isExplanationVisible) {
       setIsExplanationVisible(true);
@@ -61,6 +90,31 @@ function App() {
 
   const toggleCharacterExplanationsVisibility = () => {
     setAreCharacterExplanationsVisible(!areCharacterExplanationsVisible);
+  };
+
+  const handleRegenerateExplanation = async () => {
+    if (!selectedText || !currentContext) return;
+    
+    setIsLoading(true);
+    setCanRegenerate(false);
+    
+    try {
+      const explanation = await OpenAIService.getExplanation({
+        text: selectedText,
+        context: currentContext.context,
+        actNumber: currentContext.actNumber,
+        sceneNumber: currentContext.sceneNumber,
+        forceRegenerate: true
+      });
+      
+      setExplanation(explanation);
+      setCanRegenerate(true);
+    } catch (error) {
+      console.error('Fehler bei der Regenerierung:', error);
+      setCanRegenerate(true);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -127,6 +181,8 @@ function App() {
               characterForComparison={characterForComparison}
               onCharacterComparisonSelect={handleCharacterComparison}
               areCharacterExplanationsVisible={areCharacterExplanationsVisible}
+              canRegenerate={canRegenerate}
+              onRegenerate={handleRegenerateExplanation}
             />
           </div>
         )}

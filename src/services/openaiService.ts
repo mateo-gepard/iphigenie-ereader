@@ -13,28 +13,41 @@ const openai = new OpenAI({
 export class OpenAIService {
   static async getExplanation(request: ExplanationRequest): Promise<ExplanationResponse> {
     try {
-      // Überprüfe globalen Cache zuerst
-      const globalCachedResult = await GlobalCacheService.getCachedExplanation(
-        request.text,
-        request.context,
-        request.actNumber,
-        request.sceneNumber
-      );
+      // Überspringe Cache nur wenn explizit Regenerierung gewünscht
+      if (!request.forceRegenerate) {
+        // Überprüfe globalen Cache zuerst
+        const globalCachedResult = await GlobalCacheService.getCachedExplanation(
+          request.text,
+          request.context,
+          request.actNumber,
+          request.sceneNumber
+        );
 
-      if (globalCachedResult) {
-        return globalCachedResult;
-      }
+        if (globalCachedResult) {
+          return { 
+            ...globalCachedResult, 
+            cacheSource: 'global',
+            fromCache: true 
+          };
+        }
 
-      // Fallback auf lokalen Cache
-      const localCachedResult = CacheService.getCachedExplanation(
-        request.text,
-        request.context,
-        request.actNumber,
-        request.sceneNumber
-      );
+        // Fallback auf lokalen Cache
+        const localCachedResult = CacheService.getCachedExplanation(
+          request.text,
+          request.context,
+          request.actNumber,
+          request.sceneNumber
+        );
 
-      if (localCachedResult) {
-        return { ...localCachedResult, fromCache: true };
+        if (localCachedResult) {
+          return { 
+            ...localCachedResult, 
+            fromCache: true, 
+            cacheSource: 'local' 
+          };
+        }
+      } else {
+        console.log('🔄 Force regeneration requested, skipping cache');
       }
 
       const prompt = this.buildPrompt(request);
@@ -106,12 +119,20 @@ export class OpenAIService {
         };
       }
 
+      // Füge Metadaten hinzu
+      const enrichedResponse = {
+        ...explanationResponse,
+        cacheSource: 'none' as const,
+        generatedAt: new Date().toISOString(),
+        usageCount: 1
+      };
+
       // Cache die erfolgreiche Antwort global und lokal
       await Promise.all([
         GlobalCacheService.cacheExplanation(
           request.text,
           request.context,
-          explanationResponse,
+          enrichedResponse,
           request.actNumber,
           request.sceneNumber
         ),
@@ -120,7 +141,7 @@ export class OpenAIService {
           CacheService.cacheExplanation(
             request.text,
             request.context,
-            explanationResponse,
+            enrichedResponse,
             request.actNumber,
             request.sceneNumber
           );
@@ -128,7 +149,7 @@ export class OpenAIService {
         })
       ]);
 
-      return explanationResponse;
+      return enrichedResponse;
     } catch (error) {
       console.error('Fehler beim Abrufen der Erklärung:', error);
       return {

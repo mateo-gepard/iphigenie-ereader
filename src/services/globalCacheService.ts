@@ -153,7 +153,13 @@ export class GlobalCacheService {
         this.saveToLocalCache(docId, data.response);
 
         console.log('☁️ Firebase Cache Hit:', docId, 'Usage:', data.usageCount + 1);
-        return { ...data.response, fromCache: true };
+        return { 
+          ...data.response, 
+          fromCache: true, 
+          cacheSource: 'global',
+          usageCount: data.usageCount + 1,
+          generatedAt: data.timestamp.toDate().toISOString()
+        };
       }
 
       console.log('❌ Global Cache Miss:', docId);
