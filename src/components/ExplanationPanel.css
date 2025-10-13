@@ -204,12 +204,12 @@
   background: #a0aec0;
 }
 
-/* Mobile optimizations */
+/* Mobile optimizations - Split Screen */
 @media (max-width: 768px) {
   .explanation-panel {
     padding: 1rem;
     font-size: 0.95rem;
-    max-height: 60vh;
+    height: 100%; /* Use full container height */
   }
   
   .explanation-section {
@@ -264,7 +264,7 @@
   .explanation-panel {
     padding: 0.75rem;
     font-size: 0.9rem;
-    max-height: 50vh;
+    height: 100%; /* Use full available height */
   }
   
   .explanation-section {
@@ -290,15 +290,29 @@
   }
 }
 
-/* Landscape mobile adjustments */
+/* Landscape mobile adjustments - Side by Side */
 @media (max-width: 768px) and (orientation: landscape) {
   .explanation-panel {
-    max-height: 80vh;
-    padding: 0.75rem 1rem;
+    height: 100%;
+    padding: 0.75rem;
+    font-size: 0.9rem;
   }
   
   .explanation-section {
-    padding: 0.75rem;
-    margin-bottom: 0.75rem;
+    padding: 0.5rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  .explanation-section h4 {
+    font-size: 1rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  .empty-state {
+    padding: 0.5rem;
+  }
+  
+  .empty-state h3 {
+    font-size: 1.1rem;
   }
 }

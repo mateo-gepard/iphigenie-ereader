@@ -55,13 +55,22 @@
 @media (max-width: 1024px) {
   .app-main {
     grid-template-columns: 1fr;
+    grid-template-rows: 1fr auto;
     gap: 1rem;
     padding: 1rem;
+    height: calc(100vh - 140px); /* Account for header height */
+  }
+  
+  .reader-container {
+    overflow-y: auto;
+    min-height: 0; /* Allow flexbox to shrink */
   }
   
   .explanation-container {
     position: static;
-    max-height: none;
+    max-height: 40vh; /* Take up 40% of viewport height */
+    min-height: 200px; /* Minimum height for usability */
+    overflow-y: auto;
   }
   
   .app-header {
@@ -69,7 +78,7 @@
   }
 }
 
-/* Mobile Layout */
+/* Mobile Layout - Split Screen Top/Bottom */
 @media (max-width: 768px) {
   .app-header {
     padding: 1rem;
@@ -87,16 +96,28 @@
   .app-main {
     padding: 0.5rem;
     gap: 0.5rem;
+    height: calc(100vh - 120px); /* More precise height calculation */
+    grid-template-rows: 1fr 40vh; /* Text takes remaining space, explanation 40% */
+    display: grid;
   }
   
-  .reader-container,
+  .reader-container {
+    border-radius: 8px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+    overflow-y: auto;
+    min-height: 0;
+  }
+  
   .explanation-container {
     border-radius: 8px;
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+    max-height: 40vh;
+    min-height: 200px;
+    overflow-y: auto;
   }
 }
 
-/* Small Mobile */
+/* Small Mobile - Compact Split Screen */
 @media (max-width: 480px) {
   .app-header h1 {
     font-size: 1.5rem;
@@ -108,6 +129,40 @@
   
   .app-main {
     padding: 0.25rem;
+    gap: 0.25rem;
+    height: calc(100vh - 100px);
+    grid-template-rows: 1fr 35vh; /* Smaller explanation panel on very small screens */
+  }
+  
+  .explanation-container {
+    max-height: 35vh;
+    min-height: 150px;
+  }
+}
+
+/* Mobile Landscape - Side by Side */
+@media (max-width: 768px) and (orientation: landscape) {
+  .app-main {
+    grid-template-columns: 1fr 1fr; /* Side by side in landscape */
+    grid-template-rows: 1fr;
+    height: calc(100vh - 80px); /* Smaller header in landscape */
+  }
+  
+  .app-header {
+    padding: 0.5rem 1rem;
+  }
+  
+  .app-header h1 {
+    font-size: 1.4rem;
+  }
+  
+  .reader-container {
+    max-height: calc(100vh - 90px);
+  }
+  
+  .explanation-container {
+    max-height: calc(100vh - 90px);
+    min-height: 0;
   }
 }
 
