@@ -1,5 +1,6 @@
 import OpenAI from 'openai';
 import type { ExplanationRequest, ExplanationResponse } from '../types';
+import { CacheService } from './cacheService';
 
 // Note: In a production app, you should use environment variables and a backend API
 // to keep your API key secure. This is for demonstration purposes only.
@@ -11,6 +12,18 @@ const openai = new OpenAI({
 export class OpenAIService {
   static async getExplanation(request: ExplanationRequest): Promise<ExplanationResponse> {
     try {
+      // Überprüfe Cache zuerst
+      const cachedResult = CacheService.getCachedExplanation(
+        request.text,
+        request.context,
+        request.actNumber,
+        request.sceneNumber
+      );
+
+      if (cachedResult) {
+        return { ...cachedResult, fromCache: true };
+      }
+
       const prompt = this.buildPrompt(request);
       
       const completion = await openai.chat.completions.create({
@@ -65,10 +78,11 @@ export class OpenAIService {
       }
 
       // Try to parse JSON response, fallback to plain text if it fails
+      let explanationResponse: ExplanationResponse;
       try {
-        return JSON.parse(response) as ExplanationResponse;
+        explanationResponse = JSON.parse(response) as ExplanationResponse;
       } catch {
-        return {
+        explanationResponse = {
           explanation: response,
           summary: "Zusammenfassung nicht verfügbar",
           background: "Hintergrundinformationen nicht verfügbar",
@@ -78,6 +92,17 @@ export class OpenAIService {
           dramaticFunction: "Dramatische Funktion nicht verfügbar"
         };
       }
+
+      // Cache die erfolgreiche Antwort
+      CacheService.cacheExplanation(
+        request.text,
+        request.context,
+        explanationResponse,
+        request.actNumber,
+        request.sceneNumber
+      );
+
+      return explanationResponse;
     } catch (error) {
       console.error('Fehler beim Abrufen der Erklärung:', error);
       return {

@@ -3,6 +3,7 @@ import type { ExplanationResponse } from '../types';
 import type { Character } from '../data/characters';
 import { OpenAIService } from '../services/openaiService';
 import { getCharacterRelationship } from '../data/characters';
+import { CacheService } from '../services/cacheService';
 import './ExplanationPanel.css';
 
 const getCategoryIcon = (category?: string): string => {
@@ -38,6 +39,7 @@ export function ExplanationPanel({
   const [customQuestion, setCustomQuestion] = useState('');
   const [customAnswer, setCustomAnswer] = useState('');
   const [isAnswering, setIsAnswering] = useState(false);
+  const [showCacheStats, setShowCacheStats] = useState(false);
 
   // Reset custom question when new text is selected
   useEffect(() => {
@@ -158,6 +160,12 @@ export function ExplanationPanel({
 
       {explanation && !isLoading && (
         <div className="explanation-content">
+          {explanation.fromCache && (
+            <div className="cache-indicator">
+              <span className="cache-badge">💾 Aus Cache geladen</span>
+            </div>
+          )}
+          
           <div className="explanation-section">
             <h4>📚 Erklärung</h4>
             <p>{explanation.explanation}</p>
@@ -267,6 +275,43 @@ export function ExplanationPanel({
           <p>Die Erklärung konnte nicht geladen werden. Bitte versuchen Sie es erneut.</p>
         </div>
       )}
+
+      {/* Cache Status */}
+      <div className="cache-status">
+        <button 
+          className="cache-stats-toggle"
+          onClick={() => setShowCacheStats(!showCacheStats)}
+          title="Cache-Statistiken anzeigen"
+        >
+          💾 Cache ({CacheService.getCacheStats().totalEntries})
+        </button>
+        
+        {showCacheStats && (
+          <div className="cache-stats-details">
+            {(() => {
+              const stats = CacheService.getCacheStats();
+              return (
+                <div className="cache-info">
+                  <p><strong>Gespeicherte Erklärungen:</strong> {stats.totalEntries}</p>
+                  <p><strong>Cache-Größe:</strong> {stats.cacheSize}</p>
+                  {stats.oldestEntry && (
+                    <p><strong>Ältester Eintrag:</strong> {stats.oldestEntry.toLocaleDateString('de-DE')}</p>
+                  )}
+                  <button 
+                    className="clear-cache-btn"
+                    onClick={() => {
+                      CacheService.clearCache();
+                      setShowCacheStats(false);
+                    }}
+                  >
+                    🗑️ Cache leeren
+                  </button>
+                </div>
+              );
+            })()}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

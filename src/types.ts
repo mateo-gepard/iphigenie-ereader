@@ -54,4 +54,5 @@ export interface ExplanationResponse {
   themes?: string[];
   characterAnalysis?: string;
   dramaticFunction?: string;
+  fromCache?: boolean;
 }
