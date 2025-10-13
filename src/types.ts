@@ -38,6 +38,9 @@ export interface ExplanationRequest {
   actNumber?: number;
   sceneNumber?: number;
   forceRegenerate?: boolean;
+  isCharacterComparison?: boolean;
+  character1?: any;
+  character2?: any;
 }
 
 export interface LiteraryDevice {

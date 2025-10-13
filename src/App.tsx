@@ -23,6 +23,7 @@ function App() {
     actNumber?: number;
     sceneNumber?: number;
   } | null>(null);
+  const [isGeneratingComparison, setIsGeneratingComparison] = useState(false);
 
   const handleTextSelection = (
     text: string, 
@@ -117,6 +118,43 @@ function App() {
     }
   };
 
+  const handleGenerateComparison = async () => {
+    if (!selectedCharacter || !characterForComparison) return;
+    
+    setIsGeneratingComparison(true);
+    setIsLoading(true);
+    setSelectedText('');
+    setExplanation(null);
+    
+    try {
+      // Erstelle einen Vergleichstext für die API
+      const comparisonText = `Charaktervergleich zwischen ${selectedCharacter.name} und ${characterForComparison.name}`;
+      
+      const explanation = await OpenAIService.getExplanation({
+        text: comparisonText,
+        context: 'scene',
+        forceRegenerate: true, // Immer neue Vergleiche generieren
+        isCharacterComparison: true,
+        character1: selectedCharacter,
+        character2: characterForComparison
+      });
+      
+      setSelectedText(comparisonText);
+      setExplanation(explanation);
+      setCanRegenerate(true);
+      
+      // Panel automatisch anzeigen
+      if (!isExplanationVisible) {
+        setIsExplanationVisible(true);
+      }
+    } catch (error) {
+      console.error('Fehler beim Generieren des Vergleichs:', error);
+    } finally {
+      setIsLoading(false);
+      setIsGeneratingComparison(false);
+    }
+  };
+
   return (
     <div className="app">
       <header className="app-header">
@@ -155,6 +193,17 @@ function App() {
           >
             {areCharacterExplanationsVisible ? '📝' : '📋'}
           </button>
+          
+          {selectedCharacter && characterForComparison && (
+            <button
+              className="compare-btn"
+              onClick={handleGenerateComparison}
+              disabled={isGeneratingComparison}
+              title={`Vergleich zwischen ${selectedCharacter.name} und ${characterForComparison.name} generieren`}
+            >
+              {isGeneratingComparison ? '⏳' : '⚖️'} Vergleichen
+            </button>
+          )}
         </div>
       </header>
       

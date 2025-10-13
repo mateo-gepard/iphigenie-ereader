@@ -166,6 +166,11 @@ export class OpenAIService {
   }
 
   private static buildPrompt(request: ExplanationRequest): string {
+    // Spezielle Behandlung für Charaktervergleiche
+    if (request.isCharacterComparison && request.character1 && request.character2) {
+      return this.buildCharacterComparisonPrompt(request.character1, request.character2);
+    }
+
     const contextInfo = request.actNumber && request.sceneNumber 
       ? `${request.actNumber}. Aufzug, ${request.sceneNumber}. Szene` 
       : '';
@@ -263,5 +268,44 @@ Bitte beantworte die Frage bezogen auf diesen Textausschnitt aus Goethes "Iphige
       console.error('Fehler beim Beantworten der Frage:', error);
       throw new Error('Die Frage konnte nicht beantwortet werden.');
     }
+  }
+
+  private static buildCharacterComparisonPrompt(character1: any, character2: any): string {
+    return `ANALYSE-AUFTRAG: Charaktervergleich in Goethes "Iphigenie auf Tauris"
+
+VERGLEICHSCHARAKTERE:
+CHARACTER 1: ${character1.name}
+- Rolle: ${character1.role}
+- Beschreibung: ${character1.description}
+- Schlüsseleigenschaften: ${character1.keyTraits?.join(', ') || 'Nicht angegeben'}
+
+CHARACTER 2: ${character2.name}
+- Rolle: ${character2.role}
+- Beschreibung: ${character2.description}
+- Schlüsseleigenschaften: ${character2.keyTraits?.join(', ') || 'Nicht angegeben'}
+
+ANALYSE-SCHWERPUNKTE:
+1. CHARAKTERENTWICKLUNG: Wie entwickeln sich beide Figuren im Verlauf des Dramas?
+2. MOTIVATIONSSTRUKTUR: Was treibt die jeweiligen Charaktere an?
+3. KONFLIKTLINIEN: Welche inneren und äußeren Konflikte prägen die Figuren?
+4. BEZIEHUNGSDYNAMIK: Wie stehen die Charaktere zueinander? Welche Spannungen entstehen?
+5. SYMBOLISCHE FUNKTION: Welche Werte/Ideen verkörpern sie in Goethes Humanitätskonzept?
+6. SPRACHLICHE CHARAKTERISIERUNG: Wie drückt sich ihr Charakter in ihrer Sprache aus?
+7. DRAMATURGISCHE ROLLE: Welche Funktion haben sie für die Handlungsführung?
+
+VERGLEICHSASPEKTE:
+- Gemeinsamkeiten und Unterschiede in Weltanschauung und Verhalten
+- Verschiedene Lösungsansätze für ähnliche Dilemmata
+- Komplementäre oder kontrastierende Charakterzüge
+- Entwicklungsbogen und Wandel der Figuren
+- Repräsentation verschiedener gesellschaftlicher/kultureller Werte
+
+WICHTIG:
+- Berücksichtige die Gesamtstruktur des Dramas
+- Beziehe konkrete Textstellen mit ein (wenn möglich)
+- Analysiere die Figuren im Kontext der Weimarer Klassik
+- Erkläre die Bedeutung für Goethes Humanitätsideal
+
+Antworte ausschließlich im vorgegebenen JSON-Format.`;
   }
 }
