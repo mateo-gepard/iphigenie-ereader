@@ -160,7 +160,8 @@ export function ExplanationPanel({
       {isLoading && (
         <div className="loading">
           <div className="loading-spinner"></div>
-          <p>Erklärung wird generiert...</p>
+          <p>✨ Literaturanalyse wird vorbereitet...</p>
+          <small>Bitte einen Moment Geduld</small>
         </div>
       )}
 

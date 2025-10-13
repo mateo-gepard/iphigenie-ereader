@@ -11,8 +11,30 @@ import {
   deleteDoc,
   Timestamp 
 } from 'firebase/firestore';
-import { db } from '../config/firebase';
 import type { ExplanationResponse } from '../types';
+
+// Firebase-Verfügbarkeit prüfen
+const isFirebaseConfigured = () => {
+  return !!(
+    import.meta.env.VITE_FIREBASE_PROJECT_ID &&
+    import.meta.env.VITE_FIREBASE_API_KEY &&
+    import.meta.env.VITE_FIREBASE_AUTH_DOMAIN
+  );
+};
+
+// Firebase DB importieren nur wenn konfiguriert
+let db: any = null;
+if (isFirebaseConfigured()) {
+  try {
+    const { db: firebaseDb } = await import('../config/firebase');
+    db = firebaseDb;
+    console.log('✅ Firebase initialized successfully');
+  } catch (error) {
+    console.warn('⚠️ Firebase initialization failed:', error);
+  }
+} else {
+  console.warn('⚠️ Firebase not configured - using local cache only');
+}
 
 interface GlobalCachedExplanation {
   response: ExplanationResponse;

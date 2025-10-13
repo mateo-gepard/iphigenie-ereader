@@ -44,8 +44,10 @@ export function EReader({
       sceneNumber
     };
 
+    // Zeige immer kurz Loading-Animation für besseres UX
+    onTextSelection(verse.text, null, true, contextInfo);
+    
     try {
-      // Erste Cache-Überprüfung - wenn Cache vorhanden, zeige sofort ohne Loading
       const explanation = await OpenAIService.getExplanation({
         text: verse.text,
         context: 'verse',
@@ -53,15 +55,14 @@ export function EReader({
         sceneNumber
       });
 
-      // Wenn aus Cache geladen (fromCache: true), zeige sofort ohne Loading-State
-      if (explanation.fromCache) {
+      // Bei gecachtem Inhalt: kurze Verzögerung für glatte Animation
+      // Bei neuem Inhalt: normale Anzeige
+      const delay = explanation.fromCache ? 300 : 0;
+      
+      setTimeout(() => {
         onTextSelection(verse.text, explanation, false, contextInfo);
-      } else {
-        // Nur bei neuen API-Calls Loading-State anzeigen
-        onTextSelection(verse.text, null, true, contextInfo);
-        // Dann das frische Ergebnis anzeigen
-        onTextSelection(verse.text, explanation, false, contextInfo);
-      }
+      }, delay);
+      
     } catch (error) {
       console.error('Fehler beim Laden der Erklärung:', error);
       onTextSelection(verse.text, null, false);
@@ -128,8 +129,10 @@ export function EReader({
     setSelectedStanzaId(stanza.id);
     setSelectedVerseId('');
 
+    // Zeige immer kurz Loading-Animation für besseres UX
+    onTextSelection(stanzaText, null, true, contextInfo);
+    
     try {
-      // Erste Cache-Überprüfung - wenn Cache vorhanden, zeige sofort ohne Loading
       const explanation = await OpenAIService.getExplanation({
         text: stanzaText,
         context: 'stanza',
@@ -137,15 +140,14 @@ export function EReader({
         sceneNumber
       });
 
-      // Wenn aus Cache geladen (fromCache: true), zeige sofort ohne Loading-State
-      if (explanation.fromCache) {
+      // Bei gecachtem Inhalt: kurze Verzögerung für glatte Animation
+      // Bei neuem Inhalt: normale Anzeige
+      const delay = explanation.fromCache ? 300 : 0;
+      
+      setTimeout(() => {
         onTextSelection(stanzaText, explanation, false, contextInfo);
-      } else {
-        // Nur bei neuen API-Calls Loading-State anzeigen
-        onTextSelection(stanzaText, null, true, contextInfo);
-        // Dann das frische Ergebnis anzeigen
-        onTextSelection(stanzaText, explanation, false, contextInfo);
-      }
+      }, delay);
+      
     } catch (error) {
       console.error('Fehler beim Laden der Erklärung:', error);
       onTextSelection(stanzaText, null, false, contextInfo);
