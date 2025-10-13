@@ -113,6 +113,63 @@
   white-space: nowrap;
 }
 
+/* Toggle Buttons Container */
+.toggle-buttons-container {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  z-index: 1000;
+}
+
+.character-toggle-btn,
+.highlighting-toggle-btn {
+  background: linear-gradient(135deg, #7c3aed 0%, #5b21b6 100%);
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 180px;
+  justify-content: center;
+}
+
+.character-toggle-btn:hover:not(:disabled),
+.highlighting-toggle-btn:hover:not(:disabled) {
+  background: linear-gradient(135deg, #5b21b6 0%, #4c1d95 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3);
+}
+
+.highlighting-toggle-btn {
+  background: linear-gradient(135deg, #ea580c 0%, #c2410c 100%);
+}
+
+.highlighting-toggle-btn:hover:not(:disabled) {
+  background: linear-gradient(135deg, #c2410c 0%, #9a3412 100%);
+  box-shadow: 0 4px 12px rgba(234, 88, 12, 0.3);
+}
+
+.highlighting-toggle-btn:disabled {
+  background: #9ca3af;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* Reposition explanation toggle when multiple buttons */
+.explanation-toggle-btn {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+}
+
 /* Layout adjustments when explanation is hidden */
 .app-main.explanation-hidden {
   grid-template-columns: 1fr;

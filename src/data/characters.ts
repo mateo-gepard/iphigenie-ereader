@@ -7,6 +7,7 @@ export interface Character {
   mythology: string;
   keyTraits: string[];
   relationships: Record<string, string>;
+  color: string; // Eindeutige Farbe für jeden Charakter
 }
 
 export const characters: Character[] = [
@@ -18,6 +19,7 @@ export const characters: Character[] = [
     role: 'Protagonistin, moralisches Zentrum des Dramas',
     mythology: 'In der griechischen Mythologie sollte sie von ihrem Vater Agamemnon geopfert werden, wurde aber von Diana gerettet und nach Tauris gebracht.',
     keyTraits: ['Wahrhaftigkeit', 'Reinheit', 'Humanität', 'Sehnsucht nach Heimat', 'Gewissenskonflikt'],
+    color: '#e11d48', // Rosa/Rot - Protagonistin, zentrale Figur
     relationships: {
       'thoas': 'Respektvolle aber distanzierte Beziehung zum König, der sie liebt',
       'orest': 'Innige Geschwisterliebe, sie heilt seinen Wahnsinn',
@@ -33,6 +35,7 @@ export const characters: Character[] = [
     role: 'Antagonist und zugleich läuterungsfähiger Herrscher',
     mythology: 'Legendärer König der Taurier (Krim), in dessen Reich Fremdenopfer üblich waren.',
     keyTraits: ['Edelmut', 'Leidenschaft', 'Wandlungsfähigkeit', 'Königliche Würde', 'Barbarische Herkunft'],
+    color: '#1d4ed8', // Blau - Königlich, mächtig
     relationships: {
       'iphigenie': 'Tiefe, unerfüllte Liebe; wird durch sie geläutert',
       'orest': 'Zunächst Feindschaft, dann Respekt und Großmut',
@@ -48,6 +51,7 @@ export const characters: Character[] = [
     role: 'Zweite Hauptfigur, Symbol der Läuterung durch Liebe',
     mythology: 'Sohn Agamemnons, tötete seine Mutter Klytämnestra aus Rache für den Mord an seinem Vater.',
     keyTraits: ['Wahnsinn', 'Schuldgefühl', 'Geschwisterliebe', 'Läuterungsfähigkeit', 'Tragische Vergangenheit'],
+    color: '#059669', // Grün - Heilung, Läuterung
     relationships: {
       'iphigenie': 'Erlösende Geschwisterliebe, sie heilt seinen Wahnsinn',
       'pylades': 'Treue, lebenslange Freundschaft',
@@ -63,6 +67,7 @@ export const characters: Character[] = [
     role: 'Treuer Freund, Pragmatiker und Handlungsmotor',
     mythology: 'Klassischer Freund des Orest in der griechischen Mythologie, Symbol bedingungsloser Freundschaft.',
     keyTraits: ['Treue', 'Pragmatismus', 'Klugheit', 'Mut', 'Loyalität'],
+    color: '#ea580c', // Orange - Pragmatismus, Wärme der Freundschaft
     relationships: {
       'orest': 'Bedingungslose, lebenslange Freundschaft',
       'iphigenie': 'Respekt und Dankbarkeit, aber auch Meinungsverschiedenheiten',
@@ -77,6 +82,7 @@ export const characters: Character[] = [
     role: 'Nebenfigur, Vermittler und Botschafter',
     mythology: 'Erfindung Goethes, nicht aus antiken Quellen stammend.',
     keyTraits: ['Loyalität', 'Diplomatisches Geschick', 'Treue zum König', 'Vermittlerrolle'],
+    color: '#6b7280', // Grau - Dienerschaft, Neutralität
     relationships: {
       'thoas': 'Bedingungslose Loyalität und Vertrauen',
       'iphigenie': 'Respektvolle Distanz, Überbringer königlicher Botschaften'
@@ -90,6 +96,7 @@ export const characters: Character[] = [
     role: 'Unsichtbare, aber zentrale Figur der Vorgeschichte',
     mythology: 'König von Mykene, Anführer der Griechen im Trojanischen Krieg, opferte Iphigenie für günstigen Wind.',
     keyTraits: ['Königliche Macht', 'Opferbereitschaft für den Krieg', 'Familienfluch', 'Tragische Schuld'],
+    color: '#7c2d12', // Dunkelbraun - Tod, Vergangenheit, Schwere
     relationships: {
       'iphigenie': 'Vater-Tochter-Trauma durch geplantes Opfer',
       'orest': 'Posthume Vater-Sohn-Beziehung, Racheauftrag',
@@ -104,6 +111,7 @@ export const characters: Character[] = [
     role: 'Unsichtbare Figur der Vorgeschichte, Auslöser des Familienfluchs',
     mythology: 'Agamemnons Gattin, rächte sich für Iphigenies geplantes Opfer durch Mord an ihrem Mann.',
     keyTraits: ['Rachedurst', 'Mütterliche Liebe', 'Königliche Macht', 'Tragische Schuld'],
+    color: '#7c3aed', // Violett - Tragödie, komplexe Mutter-Figur
     relationships: {
       'agamemnon': 'Zerrüttete Ehe, die im Mord endet',
       'iphigenie': 'Mutter-Tochter-Liebe, überschattet von Familientragödie',
@@ -118,6 +126,7 @@ export const characters: Character[] = [
     role: 'Gottheit, der Iphigenie als Priesterin dient',
     mythology: 'Jungfräuliche Göttin der Jagd und des Mondes, forderte ursprünglich Iphigenies Opferung.',
     keyTraits: ['Göttliche Macht', 'Jungfräulichkeit', 'Jagd und Natur', 'Opferkult'],
+    color: '#c2410c', // Gold/Gelb - Göttlichkeit, Licht
     relationships: {
       'iphigenie': 'Priesterin-Göttin-Verhältnis, Schutz und Dienstbarkeit'
     }

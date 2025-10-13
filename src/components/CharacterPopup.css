@@ -205,28 +205,28 @@
 
 /* Character name highlighting in text */
 .character-name {
-  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
   padding: 0.1rem 0.3rem;
   border-radius: 4px;
   cursor: pointer;
   transition: all 0.2s ease;
-  border: 1px solid #f59e0b;
-  font-weight: 500;
+  border: 1.5px solid;
+  font-weight: 600;
+  /* Background and colors are set inline via data attributes */
 }
 
 .character-name:hover {
-  background: linear-gradient(135deg, #fde68a 0%, #fcd34d 100%);
   transform: translateY(-1px);
-  box-shadow: 0 2px 8px rgba(245, 158, 11, 0.3);
+  filter: brightness(0.9);
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
 }
 
 .character-name.selected-for-comparison {
-  background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);
-  border-color: #10b981;
-  color: #065f46;
+  box-shadow: 0 0 0 2px #10b981;
+  background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%) !important;
+  border-color: #10b981 !important;
+  color: #065f46 !important;
 }
 
 .character-name.selected-for-comparison:hover {
-  background: linear-gradient(135deg, #bbf7d0 0%, #86efac 100%);
-  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+  box-shadow: 0 0 0 3px #10b981, 0 3px 10px rgba(16, 185, 129, 0.3);
 }

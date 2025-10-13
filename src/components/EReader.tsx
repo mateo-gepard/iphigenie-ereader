@@ -11,6 +11,8 @@ interface EReaderProps {
   onCharacterSelection: (character: Character) => void;
   onCharacterComparison: (character: Character) => void;
   characterForComparison: Character | null;
+  areCharactersVisible: boolean;
+  isCharacterHighlightingEnabled: boolean;
 }
 
 export function EReader({ 
@@ -18,7 +20,9 @@ export function EReader({
   onTextSelection, 
   onCharacterSelection,
   onCharacterComparison,
-  characterForComparison 
+  characterForComparison,
+  areCharactersVisible,
+  isCharacterHighlightingEnabled
 }: EReaderProps) {
   const [selectedVerseId, setSelectedVerseId] = useState<string>('');
   const [selectedStanzaId, setSelectedStanzaId] = useState<string>('');
@@ -57,6 +61,8 @@ export function EReader({
 
   // Funktion zum Markieren von Charakternamen im Text
   const highlightCharacters = (text: string) => {
+    if (!isCharacterHighlightingEnabled) return text;
+    
     const foundCharacters = findCharactersInText(text);
     if (foundCharacters.length === 0) return text;
 
@@ -76,7 +82,7 @@ export function EReader({
       
       const regex = new RegExp(`\\b${match.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'gi');
       highlightedText = highlightedText.replace(regex, (matched) => 
-        `<span class="${className}" data-character-id="${character.id}" data-character-name="${character.name}">${matched}</span>`
+        `<span class="${className}" data-character-id="${character.id}" data-character-name="${character.name}" data-character-color="${character.color}" style="background-color: ${character.color}20; border-color: ${character.color}; color: ${character.color};">${matched}</span>`
       );
     });
 
