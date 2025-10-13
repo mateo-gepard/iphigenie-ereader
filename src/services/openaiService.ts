@@ -123,6 +123,7 @@ export class OpenAIService {
       const enrichedResponse = {
         ...explanationResponse,
         cacheSource: 'none' as const,
+        fromCache: false,
         generatedAt: new Date().toISOString(),
         usageCount: 1
       };

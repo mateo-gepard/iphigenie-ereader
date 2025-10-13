@@ -36,34 +36,32 @@ export function EReader({
   const [selectedVerseId, setSelectedVerseId] = useState<string>('');
   const [selectedStanzaId, setSelectedStanzaId] = useState<string>('');
 
-  const handleVerseClick = async (verse: { id: string; text: string }, actNumber: number, sceneNumber: number) => {
-    if (selectedVerseId === verse.id) {
-      // Deselect if clicking the same verse
-      setSelectedVerseId('');
-      setSelectedStanzaId('');
-      onTextSelection('', null, false);
-      return;
-    }
-
-    setSelectedVerseId(verse.id);
-    setSelectedStanzaId('');
+    const handleVerseClick = async (verse: any, actNumber: number, sceneNumber: number) => {
     
     const contextInfo = {
       type: 'verse' as const,
       actNumber,
       sceneNumber
     };
-    
-    onTextSelection(verse.text, null, true, contextInfo);
 
     try {
+      // Erste Cache-Überprüfung - wenn Cache vorhanden, zeige sofort ohne Loading
       const explanation = await OpenAIService.getExplanation({
         text: verse.text,
         context: 'verse',
         actNumber,
         sceneNumber
       });
-      onTextSelection(verse.text, explanation, false, contextInfo);
+
+      // Wenn aus Cache geladen (fromCache: true), zeige sofort ohne Loading-State
+      if (explanation.fromCache) {
+        onTextSelection(verse.text, explanation, false, contextInfo);
+      } else {
+        // Nur bei neuen API-Calls Loading-State anzeigen
+        onTextSelection(verse.text, null, true, contextInfo);
+        // Dann das frische Ergebnis anzeigen
+        onTextSelection(verse.text, explanation, false, contextInfo);
+      }
     } catch (error) {
       console.error('Fehler beim Laden der Erklärung:', error);
       onTextSelection(verse.text, null, false);
@@ -129,16 +127,25 @@ export function EReader({
     
     setSelectedStanzaId(stanza.id);
     setSelectedVerseId('');
-    onTextSelection(stanzaText, null, true, contextInfo);
 
     try {
+      // Erste Cache-Überprüfung - wenn Cache vorhanden, zeige sofort ohne Loading
       const explanation = await OpenAIService.getExplanation({
         text: stanzaText,
         context: 'stanza',
         actNumber,
         sceneNumber
       });
-      onTextSelection(stanzaText, explanation, false, contextInfo);
+
+      // Wenn aus Cache geladen (fromCache: true), zeige sofort ohne Loading-State
+      if (explanation.fromCache) {
+        onTextSelection(stanzaText, explanation, false, contextInfo);
+      } else {
+        // Nur bei neuen API-Calls Loading-State anzeigen
+        onTextSelection(stanzaText, null, true, contextInfo);
+        // Dann das frische Ergebnis anzeigen
+        onTextSelection(stanzaText, explanation, false, contextInfo);
+      }
     } catch (error) {
       console.error('Fehler beim Laden der Erklärung:', error);
       onTextSelection(stanzaText, null, false, contextInfo);
