@@ -12,6 +12,7 @@ interface ExplanationPanelProps {
   selectedCharacter: Character | null;
   characterForComparison: Character | null;
   onCharacterComparisonSelect: (character: Character) => void;
+  areCharacterExplanationsVisible: boolean;
 }
 
 export function ExplanationPanel({ 
@@ -20,7 +21,8 @@ export function ExplanationPanel({
   isLoading, 
   selectedCharacter, 
   characterForComparison, 
-  onCharacterComparisonSelect 
+  onCharacterComparisonSelect,
+  areCharacterExplanationsVisible
 }: ExplanationPanelProps) {
   const [customQuestion, setCustomQuestion] = useState('');
   const [customAnswer, setCustomAnswer] = useState('');
@@ -70,7 +72,7 @@ export function ExplanationPanel({
   return (
     <div className="explanation-panel">
       {/* Character Information Section */}
-      {selectedCharacter && (
+      {selectedCharacter && areCharacterExplanationsVisible && (
         <div className="character-info-section">
           <div className="character-header">
             <h3>🎭 {selectedCharacter.name}</h3>

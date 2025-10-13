@@ -15,6 +15,7 @@ function App() {
   const [characterForComparison, setCharacterForComparison] = useState<Character | null>(null);
   const [areCharactersVisible, setAreCharactersVisible] = useState(true);
   const [isCharacterHighlightingEnabled, setIsCharacterHighlightingEnabled] = useState(true);
+  const [areCharacterExplanationsVisible, setAreCharacterExplanationsVisible] = useState(true);
 
   const handleTextSelection = (text: string, explanation: ExplanationResponse | null, loading: boolean) => {
     setSelectedText(text);
@@ -58,6 +59,10 @@ function App() {
     setIsExplanationVisible(!isExplanationVisible);
   };
 
+  const toggleCharacterExplanationsVisibility = () => {
+    setAreCharacterExplanationsVisible(!areCharacterExplanationsVisible);
+  };
+
   return (
     <div className="app">
       <header className="app-header">
@@ -88,6 +93,14 @@ function App() {
           >
             {isCharacterHighlightingEnabled ? '🎨' : '⚫'}
           </button>
+          
+          <button
+            className="toggle-btn"
+            onClick={toggleCharacterExplanationsVisibility}
+            title={areCharacterExplanationsVisible ? 'Charaktererklärungen ausblenden' : 'Charaktererklärungen einblenden'}
+          >
+            {areCharacterExplanationsVisible ? '📝' : '📋'}
+          </button>
         </div>
       </header>
       
@@ -113,6 +126,7 @@ function App() {
               selectedCharacter={selectedCharacter}
               characterForComparison={characterForComparison}
               onCharacterComparisonSelect={handleCharacterComparison}
+              areCharacterExplanationsVisible={areCharacterExplanationsVisible}
             />
           </div>
         )}
