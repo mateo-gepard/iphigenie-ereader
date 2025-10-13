@@ -3,6 +3,7 @@ import { EReader } from './components/EReader';
 import { ExplanationPanel } from './components/ExplanationPanel';
 import { iphigenieText } from './data/iphigenieText';
 import type { ExplanationResponse } from './types';
+import type { Character } from './data/characters';
 import './App.css';
 
 function App() {
@@ -10,6 +11,8 @@ function App() {
   const [explanation, setExplanation] = useState<ExplanationResponse | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isExplanationVisible, setIsExplanationVisible] = useState(true);
+  const [selectedCharacter, setSelectedCharacter] = useState<Character | null>(null);
+  const [characterForComparison, setCharacterForComparison] = useState<Character | null>(null);
 
   const handleTextSelection = (text: string, explanation: ExplanationResponse | null, loading: boolean) => {
     setSelectedText(text);
@@ -25,6 +28,22 @@ function App() {
     setIsExplanationVisible(!isExplanationVisible);
   };
 
+  const handleCharacterSelection = (character: Character) => {
+    setSelectedCharacter(character);
+    // Automatisch Panel anzeigen wenn Charakter ausgewählt wird
+    if (!isExplanationVisible) {
+      setIsExplanationVisible(true);
+    }
+  };
+
+  const handleCharacterComparison = (character: Character) => {
+    if (characterForComparison?.id === character.id) {
+      setCharacterForComparison(null);
+    } else {
+      setCharacterForComparison(character);
+    }
+  };
+
   return (
     <div className="app">
       <header className="app-header">
@@ -37,6 +56,9 @@ function App() {
           <EReader 
             text={iphigenieText} 
             onTextSelection={handleTextSelection}
+            onCharacterSelection={handleCharacterSelection}
+            onCharacterComparison={handleCharacterComparison}
+            characterForComparison={characterForComparison}
           />
         </div>
         
@@ -46,6 +68,9 @@ function App() {
               selectedText={selectedText}
               explanation={explanation}
               isLoading={isLoading}
+              selectedCharacter={selectedCharacter}
+              characterForComparison={characterForComparison}
+              onCharacterComparisonSelect={handleCharacterComparison}
             />
           </div>
         )}

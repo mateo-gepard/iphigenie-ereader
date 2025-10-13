@@ -3,21 +3,25 @@ import type { IphigenieText, ExplanationResponse } from '../types';
 import type { Character } from '../data/characters';
 import { OpenAIService } from '../services/openaiService';
 import { findCharactersInText } from '../data/characters';
-import { CharacterPopup } from './CharacterPopup';
 import './EReader.css';
 
 interface EReaderProps {
   text: IphigenieText;
   onTextSelection: (text: string, explanation: ExplanationResponse | null, loading: boolean) => void;
+  onCharacterSelection: (character: Character) => void;
+  onCharacterComparison: (character: Character) => void;
+  characterForComparison: Character | null;
 }
 
-export function EReader({ text, onTextSelection }: EReaderProps) {
+export function EReader({ 
+  text, 
+  onTextSelection, 
+  onCharacterSelection, 
+  onCharacterComparison, 
+  characterForComparison 
+}: EReaderProps) {
   const [selectedVerseId, setSelectedVerseId] = useState<string>('');
   const [selectedStanzaId, setSelectedStanzaId] = useState<string>('');
-  const [showCharacterPopup, setShowCharacterPopup] = useState(false);
-  const [selectedCharacter, setSelectedCharacter] = useState<Character | null>(null);
-  const [popupPosition, setPopupPosition] = useState({ x: 0, y: 0 });
-  const [characterForComparison, setCharacterForComparison] = useState<Character | null>(null);
 
   const handleVerseClick = async (verse: { id: string; text: string }, actNumber: number, sceneNumber: number) => {
     if (selectedVerseId === verse.id) {
@@ -48,23 +52,11 @@ export function EReader({ text, onTextSelection }: EReaderProps) {
 
   const handleCharacterClick = (character: Character, event: React.MouseEvent) => {
     event.stopPropagation();
-    setSelectedCharacter(character);
-    setPopupPosition({ x: event.clientX, y: event.clientY });
-    setShowCharacterPopup(true);
+    onCharacterSelection(character);
   };
 
-  const handleCloseCharacterPopup = () => {
-    setShowCharacterPopup(false);
-    setSelectedCharacter(null);
-  };
-
-  const handleSelectForComparison = (character: Character) => {
-    if (characterForComparison?.id === character.id) {
-      setCharacterForComparison(null);
-    } else {
-      setCharacterForComparison(character);
-    }
-    setShowCharacterPopup(false);
+  const handleCharacterForComparison = (character: Character) => {
+    onCharacterComparison(character);
   };
 
   // Funktion zum Markieren von Charakternamen im Text
@@ -126,17 +118,18 @@ export function EReader({ text, onTextSelection }: EReaderProps) {
 
   return (
     <div className="e-reader">
-      {/* Character Info Bar */}
-      <div className="character-info-bar">
-        <span className="character-info-text">
-          💡 <strong>Charaktere markiert:</strong> Klicken Sie auf hervorgehobene Namen für Details und Vergleiche
-        </span>
-        {characterForComparison && (
-          <span className="comparison-info">
-            | Ausgewählt: <strong>{characterForComparison.name}</strong>
-          </span>
-        )}
-      </div>
+      {/* Character Comparison Status */}
+      {characterForComparison && (
+        <div className="character-comparison-status">
+          <span>Ausgewählt für Vergleich: <strong>{characterForComparison.name}</strong></span>
+          <button 
+            className="clear-comparison"
+            onClick={() => onCharacterComparison(characterForComparison)}
+          >
+            ✕
+          </button>
+        </div>
+      )}
 
       <div className="text-content">
         {text.acts.map((act) => (
@@ -194,17 +187,6 @@ export function EReader({ text, onTextSelection }: EReaderProps) {
             ))}
           </div>
         ))}
-
-        {/* Character Popup */}
-        {showCharacterPopup && selectedCharacter && (
-          <CharacterPopup
-            character={selectedCharacter}
-            position={popupPosition}
-            onClose={handleCloseCharacterPopup}
-            onSelectForComparison={handleSelectForComparison}
-            selectedForComparison={characterForComparison || undefined}
-          />
-        )}
 
 
       </div>
