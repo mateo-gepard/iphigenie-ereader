@@ -16,8 +16,8 @@ interface EReaderProps {
 export function EReader({ 
   text, 
   onTextSelection, 
-  onCharacterSelection, 
-  onCharacterComparison, 
+  onCharacterSelection,
+  onCharacterComparison,
   characterForComparison 
 }: EReaderProps) {
   const [selectedVerseId, setSelectedVerseId] = useState<string>('');
@@ -53,10 +53,6 @@ export function EReader({
   const handleCharacterClick = (character: Character, event: React.MouseEvent) => {
     event.stopPropagation();
     onCharacterSelection(character);
-  };
-
-  const handleCharacterForComparison = (character: Character) => {
-    onCharacterComparison(character);
   };
 
   // Funktion zum Markieren von Charakternamen im Text
