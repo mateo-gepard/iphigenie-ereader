@@ -37,7 +37,14 @@ export class OpenAIService {
               "explanation": "Detaillierte literaturwissenschaftliche Analyse (3-4 Sätze)",
               "summary": "Prägnante Inhaltszusammenfassung (1-2 Sätze)",
               "background": "Kulturhistorischer/mythologischer Kontext (2-3 Sätze)",
-              "literaryDevices": ["Konkretes Stilmittel mit Textbeleg", "Weiteres Stilmittel"],
+              "literaryDevices": [
+                {
+                  "name": "Stilmittel-Name (z.B. Metapher, Alliteration)",
+                  "example": "Konkreter Textbeleg aus der Passage",
+                  "effect": "Literarische Wirkung und Bedeutung",
+                  "category": "rhetoric|sound|structure|imagery|syntax"
+                }
+              ],
               "themes": ["Zentrales Thema mit Bezug zum Humanitätsideal", "Weiteres relevantes Motiv"],
               "characterAnalysis": "Charakterpsychologische Einordnung (falls Figurenrede)",
               "dramaticFunction": "Funktion für Handlungsfortschritt/Spannungsaufbau"

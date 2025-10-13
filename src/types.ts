@@ -39,11 +39,18 @@ export interface ExplanationRequest {
   sceneNumber?: number;
 }
 
+export interface LiteraryDevice {
+  name: string;
+  example: string;
+  effect: string;
+  category: 'rhetoric' | 'sound' | 'structure' | 'imagery' | 'syntax';
+}
+
 export interface ExplanationResponse {
   explanation: string;
   summary: string;
   background: string;
-  literaryDevices?: string[];
+  literaryDevices?: LiteraryDevice[];
   themes?: string[];
   characterAnalysis?: string;
   dramaticFunction?: string;

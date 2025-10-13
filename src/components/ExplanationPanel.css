@@ -169,6 +169,138 @@
   border: 1px solid #8b5cf6;
 }
 
+/* Enhanced Literary Devices Grid */
+.literary-devices-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.literary-device-card {
+  background: #ffffff;
+  border: 2px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 1.5rem;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.literary-device-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+  border-color: #3b82f6;
+}
+
+.device-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.device-name {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.device-category {
+  font-size: 1.2rem;
+  opacity: 0.8;
+}
+
+.device-example {
+  margin-bottom: 1rem;
+  padding: 0.75rem;
+  background: #f8fafc;
+  border-radius: 6px;
+  border-left: 3px solid #3b82f6;
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+.device-example strong {
+  color: #475569;
+  font-weight: 600;
+}
+
+.device-effect {
+  font-size: 0.9rem;
+  line-height: 1.5;
+  color: #475569;
+}
+
+.device-effect strong {
+  color: #334155;
+  font-weight: 600;
+}
+
+/* Category-specific colors */
+.literary-device-card.rhetoric {
+  border-color: #f59e0b;
+}
+
+.literary-device-card.rhetoric:hover {
+  border-color: #d97706;
+}
+
+.literary-device-card.sound {
+  border-color: #8b5cf6;
+}
+
+.literary-device-card.sound:hover {
+  border-color: #7c3aed;
+}
+
+.literary-device-card.structure {
+  border-color: #06b6d4;
+}
+
+.literary-device-card.structure:hover {
+  border-color: #0891b2;
+}
+
+.literary-device-card.imagery {
+  border-color: #10b981;
+}
+
+.literary-device-card.imagery:hover {
+  border-color: #059669;
+}
+
+.literary-device-card.syntax {
+  border-color: #ef4444;
+}
+
+.literary-device-card.syntax:hover {
+  border-color: #dc2626;
+}
+
+/* Mobile responsive design for literary devices */
+@media (max-width: 768px) {
+  .literary-devices-grid {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+  
+  .literary-device-card {
+    padding: 1rem;
+  }
+  
+  .device-name {
+    font-size: 1rem;
+  }
+  
+  .device-example,
+  .device-effect {
+    font-size: 0.85rem;
+  }
+}
+
 .error-state {
   text-align: center;
   padding: 2rem;

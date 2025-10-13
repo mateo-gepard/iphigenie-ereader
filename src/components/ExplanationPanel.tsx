@@ -5,6 +5,17 @@ import { OpenAIService } from '../services/openaiService';
 import { getCharacterRelationship } from '../data/characters';
 import './ExplanationPanel.css';
 
+const getCategoryIcon = (category?: string): string => {
+  switch (category) {
+    case 'rhetoric': return '🎭';
+    case 'sound': return '🎵';
+    case 'structure': return '🏗️';
+    case 'imagery': return '🖼️';
+    case 'syntax': return '📝';
+    default: return '✨';
+  }
+};
+
 interface ExplanationPanelProps {
   selectedText: string;
   explanation: ExplanationResponse | null;
@@ -165,11 +176,22 @@ export function ExplanationPanel({
           {explanation.literaryDevices && explanation.literaryDevices.length > 0 && (
             <div className="explanation-section">
               <h4>✨ Stilmittel</h4>
-              <ul className="tag-list">
+              <div className="literary-devices-grid">
                 {explanation.literaryDevices.map((device, index) => (
-                  <li key={index} className="tag literary-device">{device}</li>
+                  <div key={index} className={`literary-device-card ${device.category || 'general'}`}>
+                    <div className="device-header">
+                      <h5 className="device-name">{device.name}</h5>
+                      <span className="device-category">{getCategoryIcon(device.category)}</span>
+                    </div>
+                    <div className="device-example">
+                      <strong>Beispiel:</strong> "{device.example}"
+                    </div>
+                    <div className="device-effect">
+                      <strong>Wirkung:</strong> {device.effect}
+                    </div>
+                  </div>
                 ))}
-              </ul>
+              </div>
             </div>
           )}
 
