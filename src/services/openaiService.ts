@@ -1,6 +1,7 @@
 import OpenAI from 'openai';
 import type { ExplanationRequest, ExplanationResponse } from '../types';
 import { CacheService } from './cacheService';
+import { GlobalCacheService } from './globalCacheService';
 
 // Note: In a production app, you should use environment variables and a backend API
 // to keep your API key secure. This is for demonstration purposes only.
@@ -12,16 +13,28 @@ const openai = new OpenAI({
 export class OpenAIService {
   static async getExplanation(request: ExplanationRequest): Promise<ExplanationResponse> {
     try {
-      // Überprüfe Cache zuerst
-      const cachedResult = CacheService.getCachedExplanation(
+      // Überprüfe globalen Cache zuerst
+      const globalCachedResult = await GlobalCacheService.getCachedExplanation(
         request.text,
         request.context,
         request.actNumber,
         request.sceneNumber
       );
 
-      if (cachedResult) {
-        return { ...cachedResult, fromCache: true };
+      if (globalCachedResult) {
+        return globalCachedResult;
+      }
+
+      // Fallback auf lokalen Cache
+      const localCachedResult = CacheService.getCachedExplanation(
+        request.text,
+        request.context,
+        request.actNumber,
+        request.sceneNumber
+      );
+
+      if (localCachedResult) {
+        return { ...localCachedResult, fromCache: true };
       }
 
       const prompt = this.buildPrompt(request);
@@ -93,14 +106,27 @@ export class OpenAIService {
         };
       }
 
-      // Cache die erfolgreiche Antwort
-      CacheService.cacheExplanation(
-        request.text,
-        request.context,
-        explanationResponse,
-        request.actNumber,
-        request.sceneNumber
-      );
+      // Cache die erfolgreiche Antwort global und lokal
+      await Promise.all([
+        GlobalCacheService.cacheExplanation(
+          request.text,
+          request.context,
+          explanationResponse,
+          request.actNumber,
+          request.sceneNumber
+        ),
+        // Lokaler Cache als Fallback
+        new Promise<void>((resolve) => {
+          CacheService.cacheExplanation(
+            request.text,
+            request.context,
+            explanationResponse,
+            request.actNumber,
+            request.sceneNumber
+          );
+          resolve();
+        })
+      ]);
 
       return explanationResponse;
     } catch (error) {

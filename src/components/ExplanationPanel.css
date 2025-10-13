@@ -404,6 +404,73 @@
   }
 }
 
+/* Cache Tabs */
+.cache-tabs {
+  display: flex;
+  margin-bottom: 1rem;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.cache-tab {
+  background: none;
+  border: none;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  font-size: 0.9rem;
+  color: #64748b;
+  border-bottom: 2px solid transparent;
+  transition: all 0.2s ease;
+}
+
+.cache-tab:hover {
+  color: #334155;
+  background: #f8fafc;
+}
+
+.cache-tab.active {
+  color: #3b82f6;
+  border-bottom-color: #3b82f6;
+}
+
+/* Stats Sections */
+.stats-section {
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  background: #f8fafc;
+  border-radius: 6px;
+  border-left: 3px solid #3b82f6;
+}
+
+.stats-section h5 {
+  margin: 0 0 0.75rem 0;
+  color: #334155;
+  font-size: 1rem;
+}
+
+.top-entries {
+  list-style: none;
+  padding: 0;
+  margin: 0.5rem 0 0 0;
+}
+
+.top-entries li {
+  padding: 0.25rem 0;
+  font-size: 0.85rem;
+  color: #475569;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.top-entries li:last-child {
+  border-bottom: none;
+}
+
+.cache-actions {
+  padding-top: 1rem;
+  border-top: 1px solid #e2e8f0;
+  display: flex;
+  gap: 0.5rem;
+}
+
 .error-state {
   text-align: center;
   padding: 2rem;

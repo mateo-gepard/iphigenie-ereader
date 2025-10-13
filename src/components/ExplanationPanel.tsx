@@ -4,6 +4,7 @@ import type { Character } from '../data/characters';
 import { OpenAIService } from '../services/openaiService';
 import { getCharacterRelationship } from '../data/characters';
 import { CacheService } from '../services/cacheService';
+import { GlobalCacheService } from '../services/globalCacheService';
 import './ExplanationPanel.css';
 
 const getCategoryIcon = (category?: string): string => {
@@ -40,6 +41,7 @@ export function ExplanationPanel({
   const [customAnswer, setCustomAnswer] = useState('');
   const [isAnswering, setIsAnswering] = useState(false);
   const [showCacheStats, setShowCacheStats] = useState(false);
+  const [globalStats, setGlobalStats] = useState<any>(null);
 
   // Reset custom question when new text is selected
   useEffect(() => {
@@ -288,24 +290,67 @@ export function ExplanationPanel({
         
         {showCacheStats && (
           <div className="cache-stats-details">
+            <div className="cache-tabs">
+              <button 
+                className="cache-tab active"
+                onClick={async () => {
+                  const gStats = await GlobalCacheService.getGlobalCacheStats();
+                  setGlobalStats(gStats);
+                }}
+              >
+                🌍 Global
+              </button>
+              <button className="cache-tab">
+                📱 Lokal
+              </button>
+            </div>
+            
             {(() => {
-              const stats = CacheService.getCacheStats();
+              const localStats = CacheService.getCacheStats();
               return (
                 <div className="cache-info">
-                  <p><strong>Gespeicherte Erklärungen:</strong> {stats.totalEntries}</p>
-                  <p><strong>Cache-Größe:</strong> {stats.cacheSize}</p>
-                  {stats.oldestEntry && (
-                    <p><strong>Ältester Eintrag:</strong> {stats.oldestEntry.toLocaleDateString('de-DE')}</p>
-                  )}
-                  <button 
-                    className="clear-cache-btn"
-                    onClick={() => {
-                      CacheService.clearCache();
-                      setShowCacheStats(false);
-                    }}
-                  >
-                    🗑️ Cache leeren
-                  </button>
+                  <div className="stats-section">
+                    <h5>🌍 Globaler Cache (alle Nutzer)</h5>
+                    {globalStats ? (
+                      <>
+                        <p><strong>Gesamt Erklärungen:</strong> {globalStats.totalEntries}</p>
+                        <p><strong>Diese Woche neu:</strong> {globalStats.recentEntries}</p>
+                        {globalStats.topUsedEntries.length > 0 && (
+                          <div>
+                            <strong>Beliebteste:</strong>
+                            <ul className="top-entries">
+                              {globalStats.topUsedEntries.map((entry: any, i: number) => (
+                                <li key={i}>{entry.context} ({entry.usageCount}x)</li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                      </>
+                    ) : (
+                      <p>Lade globale Statistiken...</p>
+                    )}
+                  </div>
+                  
+                  <div className="stats-section">
+                    <h5>📱 Lokaler Cache (nur Sie)</h5>
+                    <p><strong>Ihre Erklärungen:</strong> {localStats.totalEntries}</p>
+                    <p><strong>Cache-Größe:</strong> {localStats.cacheSize}</p>
+                    {localStats.oldestEntry && (
+                      <p><strong>Ältester Eintrag:</strong> {localStats.oldestEntry.toLocaleDateString('de-DE')}</p>
+                    )}
+                  </div>
+                  
+                  <div className="cache-actions">
+                    <button 
+                      className="clear-cache-btn"
+                      onClick={() => {
+                        CacheService.clearCache();
+                        setShowCacheStats(false);
+                      }}
+                    >
+                      🗑️ Lokalen Cache leeren
+                    </button>
+                  </div>
                 </div>
               );
             })()}
