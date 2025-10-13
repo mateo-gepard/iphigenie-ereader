@@ -140,24 +140,89 @@
   background: #a0aec0;
 }
 
+/* Mobile optimizations */
 @media (max-width: 768px) {
   .text-content {
     padding: 1rem;
+    line-height: 1.6;
   }
   
   .act-title {
     font-size: 1.5rem;
+    margin-bottom: 1rem;
   }
   
   .scene-title {
     font-size: 1.2rem;
+    margin-bottom: 0.8rem;
   }
   
   .verse-text {
     font-size: 1rem;
+    line-height: 1.5;
   }
   
   .verses {
     margin-left: 0.5rem;
+  }
+  
+  .stanza {
+    padding: 0.75rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  /* Touch-friendly click targets */
+  .clickable {
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    padding: 0.5rem;
+    border-radius: 4px;
+  }
+  
+  /* Hide scrollbar on mobile for cleaner look */
+  .e-reader::-webkit-scrollbar {
+    width: 0px;
+    background: transparent;
+  }
+}
+
+@media (max-width: 480px) {
+  .text-content {
+    padding: 0.75rem;
+    font-size: 0.9rem;
+  }
+  
+  .act-title {
+    font-size: 1.3rem;
+  }
+  
+  .scene-title {
+    font-size: 1.1rem;
+  }
+  
+  .verse-text {
+    font-size: 0.9rem;
+  }
+  
+  .stanza {
+    padding: 0.5rem;
+    margin-bottom: 1rem;
+  }
+}
+
+/* Landscape mobile */
+@media (max-width: 768px) and (orientation: landscape) {
+  .text-content {
+    padding: 0.5rem 1rem;
+  }
+  
+  .act-title,
+  .scene-title {
+    margin-bottom: 0.5rem;
+  }
+  
+  .stanza {
+    margin-bottom: 1rem;
   }
 }

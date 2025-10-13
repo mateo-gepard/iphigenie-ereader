@@ -204,20 +204,101 @@
   background: #a0aec0;
 }
 
+/* Mobile optimizations */
 @media (max-width: 768px) {
   .explanation-panel {
     padding: 1rem;
+    font-size: 0.95rem;
+    max-height: 60vh;
   }
   
   .explanation-section {
     padding: 1rem;
+    margin-bottom: 1rem;
+  }
+  
+  .explanation-section h4 {
+    font-size: 1.1rem;
+    margin-bottom: 0.75rem;
   }
   
   .selected-text {
     padding: 1rem;
+    font-size: 0.9rem;
+    line-height: 1.5;
   }
   
   .empty-state {
     padding: 1rem;
+  }
+  
+  .empty-state h3 {
+    font-size: 1.3rem;
+  }
+  
+  .instructions {
+    padding: 1rem;
+    font-size: 0.9rem;
+  }
+  
+  /* Hide scrollbar on mobile */
+  .explanation-panel::-webkit-scrollbar {
+    width: 0px;
+    background: transparent;
+  }
+  
+  /* Loading and error states for mobile */
+  .loading-state,
+  .error-state {
+    padding: 1.5rem 1rem;
+    font-size: 0.9rem;
+  }
+  
+  .loading-spinner {
+    width: 24px;
+    height: 24px;
+  }
+}
+
+@media (max-width: 480px) {
+  .explanation-panel {
+    padding: 0.75rem;
+    font-size: 0.9rem;
+    max-height: 50vh;
+  }
+  
+  .explanation-section {
+    padding: 0.75rem;
+  }
+  
+  .explanation-section h4 {
+    font-size: 1rem;
+  }
+  
+  .selected-text {
+    padding: 0.75rem;
+    font-size: 0.85rem;
+  }
+  
+  .empty-state h3 {
+    font-size: 1.2rem;
+  }
+  
+  .instructions {
+    padding: 0.75rem;
+    font-size: 0.85rem;
+  }
+}
+
+/* Landscape mobile adjustments */
+@media (max-width: 768px) and (orientation: landscape) {
+  .explanation-panel {
+    max-height: 80vh;
+    padding: 0.75rem 1rem;
+  }
+  
+  .explanation-section {
+    padding: 0.75rem;
+    margin-bottom: 0.75rem;
   }
 }

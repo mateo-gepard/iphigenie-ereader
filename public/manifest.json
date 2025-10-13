@@ -1,0 +1,22 @@
+{
+  "name": "Iphigenie auf Tauris - Interaktiver E-Reader",
+  "short_name": "Iphigenie E-Reader",
+  "description": "Interaktiver E-Reader für Goethes 'Iphigenie auf Tauris' mit KI-gestützten Textanalysen",
+  "icons": [
+    {
+      "src": "/vite.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "start_url": "/",
+  "display": "standalone",
+  "theme_color": "#1e3a8a",
+  "background_color": "#f5f7fa",
+  "orientation": "portrait-primary",
+  "categories": ["education", "books", "productivity"],
+  "lang": "de",
+  "scope": "/",
+  "prefer_related_applications": false
+}

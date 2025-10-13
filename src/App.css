@@ -51,6 +51,7 @@
   max-height: calc(100vh - 4rem);
 }
 
+/* Tablet Layout */
 @media (max-width: 1024px) {
   .app-main {
     grid-template-columns: 1fr;
@@ -62,14 +63,60 @@
     position: static;
     max-height: none;
   }
+  
+  .app-header {
+    padding: 1.5rem;
+  }
 }
 
+/* Mobile Layout */
 @media (max-width: 768px) {
+  .app-header {
+    padding: 1rem;
+  }
+  
   .app-header h1 {
-    font-size: 2rem;
+    font-size: 1.8rem;
+    line-height: 1.2;
   }
   
   .subtitle {
-    font-size: 1rem;
+    font-size: 0.9rem;
+  }
+  
+  .app-main {
+    padding: 0.5rem;
+    gap: 0.5rem;
+  }
+  
+  .reader-container,
+  .explanation-container {
+    border-radius: 8px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  }
+}
+
+/* Small Mobile */
+@media (max-width: 480px) {
+  .app-header h1 {
+    font-size: 1.5rem;
+  }
+  
+  .subtitle {
+    font-size: 0.8rem;
+  }
+  
+  .app-main {
+    padding: 0.25rem;
+  }
+}
+
+/* Touch-friendly improvements */
+@media (hover: none) and (pointer: coarse) {
+  /* This targets touch devices */
+  .reader-container,
+  .explanation-container {
+    /* Ensure tap targets are large enough */
+    min-height: 44px;
   }
 }
