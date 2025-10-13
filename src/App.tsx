@@ -13,6 +13,8 @@ function App() {
   const [isExplanationVisible, setIsExplanationVisible] = useState(true);
   const [selectedCharacter, setSelectedCharacter] = useState<Character | null>(null);
   const [characterForComparison, setCharacterForComparison] = useState<Character | null>(null);
+  const [areCharactersVisible, setAreCharactersVisible] = useState(true);
+  const [isCharacterHighlightingEnabled, setIsCharacterHighlightingEnabled] = useState(true);
 
   const handleTextSelection = (text: string, explanation: ExplanationResponse | null, loading: boolean) => {
     setSelectedText(text);
@@ -44,11 +46,49 @@ function App() {
     }
   };
 
+  const toggleCharacterVisibility = () => {
+    setAreCharactersVisible(!areCharactersVisible);
+  };
+
+  const toggleCharacterHighlighting = () => {
+    setIsCharacterHighlightingEnabled(!isCharacterHighlightingEnabled);
+  };
+
+  const toggleExplanationVisibility = () => {
+    setIsExplanationVisible(!isExplanationVisible);
+  };
+
   return (
     <div className="app">
       <header className="app-header">
         <h1>Iphigenie auf Tauris</h1>
         <p className="subtitle">Interaktiver E-Reader - Johann Wolfgang von Goethe</p>
+        
+        <div className="toggle-buttons">
+          <button
+            className="toggle-btn"
+            onClick={toggleExplanationVisibility}
+            title={isExplanationVisible ? 'Erklärung ausblenden' : 'Erklärung einblenden'}
+          >
+            {isExplanationVisible ? '📖' : '📕'}
+          </button>
+          
+          <button
+            className="toggle-btn"
+            onClick={toggleCharacterVisibility}
+            title={areCharactersVisible ? 'Charaktere ausblenden' : 'Charaktere einblenden'}
+          >
+            {areCharactersVisible ? '👥' : '👤'}
+          </button>
+          
+          <button
+            className="toggle-btn"
+            onClick={toggleCharacterHighlighting}
+            title={isCharacterHighlightingEnabled ? 'Hervorhebung deaktivieren' : 'Hervorhebung aktivieren'}
+          >
+            {isCharacterHighlightingEnabled ? '🎨' : '⚫'}
+          </button>
+        </div>
       </header>
       
       <main className={`app-main ${!isExplanationVisible ? 'explanation-hidden' : ''}`}>
@@ -59,6 +99,8 @@ function App() {
             onCharacterSelection={handleCharacterSelection}
             onCharacterComparison={handleCharacterComparison}
             characterForComparison={characterForComparison}
+            areCharactersVisible={areCharactersVisible}
+            isCharacterHighlightingEnabled={isCharacterHighlightingEnabled}
           />
         </div>
         
