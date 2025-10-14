@@ -16,7 +16,7 @@ function App() {
   const [characterForComparison, setCharacterForComparison] = useState<Character | null>(null);
   const [areCharactersVisible, setAreCharactersVisible] = useState(true);
   const [isCharacterHighlightingEnabled, setIsCharacterHighlightingEnabled] = useState(true);
-  const [areCharacterExplanationsVisible, setAreCharacterExplanationsVisible] = useState(true);
+  const [areCharacterExplanationsVisible] = useState(true);
   const [canRegenerate, setCanRegenerate] = useState(false);
   const [currentContext, setCurrentContext] = useState<{
     context: 'verse' | 'stanza' | 'scene';
