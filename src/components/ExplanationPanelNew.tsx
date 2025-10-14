@@ -287,14 +287,14 @@ export function ExplanationPanel({
             <div className="character-controls">
               <button 
                 onClick={onToggleCharacters}
-                className={`toggle-btn ${areCharactersVisible ? 'active' : ''}`}
+                className={`character-toggle-btn ${areCharactersVisible ? 'active' : ''}`}
               >
                 {areCharactersVisible ? 'Charaktere ausblenden' : 'Charaktere anzeigen'}
               </button>
               
               <button 
                 onClick={onToggleHighlighting}
-                className={`toggle-btn ${isCharacterHighlightingEnabled ? 'active' : ''}`}
+                className={`character-toggle-btn ${isCharacterHighlightingEnabled ? 'active' : ''}`}
               >
                 {isCharacterHighlightingEnabled ? 'Hervorhebung aus' : 'Hervorhebung an'}
               </button>

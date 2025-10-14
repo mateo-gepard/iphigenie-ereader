@@ -76,12 +76,15 @@ export function EReader({
 
   // Funktion zum Markieren von Charakternamen im Text
   const highlightCharacters = (text: string) => {
-    if (!areCharactersVisible) return text;
+    // Entferne zuerst alle vorhandenen HTML-Markierungen
+    let cleanText = text.replace(/<span[^>]*class="character-name[^"]*"[^>]*>(.*?)<\/span>/gi, '$1');
     
-    const foundCharacters = findCharactersInText(text);
-    if (foundCharacters.length === 0) return text;
+    if (!areCharactersVisible) return cleanText;
+    
+    const foundCharacters = findCharactersInText(cleanText);
+    if (foundCharacters.length === 0) return cleanText;
 
-    let highlightedText = text;
+    let highlightedText = cleanText;
     
     // Sortiere nach Länge (längste zuerst) um Überschneidungen zu vermeiden
     const allMatches: Array<{character: Character, match: string}> = [];

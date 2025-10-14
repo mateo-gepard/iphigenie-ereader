@@ -1238,11 +1238,11 @@
   }
 }
 
-/* Toggle Buttons for Character Tab */
-.toggle-btn {
-  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+/* Character Toggle Buttons for Character Tab */
+.character-toggle-btn {
+  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%) !important;
   color: white !important;
-  border: none;
+  border: none !important;
   padding: 0.75rem 1.5rem;
   border-radius: 8px;
   font-size: 0.9rem;
@@ -1256,20 +1256,20 @@
   justify-content: center;
 }
 
-.toggle-btn:hover {
-  background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+.character-toggle-btn:hover {
+  background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%) !important;
   color: white !important;
   transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
 }
 
-.toggle-btn.active {
-  background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+.character-toggle-btn.active {
+  background: linear-gradient(135deg, #059669 0%, #10b981 100%) !important;
   color: white !important;
 }
 
-.toggle-btn.active:hover {
-  background: linear-gradient(135deg, #047857 0%, #059669 100%);
+.character-toggle-btn.active:hover {
+  background: linear-gradient(135deg, #047857 0%, #059669 100%) !important;
   color: white !important;
 }
 
