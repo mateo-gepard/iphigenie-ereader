@@ -11,7 +11,7 @@ function App() {
   const [selectedText, setSelectedText] = useState<string>('');
   const [explanation, setExplanation] = useState<ExplanationResponse | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [isExplanationVisible, setIsExplanationVisible] = useState(true);
+
   const [selectedCharacter, setSelectedCharacter] = useState<Character | null>(null);
   const [characterForComparison, setCharacterForComparison] = useState<Character | null>(null);
   const [areCharactersVisible, setAreCharactersVisible] = useState(true);
@@ -51,22 +51,10 @@ function App() {
     // Zeige Regenerierung-Option nur für Erklärungen (nicht für Loading-States)
     setCanRegenerate(!!explanation && !loading);
     
-    // Automatisch Erklärungen anzeigen wenn neuer Text ausgewählt wird
-    if (explanation && !isExplanationVisible) {
-      setIsExplanationVisible(true);
-    }
-  };
-
-  const toggleExplanation = () => {
-    setIsExplanationVisible(!isExplanationVisible);
   };
 
   const handleCharacterSelection = (character: Character) => {
     setSelectedCharacter(character);
-    // Automatisch Panel anzeigen wenn Charakter ausgewählt wird
-    if (!isExplanationVisible) {
-      setIsExplanationVisible(true);
-    }
   };
 
   const handleCharacterComparison = (character: Character) => {
@@ -85,13 +73,7 @@ function App() {
     setIsCharacterHighlightingEnabled(!isCharacterHighlightingEnabled);
   };
 
-  const toggleExplanationVisibility = () => {
-    setIsExplanationVisible(!isExplanationVisible);
-  };
 
-  const toggleCharacterExplanationsVisibility = () => {
-    setAreCharacterExplanationsVisible(!areCharacterExplanationsVisible);
-  };
 
   const handleRegenerateExplanation = async () => {
     if (!selectedText || !currentContext) return;
@@ -143,10 +125,7 @@ function App() {
       setExplanation(explanation);
       setCanRegenerate(true);
       
-      // Panel automatisch anzeigen
-      if (!isExplanationVisible) {
-        setIsExplanationVisible(true);
-      }
+
     } catch (error) {
       console.error('Fehler beim Generieren des Vergleichs:', error);
     } finally {
@@ -194,25 +173,7 @@ function App() {
             onToggleHighlighting={toggleCharacterHighlighting}
           />
         </div>
-        
-        <button 
-          className="explanation-toggle-btn"
-          onClick={toggleExplanation}
-          aria-label={isExplanationVisible ? 'Erklärungen verstecken' : 'Erklärungen anzeigen'}
-          title={isExplanationVisible ? 'Erklärungen verstecken' : 'Erklärungen anzeigen'}
-        >
-          {isExplanationVisible ? (
-            <>
-              <span className="toggle-icon">❌</span>
-              <span className="toggle-text">Erklärungen verstecken</span>
-            </>
-          ) : (
-            <>
-              <span className="toggle-icon">�</span>
-              <span className="toggle-text">Erklärungen anzeigen</span>
-            </>
-          )}
-        </button>
+
       </main>
     </div>
   );
