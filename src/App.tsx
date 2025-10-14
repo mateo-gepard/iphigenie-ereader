@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { EReader } from './components/EReader';
 import { ExplanationPanel } from './components/ExplanationPanelNew';
-import { iphigenieText } from './data/iphigenieText';
+import { iphigenieText } from './data/iphigenieText_final';
 import type { ExplanationResponse } from './types';
 import type { Character } from './data/characters';
 import { OpenAIService } from './services/openaiService';

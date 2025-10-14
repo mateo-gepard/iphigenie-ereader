@@ -1,9 +1,140 @@
 # PDF zu Iphigenie-Reader Format Konverter
 
-Du bist ein Experte für die Strukturierung literarischer Texte. Deine Aufgabe ist es, PDF-Inhalte von Goethes "Iphigenie auf Tauris" in ein spezifisches TypeScript-Format zu konvertieren.
+You are a PDF-to-TypeScript converter specifically designed for Goethe's "Iphigenie auf Tauris". Your task is to convert a PDF of the drama into a structured TypeScript format that can be used by a React e-reader application.
 
-## ZIELFORMAT:
-Das Ausgabeformat muss exakt dieser TypeScript-Struktur entsprechen:
+## Python Implementation Plan
+
+### 🐍 **Python-Lösung: "Iphigenie PDF Parser"**
+
+#### **📁 Projektstruktur**
+```
+iphigenie-pdf-parser/
+├── main.py                 # Hauptskript
+├── pdf_extractor.py        # PDF → Rohtext
+├── text_parser.py          # Struktur-Erkennung
+├── footnote_cleaner.py     # Fußnoten-Separation
+├── typescript_exporter.py  # TypeScript-Format
+├── validators.py           # Qualitätskontrolle
+├── config.py              # Konfiguration & Regex-Patterns
+└── requirements.txt       # Dependencies
+```
+
+#### **🔧 Dependencies (requirements.txt)**
+```txt
+pdfplumber==0.9.0
+pandas==2.0.3
+regex==2023.8.8
+click==8.1.7
+rich==13.5.2
+```
+
+#### **📋 Schritt-für-Schritt Pipeline**
+
+**Phase 1: PDF-Extraktion (`pdf_extractor.py`)**
+```python
+def extract_text_from_pdf(pdf_path):
+    # 1. Seitenweise Extraktion mit pdfplumber
+    # 2. Erhaltung von Zeilennummern
+    # 3. Metadaten sammeln (Seitenzahlen)
+    # Output: Liste von Text-Blöcken
+```
+
+**Phase 2: Struktur-Erkennung (`text_parser.py`)**
+```python
+def parse_drama_structure(raw_text):
+    # 1. Akt-Erkennung: "ERSTER AUFZUG", "ZWEITER AUFZUG"
+    # 2. Szenen-Erkennung: "ERSTER AUFTRITT", "ZWEITER AUFTRITT"
+    # 3. Sprecher-Erkennung: "IPHIGENIE", "THOAS", "OREST"
+    # 4. Vers-Nummerierung: Fortlaufende Zählung
+    # Output: Hierarchische Struktur
+```
+
+**Phase 3: Fußnoten-Bereinigung (`footnote_cleaner.py`)**
+```python
+def separate_footnotes_from_verses(text_blocks):
+    # Regex-Patterns für Fußnoten:
+    FOOTNOTE_PATTERNS = [
+        r'\d+\s+\w+:\s+.*',        # "16 Gram: Kummer"
+        r'vgl\.\s+Anm\.\s+zu',     # "vgl. Anm. zu V."
+        r'\d+\s+[A-Z][a-z]+:',     # Nummerierte Erklärungen
+    ]
+    # Output: Saubere Verse + separierte Fußnoten
+```
+
+**Phase 4: Validierung (`validators.py`)**
+```python
+def validate_structure(parsed_data):
+    # 1. Akt-Vollständigkeit (5 Akte?)
+    # 2. Szenen-Konsistenz
+    # 3. Vers-Nummerierung (keine Lücken?)
+    # 4. Sprecher-Namen (standardisiert?)
+    # Output: Validation-Report + Korrekturen
+```
+
+**Phase 5: TypeScript-Export (`typescript_exporter.py`)**
+```python
+def export_to_typescript(validated_data):
+    # 1. JSON-Struktur erstellen
+    # 2. TypeScript-Interfaces generieren
+    # 3. Formatierte .ts Datei schreiben
+    # Output: iphigenieText.ts für React-App
+```
+
+#### **🎯 Regex-Patterns (config.py)**
+```python
+# Struktur-Erkennung
+ACT_PATTERN = r'^(ERSTER|ZWEITER|DRITTER|VIERTER|FÜNFTER)\s+AUFZUG'
+SCENE_PATTERN = r'^(ERSTER|ZWEITER|DRITTER|VIERTER|FÜNFTER|SECHSTER)\s+AUFTRITT'
+SPEAKER_PATTERN = r'^([A-Z]{4,})\s*\.'
+
+# Fußnoten-Erkennung
+FOOTNOTE_MAIN = r'(\d{1,4})\s+([A-Za-zäöüÄÖÜß]+):\s*([^0-9]*?)(?=\s+\d{1,4}\s+\w+:|$)'
+REFERENCE_PATTERN = r'vgl\.\s+Anm\.\s+zu\s+V\.\s*\d+'
+
+# Vers-Bereinigung
+VERSE_CLEANUP = [
+    r'^\d+\s*',              # Zeilennummern entfernen
+    r'\[\d+\]',              # Referenzen entfernen
+    r'\s+', ' '              # Mehrfache Leerzeichen
+]
+```
+
+#### **🚀 Hauptskript (main.py)**
+```python
+import click
+from rich.console import Console
+
+@click.command()
+@click.argument('pdf_path', type=click.Path(exists=True))
+@click.option('--output', '-o', default='iphigenieText.ts')
+@click.option('--validate', '-v', is_flag=True)
+def convert_pdf_to_typescript(pdf_path, output, validate):
+    """
+    Konvertiert Iphigenie PDF zu TypeScript-Format
+    """
+    console = Console()
+    
+    # Pipeline ausführen
+    with console.status("PDF wird verarbeitet..."):
+        # 1. PDF extrahieren
+        # 2. Struktur parsen  
+        # 3. Fußnoten bereinigen
+        # 4. Validieren (optional)
+        # 5. TypeScript exportieren
+        
+    console.print("✅ Konvertierung abgeschlossen!")
+```
+
+#### **⚡ Usage**
+```bash
+# Installation
+pip install -r requirements.txt
+
+# Konvertierung
+python main.py iphigenie.pdf --output clean_iphigenie.ts --validate
+```
+
+## Target TypeScript Structure
 
 ```typescript
 export interface Verse {
@@ -14,7 +145,7 @@ export interface Verse {
 
 export interface Stanza {
   id: string;
-  title: string;
+  title: string; // Speaker name like "IPHIGENIE", "THOAS"
   verses: Verse[];
   act: number;
   scene: number;
@@ -22,134 +153,20 @@ export interface Stanza {
 
 export interface Scene {
   id: string;
-  title: string;
+  title: string; // Like "ERSTER AUFTRITT", "ZWEITER AUFTRITT"
   number: number;
   stanzas: Stanza[];
 }
 
 export interface Act {
   id: string;
-  title: string;
+  title: string; // Like "ERSTER AUFZUG", "ZWEITER AUFZUG"
   number: number;
   scenes: Scene[];
 }
 
-export const iphigenieText: Act[] = [
-  // Hier die Daten
-];
+export const iphigenieText: Act[] = [...]
 ```
 
-## STRUKTUR-REGELN:
-
-### IDs generieren:
-- Acts: `act-${number}` (z.B. "act-1")
-- Scenes: `act-${actNumber}-scene-${sceneNumber}` (z.B. "act-1-scene-1")
-- Stanzas: `act-${actNumber}-scene-${sceneNumber}-stanza-${stanzaNumber}` (z.B. "act-1-scene-1-stanza-1")
-- Verses: `act-${actNumber}-scene-${sceneNumber}-stanza-${stanzaNumber}-verse-${verseNumber}` (z.B. "act-1-scene-1-stanza-1-verse-1")
-
-### Titel-Konventionen:
-- Acts: "ERSTER AUFZUG", "ZWEITER AUFZUG", etc.
-- Scenes: "ERSTER AUFTRITT", "ZWEITER AUFTRITT", etc.
-- Stanzas: Sprechername oder beschreibender Titel (z.B. "IPHIGENIE", "OREST", "Chor der Priesterinnen")
-
-### Vers-Nummerierung:
-- lineNumber: Fortlaufende Nummerierung durch das gesamte Werk (1, 2, 3, ...)
-- Jeder Vers ist eine separate Zeile des Originaltexts
-
-### Text-Bereinigung:
-- Entferne Seitenzahlen, Kopf- und Fußzeilen
-- Behalte nur den literarischen Text
-- Trenne Sprecher von gesprochenen Versen
-- Behalte Regieanweisungen als separate Stanzas bei
-
-## BEISPIEL-AUSGABE:
-
-```typescript
-export const iphigenieText: Act[] = [
-  {
-    id: "act-1",
-    title: "ERSTER AUFZUG",
-    number: 1,
-    scenes: [
-      {
-        id: "act-1-scene-1",
-        title: "ERSTER AUFTRITT",
-        number: 1,
-        stanzas: [
-          {
-            id: "act-1-scene-1-stanza-1",
-            title: "IPHIGENIE",
-            verses: [
-              {
-                id: "act-1-scene-1-stanza-1-verse-1",
-                text: "Heraus in eure Schatten, rege Wipfel",
-                lineNumber: 1
-              },
-              {
-                id: "act-1-scene-1-stanza-1-verse-2",
-                text: "Des heiligen, dichtbelaubten Haines, wie",
-                lineNumber: 2
-              }
-              // ... weitere Verse
-            ],
-            act: 1,
-            scene: 1
-          }
-          // ... weitere Stanzas
-        ]
-      }
-      // ... weitere Scenes
-    ]
-  }
-  // ... weitere Acts
-];
-```
-
-## VERARBEITUNGSSCHRITTE:
-
-1. **PDF-Text extrahieren**: Erkenne die Grundstruktur (Aufzüge, Auftritte)
-2. **Hierarchie identifizieren**: 
-   - Aufzüge (meist römische Zahlen oder "ERSTER AUFZUG" etc.)
-   - Auftritte (meist "ERSTER AUFTRITT", "ZWEITER AUFTRITT" etc.)
-   - Sprecher (meist in Großbuchstaben vor dem gesprochenen Text)
-3. **Verse segmentieren**: Jede Zeile ist ein separater Vers
-4. **IDs generieren**: Nach dem oben beschriebenen Schema
-5. **Nummerierung**: Fortlaufende lineNumber für alle Verse
-6. **Validierung**: Überprüfe die Struktur auf Vollständigkeit
-
-## QUALITÄTSKRITERIEN:
-
-✅ Alle Aufzüge und Auftritte sind erfasst
-✅ Jeder Vers hat eine eindeutige ID und fortlaufende lineNumber
-✅ Sprechernamen sind korrekt als Stanza-Titel erfasst
-✅ Text ist von Formatierungsartefakten bereinigt
-✅ Struktur entspricht exakt dem TypeScript-Interface
-✅ Exportierbare TypeScript-Datei als Ausgabe
-
-## AUSGABEFORMAT:
-Generiere eine vollständige TypeScript-Datei mit:
-- Korrekten Imports/Exports
-- Vollständiger Datenstruktur
-- Gültiger TypeScript-Syntax
-- Kommentaren für bessere Verständlichkeit
-
-**WICHTIG**: Die Ausgabe muss direkt als `.ts`-Datei verwendbar sein und alle TypeScript-Interfaces korrekt implementieren!
-
-## ZUSÄTZLICHE HINWEISE:
-
-### Charaktererkennung:
-- Hauptcharaktere: IPHIGENIE, THOAS, OREST, PYLADES
-- Nebencharaktere: ARKAS, verschiedene Priester/Priesterinnen
-- Regieanweisungen in Klammern oder kursiv sollten als separate Stanzas behandelt werden
-
-### Metrische Besonderheiten:
-- Goethes "Iphigenie" ist in Blankversen geschrieben (jambischer Pentameter)
-- Achte auf Zeilenbrechungen und Enjambements
-- Behalte die originale Versstruktur bei
-
-### Fehlerbehandlung:
-- Bei unklaren Strukturen: Dokumentiere in Kommentaren
-- Bei fehlenden Teilen: Markiere mit "// TODO: Überprüfen"
-- Bei Formatierungsproblemen: Bevorzuge Vollständigkeit über Perfektion
-
-Diese Datei enthält alle Informationen, die eine andere KI benötigt, um PDF-Inhalte perfekt in das Format Ihrer Iphigenie-Reader-Anwendung zu konvertieren.
+## Expected Result
+A clean, structured TypeScript file without footnote chaos, ready for React e-reader integration!
