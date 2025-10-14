@@ -70,6 +70,10 @@ export class OpenAIService {
             - Erkläre komplexe Konzepte verständlich für Schüler/Studenten
             - Beziehe immer den dramatischen Kontext mit ein
             - Berücksichtige Goethes Humanitätsideal und klassische Ästhetik
+            - WICHTIG: Identifiziere 2-4 verschiedene Stilmittel pro Analyse
+            - Variiere die Stilmittel stark - verwende NICHT immer dieselben
+            - Analysiere sowohl offensichtliche als auch subtile sprachliche Mittel
+            - Berücksichtige den Blankvers und metrische Besonderheiten
             
             PFLICHTSTRUKTUR (Antworte IMMER in diesem exakten JSON-Format):
             {
@@ -78,9 +82,9 @@ export class OpenAIService {
               "background": "Kulturhistorischer/mythologischer Kontext (2-3 Sätze)",
               "literaryDevices": [
                 {
-                  "name": "Stilmittel-Name (z.B. Metapher, Alliteration)",
-                  "example": "Konkreter Textbeleg aus der Passage",
-                  "effect": "Literarische Wirkung und Bedeutung",
+                  "name": "Exaktes Stilmittel (variiere zwischen: Metapher, Personifikation, Hyperbel, Chiasmus, Parallelismus, Anapher, Epipher, Klimax, Antiklimax, Oxymoron, Antithese, Synecdoche, Metonymie, Ironie, Rhetorische Frage, Exclamatio, Apostrophe, Ellipse, Polysyndeton, Asyndeton, Alliteration, Assonanz, Onomatopoesie, Enjambement, Zäsur, etc.)",
+                  "example": "Wörtliches Zitat aus dem Text",
+                  "effect": "Spezifische Wirkung auf Leser/Zuschauer und dramatische Funktion",
                   "category": "rhetoric|sound|structure|imagery|syntax"
                 }
               ],
@@ -94,8 +98,8 @@ export class OpenAIService {
             content: prompt
           }
         ],
-        max_tokens: 1000,
-        temperature: 0.7
+        max_tokens: 1200,
+        temperature: 0.8
       });
 
       const response = completion.choices[0]?.message?.content;

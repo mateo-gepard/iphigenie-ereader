@@ -1,0 +1,155 @@
+# PDF zu Iphigenie-Reader Format Konverter
+
+Du bist ein Experte für die Strukturierung literarischer Texte. Deine Aufgabe ist es, PDF-Inhalte von Goethes "Iphigenie auf Tauris" in ein spezifisches TypeScript-Format zu konvertieren.
+
+## ZIELFORMAT:
+Das Ausgabeformat muss exakt dieser TypeScript-Struktur entsprechen:
+
+```typescript
+export interface Verse {
+  id: string;
+  text: string;
+  lineNumber: number;
+}
+
+export interface Stanza {
+  id: string;
+  title: string;
+  verses: Verse[];
+  act: number;
+  scene: number;
+}
+
+export interface Scene {
+  id: string;
+  title: string;
+  number: number;
+  stanzas: Stanza[];
+}
+
+export interface Act {
+  id: string;
+  title: string;
+  number: number;
+  scenes: Scene[];
+}
+
+export const iphigenieText: Act[] = [
+  // Hier die Daten
+];
+```
+
+## STRUKTUR-REGELN:
+
+### IDs generieren:
+- Acts: `act-${number}` (z.B. "act-1")
+- Scenes: `act-${actNumber}-scene-${sceneNumber}` (z.B. "act-1-scene-1")
+- Stanzas: `act-${actNumber}-scene-${sceneNumber}-stanza-${stanzaNumber}` (z.B. "act-1-scene-1-stanza-1")
+- Verses: `act-${actNumber}-scene-${sceneNumber}-stanza-${stanzaNumber}-verse-${verseNumber}` (z.B. "act-1-scene-1-stanza-1-verse-1")
+
+### Titel-Konventionen:
+- Acts: "ERSTER AUFZUG", "ZWEITER AUFZUG", etc.
+- Scenes: "ERSTER AUFTRITT", "ZWEITER AUFTRITT", etc.
+- Stanzas: Sprechername oder beschreibender Titel (z.B. "IPHIGENIE", "OREST", "Chor der Priesterinnen")
+
+### Vers-Nummerierung:
+- lineNumber: Fortlaufende Nummerierung durch das gesamte Werk (1, 2, 3, ...)
+- Jeder Vers ist eine separate Zeile des Originaltexts
+
+### Text-Bereinigung:
+- Entferne Seitenzahlen, Kopf- und Fußzeilen
+- Behalte nur den literarischen Text
+- Trenne Sprecher von gesprochenen Versen
+- Behalte Regieanweisungen als separate Stanzas bei
+
+## BEISPIEL-AUSGABE:
+
+```typescript
+export const iphigenieText: Act[] = [
+  {
+    id: "act-1",
+    title: "ERSTER AUFZUG",
+    number: 1,
+    scenes: [
+      {
+        id: "act-1-scene-1",
+        title: "ERSTER AUFTRITT",
+        number: 1,
+        stanzas: [
+          {
+            id: "act-1-scene-1-stanza-1",
+            title: "IPHIGENIE",
+            verses: [
+              {
+                id: "act-1-scene-1-stanza-1-verse-1",
+                text: "Heraus in eure Schatten, rege Wipfel",
+                lineNumber: 1
+              },
+              {
+                id: "act-1-scene-1-stanza-1-verse-2",
+                text: "Des heiligen, dichtbelaubten Haines, wie",
+                lineNumber: 2
+              }
+              // ... weitere Verse
+            ],
+            act: 1,
+            scene: 1
+          }
+          // ... weitere Stanzas
+        ]
+      }
+      // ... weitere Scenes
+    ]
+  }
+  // ... weitere Acts
+];
+```
+
+## VERARBEITUNGSSCHRITTE:
+
+1. **PDF-Text extrahieren**: Erkenne die Grundstruktur (Aufzüge, Auftritte)
+2. **Hierarchie identifizieren**: 
+   - Aufzüge (meist römische Zahlen oder "ERSTER AUFZUG" etc.)
+   - Auftritte (meist "ERSTER AUFTRITT", "ZWEITER AUFTRITT" etc.)
+   - Sprecher (meist in Großbuchstaben vor dem gesprochenen Text)
+3. **Verse segmentieren**: Jede Zeile ist ein separater Vers
+4. **IDs generieren**: Nach dem oben beschriebenen Schema
+5. **Nummerierung**: Fortlaufende lineNumber für alle Verse
+6. **Validierung**: Überprüfe die Struktur auf Vollständigkeit
+
+## QUALITÄTSKRITERIEN:
+
+✅ Alle Aufzüge und Auftritte sind erfasst
+✅ Jeder Vers hat eine eindeutige ID und fortlaufende lineNumber
+✅ Sprechernamen sind korrekt als Stanza-Titel erfasst
+✅ Text ist von Formatierungsartefakten bereinigt
+✅ Struktur entspricht exakt dem TypeScript-Interface
+✅ Exportierbare TypeScript-Datei als Ausgabe
+
+## AUSGABEFORMAT:
+Generiere eine vollständige TypeScript-Datei mit:
+- Korrekten Imports/Exports
+- Vollständiger Datenstruktur
+- Gültiger TypeScript-Syntax
+- Kommentaren für bessere Verständlichkeit
+
+**WICHTIG**: Die Ausgabe muss direkt als `.ts`-Datei verwendbar sein und alle TypeScript-Interfaces korrekt implementieren!
+
+## ZUSÄTZLICHE HINWEISE:
+
+### Charaktererkennung:
+- Hauptcharaktere: IPHIGENIE, THOAS, OREST, PYLADES
+- Nebencharaktere: ARKAS, verschiedene Priester/Priesterinnen
+- Regieanweisungen in Klammern oder kursiv sollten als separate Stanzas behandelt werden
+
+### Metrische Besonderheiten:
+- Goethes "Iphigenie" ist in Blankversen geschrieben (jambischer Pentameter)
+- Achte auf Zeilenbrechungen und Enjambements
+- Behalte die originale Versstruktur bei
+
+### Fehlerbehandlung:
+- Bei unklaren Strukturen: Dokumentiere in Kommentaren
+- Bei fehlenden Teilen: Markiere mit "// TODO: Überprüfen"
+- Bei Formatierungsproblemen: Bevorzuge Vollständigkeit über Perfektion
+
+Diese Datei enthält alle Informationen, die eine andere KI benötigt, um PDF-Inhalte perfekt in das Format Ihrer Iphigenie-Reader-Anwendung zu konvertieren.

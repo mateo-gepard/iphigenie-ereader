@@ -1,12 +1,12 @@
 import { useState } from 'react';
-import type { IphigenieText, ExplanationResponse } from '../types';
+import type { Act, ExplanationResponse } from '../types';
 import type { Character } from '../data/characters';
 import { OpenAIService } from '../services/openaiService';
 import { findCharactersInText } from '../data/characters';
 import './EReader.css';
 
 interface EReaderProps {
-  text: IphigenieText;
+  text: Act[];
   onTextSelection: (
     text: string, 
     explanation: ExplanationResponse | null, 
@@ -170,15 +170,15 @@ export function EReader({
       )}
 
       <div className="text-content">
-        {text.acts.map((act) => (
+        {text.map((act: Act) => (
           <div key={act.id} className="act">
             <h2 className="act-title">{act.title}</h2>
             
-            {act.scenes.map((scene) => (
+            {act.scenes.map((scene: any) => (
               <div key={scene.id} className="scene">
                 <h3 className="scene-title">{scene.title}</h3>
                 
-                {scene.stanzas.map((stanza) => (
+                {scene.stanzas.map((stanza: any) => (
                   <div 
                     key={stanza.id} 
                     className={`stanza ${selectedStanzaId === stanza.id ? 'selected-stanza' : ''}`}
@@ -193,7 +193,7 @@ export function EReader({
                     </div>
                     
                     <div className="verses">
-                      {stanza.verses.map((verse) => (
+                      {stanza.verses.map((verse: any) => (
                         <div
                           key={verse.id}
                           className={`verse ${selectedVerseId === verse.id ? 'selected-verse' : ''} clickable`}

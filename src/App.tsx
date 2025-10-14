@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { EReader } from './components/EReader';
-import { ExplanationPanel } from './components/ExplanationPanel';
+import { ExplanationPanel } from './components/ExplanationPanelNew';
 import { iphigenieText } from './data/iphigenieText';
 import type { ExplanationResponse } from './types';
 import type { Character } from './data/characters';
@@ -160,54 +160,9 @@ function App() {
       <header className="app-header">
         <h1>Iphigenie auf Tauris</h1>
         <p className="subtitle">Interaktiver E-Reader - Johann Wolfgang von Goethe</p>
-        
-        <div className="toggle-buttons">
-          <button
-            className="toggle-btn"
-            onClick={toggleExplanationVisibility}
-            title={isExplanationVisible ? 'Erklärung ausblenden' : 'Erklärung einblenden'}
-          >
-            {isExplanationVisible ? '📖' : '📕'}
-          </button>
-          
-          <button
-            className="toggle-btn"
-            onClick={toggleCharacterVisibility}
-            title={areCharactersVisible ? 'Charaktere ausblenden' : 'Charaktere einblenden'}
-          >
-            {areCharactersVisible ? '👥' : '👤'}
-          </button>
-          
-          <button
-            className="toggle-btn"
-            onClick={toggleCharacterHighlighting}
-            title={isCharacterHighlightingEnabled ? 'Hervorhebung deaktivieren' : 'Hervorhebung aktivieren'}
-          >
-            {isCharacterHighlightingEnabled ? '🎨' : '⚫'}
-          </button>
-          
-          <button
-            className="toggle-btn"
-            onClick={toggleCharacterExplanationsVisibility}
-            title={areCharacterExplanationsVisible ? 'Charaktererklärungen ausblenden' : 'Charaktererklärungen einblenden'}
-          >
-            {areCharacterExplanationsVisible ? '📝' : '📋'}
-          </button>
-          
-          {selectedCharacter && characterForComparison && (
-            <button
-              className="compare-btn"
-              onClick={handleGenerateComparison}
-              disabled={isGeneratingComparison}
-              title={`Vergleich zwischen ${selectedCharacter.name} und ${characterForComparison.name} generieren`}
-            >
-              {isGeneratingComparison ? '⏳' : '⚖️'} Vergleichen
-            </button>
-          )}
-        </div>
       </header>
       
-      <main className={`app-main ${!isExplanationVisible ? 'explanation-hidden' : ''}`}>
+      <main className="app-main">
         <div className="reader-container">
           <EReader 
             text={iphigenieText} 
@@ -220,21 +175,25 @@ function App() {
           />
         </div>
         
-        {isExplanationVisible && (
-          <div className="explanation-container">
-            <ExplanationPanel 
-              selectedText={selectedText}
-              explanation={explanation}
-              isLoading={isLoading}
-              selectedCharacter={selectedCharacter}
-              characterForComparison={characterForComparison}
-              onCharacterComparisonSelect={handleCharacterComparison}
-              areCharacterExplanationsVisible={areCharacterExplanationsVisible}
-              canRegenerate={canRegenerate}
-              onRegenerate={handleRegenerateExplanation}
-            />
-          </div>
-        )}
+        <div className="explanation-container">
+          <ExplanationPanel 
+            selectedText={selectedText}
+            explanation={explanation}
+            isLoading={isLoading}
+            selectedCharacter={selectedCharacter}
+            characterForComparison={characterForComparison}
+            onCharacterComparisonSelect={handleCharacterComparison}
+            areCharacterExplanationsVisible={areCharacterExplanationsVisible}
+            canRegenerate={canRegenerate}
+            onRegenerate={handleRegenerateExplanation}
+            onGenerateComparison={handleGenerateComparison}
+            isGeneratingComparison={isGeneratingComparison}
+            areCharactersVisible={areCharactersVisible}
+            isCharacterHighlightingEnabled={isCharacterHighlightingEnabled}
+            onToggleCharacters={toggleCharacterVisibility}
+            onToggleHighlighting={toggleCharacterHighlighting}
+          />
+        </div>
         
         <button 
           className="explanation-toggle-btn"
