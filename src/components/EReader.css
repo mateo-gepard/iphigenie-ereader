@@ -358,6 +358,28 @@
   color: #065f46;
 }
 
+/* Footnote styling */
+.footnote {
+  background: #e0e7ff;
+  color: #3730a3;
+  padding: 0.1rem 0.3rem;
+  border-radius: 3px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: help;
+  border: 1px solid #c7d2fe;
+  margin: 0 0.2rem;
+  display: inline-block;
+  vertical-align: super;
+  line-height: 1;
+}
+
+.footnote:hover {
+  background: #c7d2fe;
+  transform: scale(1.1);
+  transition: all 0.2s ease;
+}
+
 /* Mobile responsive for info bar */
 @media (max-width: 768px) {
   .character-info-bar {

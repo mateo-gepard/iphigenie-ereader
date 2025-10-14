@@ -74,10 +74,32 @@ export function EReader({
     onCharacterSelection(character);
   };
 
+  // Funktion zum Bereinigen von HTML aus Text
+  const cleanHTML = (text: string): string => {
+    return text
+      .replace(/<span[^>]*class="character-name[^"]*"[^>]*>(.*?)<\/span>/gi, '$1')
+      .replace(/<span[^>]*data-character-[^>]*>(.*?)<\/span>/gi, '$1')
+      .replace(/<span[^>]*style="[^"]*"[^>]*>(.*?)<\/span>/gi, '$1')
+      .replace(/<span[^>]*>(.*?)<\/span>/gi, '$1')
+      .replace(/<[^>]*>/g, '')
+      .trim();
+  };
+
+  // Funktion zum Formatieren von Fußnoten im Text
+  const formatFootnotes = (text: string): string => {
+    // Erkenne Muster wie "16 Gram: Kummer" oder "114 feiert: tatenlos verbringt"
+    return text.replace(/(\d{1,4})\s+([^:\s]+):\s*([^0-9]*?)(?=\s+\d{1,4}\s+\w+:|$)/g, 
+      '<span class="footnote" title="$2: $3">[$1]</span>'
+    );
+  };
+
   // Funktion zum Markieren von Charakternamen im Text
   const highlightCharacters = (text: string) => {
-    // Entferne zuerst alle vorhandenen HTML-Markierungen
-    let cleanText = text.replace(/<span[^>]*class="character-name[^"]*"[^>]*>(.*?)<\/span>/gi, '$1');
+    // Bereinige den Text zuerst komplett von HTML
+    let cleanText = cleanHTML(text);
+    
+    // Formatiere Fußnoten als Tooltips
+    cleanText = formatFootnotes(cleanText);
     
     if (!areCharactersVisible) return cleanText;
     
