@@ -74,22 +74,34 @@ export function EReader({
     onCharacterSelection(character);
   };
 
-  // Funktion zum Bereinigen von HTML aus Text
+  // Funktion zum Bereinigen von HTML aus Text - sehr aggressiv
   const cleanHTML = (text: string): string => {
-    return text
-      .replace(/<span[^>]*class="character-name[^"]*"[^>]*>(.*?)<\/span>/gi, '$1')
-      .replace(/<span[^>]*data-character-[^>]*>(.*?)<\/span>/gi, '$1')
-      .replace(/<span[^>]*style="[^"]*"[^>]*>(.*?)<\/span>/gi, '$1')
-      .replace(/<span[^>]*>(.*?)<\/span>/gi, '$1')
-      .replace(/<[^>]*>/g, '')
-      .trim();
+    let cleanText = text;
+    
+    // Mehrfache Bereinigung für hartnäckige HTML-Reste
+    for (let i = 0; i < 3; i++) {
+      cleanText = cleanText
+        .replace(/<span[^>]*class="character-name[^"]*"[^>]*>(.*?)<\/span>/gi, '$1')
+        .replace(/<span[^>]*data-character-[^>]*>(.*?)<\/span>/gi, '$1')
+        .replace(/<span[^>]*data-character-color[^>]*>(.*?)<\/span>/gi, '$1')
+        .replace(/<span[^>]*style="[^"]*"[^>]*>(.*?)<\/span>/gi, '$1')
+        .replace(/<span[^>]*class="footnote"[^>]*>(.*?)<\/span>/gi, '$1')
+        .replace(/<span[^>]*>(.*?)<\/span>/gi, '$1')
+        .replace(/<[^>]*>/g, '')
+        .replace(/&gt;/g, '>')
+        .replace(/&lt;/g, '<')
+        .replace(/&amp;/g, '&')
+        .replace(/&quot;/g, '"');
+    }
+    
+    return cleanText.trim();
   };
 
   // Funktion zum Formatieren von Fußnoten im Text
   const formatFootnotes = (text: string): string => {
-    // Erkenne Muster wie "16 Gram: Kummer" oder "114 feiert: tatenlos verbringt"
-    return text.replace(/(\d{1,4})\s+([^:\s]+):\s*([^0-9]*?)(?=\s+\d{1,4}\s+\w+:|$)/g, 
-      '<span class="footnote" title="$2: $3">[$1]</span>'
+    // Erkenne Muster wie "16 Gram: Kummer" - einfacherer, robusterer Regex
+    return text.replace(/\s(\d{1,4})\s+([A-Za-zäöüÄÖÜß]+):\s*([^0-9]+?)(?=\s+\d{1,4}\s+[A-Za-zäöüÄÖÜß]+:|$)/g, 
+      ' <span class="footnote" title="$2: $3">[$1]</span>'
     );
   };
 
@@ -130,6 +142,13 @@ export function EReader({
         `<span class="${className}" data-character-id="${character.id}" data-character-name="${character.name}" data-character-color="${character.color}" ${styleAttributes}>${matched}</span>`
       );
     });
+
+    // Finale Sicherheitsbereinigung - entferne alle problematischen HTML-Reste
+    highlightedText = highlightedText
+      .replace(/&gt;/g, '>')
+      .replace(/&lt;/g, '<')
+      .replace(/&amp;/g, '&')
+      .replace(/&quot;/g, '"');
 
     return highlightedText;
   };
