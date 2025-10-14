@@ -1237,3 +1237,124 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* Toggle Buttons for Character Tab */
+.toggle-btn {
+  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 150px;
+  justify-content: center;
+}
+
+.toggle-btn:hover {
+  background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+}
+
+.toggle-btn.active {
+  background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+}
+
+.toggle-btn.active:hover {
+  background: linear-gradient(135deg, #047857 0%, #059669 100%);
+}
+
+/* Character Buttons Container */
+.character-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 1rem;
+  padding: 1rem;
+  background: #f8fafc;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+}
+
+/* Individual Character Select Buttons */
+.character-select-btn {
+  background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+  color: #1e293b;
+  border: 1px solid #cbd5e1;
+  padding: 0.75rem 1.25rem;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  min-width: 100px;
+  text-align: center;
+}
+
+.character-select-btn:hover {
+  background: linear-gradient(135deg, #e2e8f0 0%, #cbd5e1 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border-color: #94a3b8;
+}
+
+.character-select-btn.selected {
+  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+  color: white;
+  border-color: #2563eb;
+}
+
+.character-select-btn.selected:hover {
+  background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
+}
+
+/* Character Comparison Section */
+.character-comparison-section {
+  margin-top: 2rem;
+  padding: 1.5rem;
+  background: #f8fafc;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+}
+
+.character-comparison-section h4 {
+  color: #1e293b;
+  margin-bottom: 1rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+/* No Character Selected State */
+.no-character-selected {
+  text-align: center;
+  padding: 3rem 2rem;
+  color: #64748b;
+  background: #f8fafc;
+  border-radius: 8px;
+  margin: 2rem 0;
+  border: 1px solid #e2e8f0;
+}
+
+.no-character-selected p {
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+/* Character Details Layout */
+.character-details {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.character-main-info {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
