@@ -48,8 +48,11 @@ export function EReader({
     onTextSelection(verse.text, null, true, contextInfo);
     
     try {
+      // Bereinige den Text für die KI-Anfrage
+      const cleanedText = extractCharacterFromText(cleanHTML(verse.text)).cleanText;
+      
       const explanation = await OpenAIService.getExplanation({
-        text: verse.text,
+        text: cleanedText,
         context: 'verse',
         actNumber,
         sceneNumber
@@ -95,6 +98,36 @@ export function EReader({
     }
     
     return cleanText.trim();
+  };
+
+  // Funktion zum Normalisieren von Charakternamen
+  const normalizeCharacterName = (name: string): string => {
+    return name
+      .replace(/:/g, '') // Entferne Doppelpunkte
+      .replace(/\./g, '') // Entferne Punkte
+      .trim()
+      .toUpperCase();
+  };
+
+  // Funktion zum Erkennen von eingebetteten Charakternamen im Text
+  const extractCharacterFromText = (text: string): { cleanText: string, foundCharacter?: string } => {
+    const characterPatterns = [
+      /^(IPHIGENIE|THOAS|OREST|PYLADES|ARKAS):\s*/i,
+      /\b(IPHIGENIE|THOAS|OREST|PYLADES|ARKAS)\.\s*$/i,
+      /\b(IPHIGENIE|THOAS|OREST|PYLADES|ARKAS):\s*$/i
+    ];
+
+    for (const pattern of characterPatterns) {
+      const match = text.match(pattern);
+      if (match) {
+        return {
+          cleanText: text.replace(pattern, '').trim(),
+          foundCharacter: normalizeCharacterName(match[1])
+        };
+      }
+    }
+
+    return { cleanText: text };
   };
 
   // Funktion zum Formatieren von Fußnoten im Text
@@ -162,7 +195,11 @@ export function EReader({
       return;
     }
 
-    const stanzaText = stanza.verses.map((v: any) => v.text).join('\n');
+    // Bereinige alle Verse der Stanza
+    const cleanedVerses = stanza.verses.map((v: any) => 
+      extractCharacterFromText(cleanHTML(v.text)).cleanText
+    );
+    const stanzaText = cleanedVerses.join('\n');
     
     const contextInfo = {
       type: 'stanza' as const,
@@ -232,7 +269,7 @@ export function EReader({
                         className="stanza-title clickable"
                         onClick={() => handleStanzaClick(stanza, act.number, scene.number)}
                       >
-                        {stanza.title}
+                        {normalizeCharacterName(stanza.title)}
                       </h4>
                     </div>
                     
@@ -246,7 +283,11 @@ export function EReader({
                           <span className="line-number">{verse.lineNumber}</span>
                           <span 
                             className="verse-text"
-                            dangerouslySetInnerHTML={{ __html: highlightCharacters(verse.text) }}
+                            dangerouslySetInnerHTML={{
+                              __html: isCharacterHighlightingEnabled && areCharactersVisible 
+                                ? highlightCharacters(extractCharacterFromText(verse.text).cleanText)
+                                : formatFootnotes(cleanHTML(extractCharacterFromText(verse.text).cleanText))
+                            }}
                             onClick={(e) => {
                               const target = e.target as HTMLElement;
                               if (target.classList.contains('character-name')) {
