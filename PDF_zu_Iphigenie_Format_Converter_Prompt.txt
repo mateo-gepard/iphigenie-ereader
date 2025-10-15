@@ -1,57 +1,160 @@
-# PDF zu Iphigenie-Reader Format Konverter - ADVANCED AI PROMPT
+# 🎭 ULTIMATIVER PDF-zu-TypeScript KONVERTER für "Iphigenie auf Tauris"
 
-You are an EXPERT PDF-to-TypeScript converter specifically designed for Goethe's "Iphigenie auf Tauris". Your mission is to create PERFECT, CLEAN, PRODUCTION-READY TypeScript data from a messy PDF source.
+Du bist ein HOCHSPEZIALISIERTER AI-Experte für die Konvertierung von PDF-Dateien von Goethes "Iphigenie auf Tauris" in perfekte, saubere TypeScript-Datenstrukturen. Deine Aufgabe ist es, aus chaotischen, verschmutzten PDF-Extraktionen MAKELLOSE, PRODUKTIONSTAUGLICHE TypeScript-Dateien zu erstellen.
 
-## ⚠️ CRITICAL REQUIREMENTS - MUST FOLLOW EXACTLY
+## 🚨 ABSOLUT KRITISCHE ANFORDERUNGEN - KEINE AUSNAHMEN
 
-### 🎯 **ZERO TOLERANCE POLICY**
-- **NO HTML ENTITIES**: Never output `&nbsp;`, `&amp;`, `&#x`, `(cid:)` or ANY HTML code
-- **NO FOOTNOTE POLLUTION**: Footnotes must be 100% separated from verse text  
-- **NO FORMATTING ARTIFACTS**: Remove all PDF conversion garbage
-- **PERFECT GERMAN TEXT**: Output must be readable, natural German prose/poetry
-- **COMPLETE DATA INTEGRITY**: Every verse, every character, every scene must be preserved
+### ⚡ **NULL-FEHLER-TOLERANZ POLITIK**
+- **ABSOLUT KEINE HTML-ENTITIES**: Niemals `&nbsp;`, `&amp;`, `&#x`, `(cid:)`, `&lt;`, `&gt;` oder JEGLICHEN HTML-Code ausgeben
+- **ZERO FOOTNOTE CONTAMINATION**: Fußnoten müssen zu 100% von Verstext getrennt werden
+- **KEINE PDF-ARTEFAKTE**: Alle Konvertierungs-Müll-Zeichen eliminieren  
+- **PERFEKTER DEUTSCHER TEXT**: Ausgabe muss natürliche, lesbare deutsche Dichtung/Prosa sein
+- **VOLLSTÄNDIGE DATENINTEGRITÄT**: Jeder Vers, jeder Charakter, jede Szene muss erhalten bleiben
+- **PRÄZISE STRUKTUR-ERKENNUNG**: Acts → Scenes → Stanzas → Verses exakt identifizieren
 
-## 🔥 ADVANCED TEXT CLEANING PIPELINE
+## 🔬 BEISPIEL-ANALYSE: WAS FALSCH IST vs. WAS RICHTIG IST
 
-### 🧹 **SUPER-AGGRESSIVE CLEANING STRATEGY**
-
-Before ANY structural parsing, implement these cleaning stages:
-
-#### **Stage 1: HTML Entity Destruction**
-```python
-def destroy_html_entities(text):
-    """NUCLEAR approach to HTML cleanup"""
-    import html
-    import re
-    
-    # Decode HTML entities
-    text = html.unescape(text)
-    
-    # Remove PDF artifacts
-    text = re.sub(r'\(cid:\d+\)', '', text)  # (cid:2) garbage
-    text = re.sub(r'&#x?[0-9a-fA-F]+;', '', text)  # Numeric entities
-    text = re.sub(r'&[a-zA-Z]+;', '', text)  # Named entities
-    
-    # Remove invisible characters
-    text = re.sub(r'[\u200b-\u200d\ufeff]', '', text)  # Zero-width chars
-    text = re.sub(r'[\x00-\x08\x0b\x0c\x0e-\x1f\x7f-\x9f]', '', text)  # Control chars
-    
-    return text
+### ❌ **TYPISCHE PDF-CHAOS (NIEMALS SO AUSGEBEN!):**
+```
+Heraus in eure Schatten, rege Wipfel 16 Wipfel: Baumkronen vgl. Anm. zu V. 45
+Des uralten, heiligen, dichtbelaubten Haines, (cid:2) 17 Hain: heiliger Wald
+Wie in der Göttin stilles Heiligtum &nbsp;&amp;lt;
 ```
 
-#### **Stage 2: Footnote Nuclear Separation**
-```python
-def nuclear_footnote_separation(text):
-    """PERFECT footnote extraction - NO MIXING ALLOWED"""
-    
-    # German drama footnote patterns - ULTRA COMPREHENSIVE
-    footnote_patterns = [
-        r'\d+\s+[A-ZÄÖÜ][a-zäöüß]+:\s+[^0-9]+(?=\d+\s+[A-ZÄÖÜ]|$)',  # "16 Gram: explanation"
-        r'vgl\.\s+Anm\.\s+zu\s+V\.\s*\d+[^\d]*',  # "vgl. Anm. zu V. 123"
-        r'\[\d+\]\s*[^0-9\[\]]+',  # [16] footnote markers
-        r'Anm\.\s+\d+:.*?(?=Anm\.\s+\d+:|$)',  # "Anm. 16: explanation"
-        r'\d+\)\s+[^0-9)]+(?=\d+\)|$)',  # "16) explanation"
-    ]
+### ✅ **PERFEKTE AUSGABE (SO MUSS ES SEIN!):**
+```typescript
+{
+  "id": "act-1-scene-1-stanza-1-verse-1",
+  "text": "Heraus in eure Schatten, rege Wipfel",
+  "lineNumber": 1
+},
+{
+  "id": "act-1-scene-1-stanza-1-verse-2", 
+  "text": "Des uralten, heiligen, dichtbelaubten Haines,",
+  "lineNumber": 2
+},
+{
+  "id": "act-1-scene-1-stanza-1-verse-3",
+  "text": "Wie in der Göttin stilles Heiligtum",
+  "lineNumber": 3
+}
+```
+
+## 🧹 ULTRA-AGGRESSIVE TEXT-CLEANING PIPELINE
+
+### **SCHRITT 1: PDF-CHAOS VERNICHTUNG**
+Bevor du IRGENDWAS anderes machst, VERNICHTE alle PDF-Artefakte:
+
+```
+❌ ENTFERNE SOFORT:
+(cid:1), (cid:2), (cid:255) → ""
+&nbsp;, &amp;, &lt;, &gt; → ""  
+&#x20;, &#160;, &#8203; → ""
+vgl. Anm. zu V. 123 blabla → ""
+16 Wort: Erklärung hier → ""
+[16], (16), ¹⁶ → ""
+Schauplatz: Details → ""
+```
+
+### **SCHRITT 2: DEUTSCHE TEXT-NORMALISIERUNG**
+```
+✅ KORRIGIERE:
+"ae" → "ä", "oe" → "ö", "ue" → "ü", "ss" → "ß"
+"Ae" → "Ä", "Oe" → "Ö", "Ue" → "Ü"
+" ," → ",", " ." → ".", " !" → "!", " ?" → "?"
+"  " → " " (doppelte Leerzeichen)
+```
+
+### **SCHRITT 3: STRUKTUR-ERKENNUNG (ULTRA-PRÄZISE)**
+
+#### **🎭 ACT (AUFZUG) ERKENNUNG:**
+```
+✅ ERKENNE DIESE PATTERNS:
+"ERSTER AUFZUG" → Act 1
+"ZWEITER AUFZUG" → Act 2  
+"DRITTER AUFZUG" → Act 3
+"VIERTER AUFZUG" → Act 4
+"FÜNFTER AUFZUG" → Act 5
+
+AUCH: "I. AUFZUG", "1. AUFZUG", "ACT I", etc.
+```
+
+#### **🎪 SCENE (AUFTRITT) ERKENNUNG:**
+```
+✅ ERKENNE DIESE PATTERNS:
+"ERSTER AUFTRITT" → Scene 1
+"ZWEITER AUFTRITT" → Scene 2
+"DRITTER AUFTRITT" → Scene 3
+etc.
+
+AUCH: "I. AUFTRITT", "1. AUFTRITT", "SCENE I", etc.
+```
+        #### **👥 CHARACTER (SPRECHER) ERKENNUNG:**
+```
+✅ HAUPTCHARAKTERE (EXAKT SO BENENNEN):
+"IPHIGENIE" oder "IPHIGENIA" → "IPHIGENIE"
+"THOAS" oder "THOAS, KÖNIG" → "THOAS"  
+"OREST" oder "ORESTES" → "OREST"
+"PYLADES" → "PYLADES"
+"ARKAS" → "ARKAS"
+
+❌ VERMEIDE: 
+- "Iphigenie" (kleinbuchstaben)
+- "IPHIGENIE." (mit Punkt)
+- Verwechslungen mit Verstext
+```
+
+#### **📝 VERSE ERKENNUNG (ULTRA-WICHTIG):**
+```
+✅ JEDE ZEILE DEUTSCHER DICHTUNG IST EIN VERSE:
+"Heraus in eure Schatten, rege Wipfel" → Verse
+"Des uralten, heiligen, dichtbelaubten Haines," → Verse
+"Wie in der Göttin stilles Heiligtum" → Verse
+
+❌ NIEMALS ALS VERSE:
+- Fußnoten: "16 Wipfel: Baumkronen"  
+- Anmerkungen: "vgl. Anm. zu V. 45"
+- Seitenangaben, Titel, Strukturelemente
+```
+
+## 🎯 KONKRETE ANWEISUNGEN FÜR PERFEKTE KONVERTIERUNG
+
+### **TASK 1: TEXT-INPUT ANALYSIEREN**
+1. **Identifiziere alle Akte/Szenen** mittels Pattern-Matching
+2. **Erkenne alle Charakternamen** in GROSSBUCHSTABEN
+3. **Separiere Verse von Fußnoten** zu 100%
+4. **Reinige alle HTML/PDF-Artefakte** komplett
+
+### **TASK 2: STRUKTUR AUFBAUEN**
+```typescript
+// EXAKTE ZIEL-STRUKTUR:
+Act {
+  id: "act-1", "act-2", etc.
+  title: "ERSTER AUFZUG", "ZWEITER AUFZUG", etc.
+  number: 1, 2, 3, 4, 5
+  scenes: Scene[]
+}
+
+Scene {
+  id: "act-X-scene-Y"
+  title: "ERSTER AUFTRITT", "ZWEITER AUFTRITT", etc.
+  number: 1, 2, 3, etc.
+  stanzas: Stanza[]
+}
+
+Stanza {
+  id: "act-X-scene-Y-stanza-Z"
+  title: "IPHIGENIE", "THOAS", "OREST", etc.
+  verses: Verse[]
+  act: X, scene: Y
+}
+
+Verse {
+  id: "act-X-scene-Y-stanza-Z-verse-W"
+  text: "SAUBERER DEUTSCHER TEXT",
+  lineNumber: fortlaufende Nummer
+}
+```
     
     footnotes = []
     clean_text = text
@@ -89,6 +192,67 @@ def normalize_german_text(text):
     text = re.sub(r'\n\s*\n', '\n', text)  # Multiple newlines → single
     
     return text.strip()
+```
+
+### **TASK 3: QUALITÄTSKONTROLLE (MANDATORY)**
+```
+✅ ÜBERPRÜFE VOR AUSGABE:
+□ Genau 5 Akte vorhanden?
+□ Alle Hauptcharaktere (IPHIGENIE, THOAS, OREST, PYLADES, ARKAS) gefunden?
+□ Mindestens 1500 Verse insgesamt?
+□ Keine HTML-Entities in Versen?
+□ Keine Fußnoten in Versen?
+□ Alle Verse-IDs eindeutig?
+□ Deutsche Umlaute korrekt (ä, ö, ü, ß)?
+```
+
+## 🚀 STEP-BY-STEP KONVERTIERUNGS-PROZESS
+
+### **PHASE 1: ROHTEXT BEREINIGUNG**
+```
+INPUT: Chaotischer PDF-Text mit Fußnoten, HTML-Entities, Artefakten
+PROCESS: Aggressives Cleaning aller Störelemente
+OUTPUT: Sauberer deutscher Text ohne Verschmutzungen
+```
+
+### **PHASE 2: STRUKTUR-PARSING**  
+```
+INPUT: Gereinigter Text
+PROCESS: Pattern-basierte Erkennung von Akten, Szenen, Charakteren
+OUTPUT: Hierarchische Struktur: Acts → Scenes → Stanzas
+```
+
+### **PHASE 3: VERS-EXTRAKTION**
+```  
+INPUT: Strukturierte Szenen mit Charakterreden
+PROCESS: Zeilenweise Vers-Erstellung mit fortlaufender Nummerierung
+OUTPUT: Einzelne Verse mit eindeutigen IDs
+```
+
+### **PHASE 4: TYPESCRIPT-GENERIERUNG**
+```
+INPUT: Vollständige Datenstruktur  
+PROCESS: JSON-Serialisierung mit korrekten TypeScript-Interfaces
+OUTPUT: Produktionstaugliche .ts-Datei
+```
+
+## 💡 IMPLEMENTIERUNGS-STRATEGIEN
+
+### **REGEX-PATTERNS FÜR DEUTSCHE LITERATUR:**
+```regex
+# Akte erkennen:
+^(ERSTER|ZWEITER|DRITTER|VIERTER|FÜNFTER|I\.|II\.|III\.|IV\.|V\.)\s+(AUFZUG|ACT)
+
+# Szenen erkennen:  
+^(ERSTER|ZWEITER|DRITTER|VIERTER|FÜNFTER|SECHSTER|I\.|II\.|III\.|IV\.|V\.|VI\.)\s+(AUFTRITT|SCENE)
+
+# Charaktere erkennen:
+^(IPHIGENIE|THOAS|OREST|PYLADES|ARKAS)\s*\.?\s*$
+
+# Fußnoten vernichten:
+\d+\s+[A-ZÄÖÜ][a-zäöüß]*:\s+[^0-9]+
+vgl\.\s+Anm\.\s+zu\s+V\.\s*\d+
+\[\d+\]|\(\d+\)|¹|²|³|⁴|⁵
 ```
 
 ## Python Implementation Plan
@@ -353,57 +517,84 @@ export interface Act {
 export const iphigenieText: Act[] = [...]
 ```
 
-## 🏆 QUALITY CONTROL CHECKLIST
+## 🏆 ULTIMATIVE QUALITÄTSKONTROLLE & VALIDATION
 
-### ✅ **MANDATORY PRE-DELIVERY CHECKS**
+### ✅ **MANDATORY PRE-DELIVERY CHECKLIST - JEDER PUNKT MUSS ERFÜLLT SEIN**
 
-Before outputting ANY TypeScript file, verify EVERY item:
+#### **📝 TEXT-QUALITÄT (NULL-TOLERANZ)**
+- [ ] **HTML-ENTITIES**: ABSOLUT KEINE `&nbsp;`, `&amp;`, `&#x`, `&lt;`, `&gt;` 
+- [ ] **PDF-ARTEFAKTE**: KEINE `(cid:2)`, `(cid:255)`, seltsame Symbole
+- [ ] **FOOTNOTE-KONTAMINATION**: NULL Fußnotentext in Versen
+- [ ] **REFERENZ-MARKER**: KEINE `vgl. Anm. zu V.`, `[16]`, `(16)`
+- [ ] **LEERE EINTRÄGE**: Keine leeren Verse oder Stanzas
+- [ ] **DEUTSCHE UMLAUTE**: Perfekte ä, ö, ü, ß Darstellung
+- [ ] **INTERPUNKTION**: Korrekte Abstände `,`, `.`, `!`, `?`
+- [ ] **WHITESPACE**: Keine führenden/nachfolgenden Leerzeichen
 
-#### **📝 Text Quality (ZERO TOLERANCE)**
-- [ ] NO HTML entities (`&nbsp;`, `&amp;`, `&#x`, etc.)
-- [ ] NO PDF artifacts (`(cid:2)`, weird symbols)
-- [ ] NO footnote text mixed with verses
-- [ ] NO reference markers (`vgl. Anm. zu V.`)
-- [ ] NO empty verses or stanzas
-- [ ] PERFECT German umlauts (ä, ö, ü, ß)
-- [ ] PROPER punctuation spacing
-- [ ] CLEAN whitespace (no leading/trailing spaces)
+#### **🏗️ STRUKTUR-INTEGRITÄT**
+- [ ] **EXAKT 5 AKTE**: Muss genau 5 Aufzüge haben
+- [ ] **SZENEN-NUMMERIERUNG**: Alle Auftritte korrekt nummeriert
+- [ ] **CHARAKTER-IDENTIFIKATION**: Alle 5 Hauptfiguren erkannt
+- [ ] **VERS-NUMMERIERUNG**: Fortlaufende, lückenlose Nummerierung
+- [ ] **SPRECHER-ZUORDNUNG**: Korrekte Character-Zuweisungen
+- [ ] **EINDEUTIGE IDs**: Keine doppelten oder fehlenden IDs
 
-#### **🏗️ Structure Integrity**
-- [ ] EXACTLY 5 acts (Aufzüge)
-- [ ] All scenes properly numbered
-- [ ] All characters correctly identified
-- [ ] Continuous verse numbering
-- [ ] Proper speaker assignments
-- [ ] No duplicate IDs
+#### **📊 DATEN-VOLLSTÄNDIGKEIT**
+- [ ] **MINDESTENS 1500 VERSE**: Vollständiges Drama
+- [ ] **ALLE HAUPTCHARAKTERE**: IPHIGENIE, THOAS, OREST, PYLADES, ARKAS
+- [ ] **VOLLSTÄNDIGE SZENEN**: Keine fehlenden Akte oder Auftritte
+- [ ] **TYPESCRIPT-SYNTAX**: Valide .ts Datei
+- [ ] **JSON-STRUKTUR**: Korrekte Verschachtelung und Kommas
 
-#### **📊 Data Completeness**
-- [ ] Total verses > 1500 (full drama)
-- [ ] All main characters present (Iphigenie, Thoas, Orest, Pylades, Arkas)
-- [ ] No missing scenes or acts
-- [ ] Proper TypeScript syntax
-- [ ] Valid JSON structure
+### 🎯 **DETAILLIERTE BEISPIELE - SO MUSS ES AUSSEHEN**
 
-#### **🎯 Example Perfect Verse**
+#### **✅ PERFEKTE VERS-AUSGABE:**
+```typescript
+{
+  "id": "act-1-scene-1-stanza-1-verse-1",
+  "text": "Heraus in eure Schatten, rege Wipfel",
+  "lineNumber": 1
+},
+{
+  "id": "act-1-scene-1-stanza-1-verse-2", 
+  "text": "Des uralten, heiligen, dichtbelaubten Haines,",
+  "lineNumber": 2
+}
+```
+
+#### **❌ KATASTROPHALE AUSGABE (NIEMALS SO!):**
 ```typescript
 {
   "id": "verse-123",
-  "text": "Heraus in eure Schatten, rege Wipfel", // ✅ Clean German text
+  "text": "Heraus in eure Schatten, rege Wipfel 16 Wipfel: Baumkronen vgl. Anm. zu V. 45 (cid:2) &nbsp;Des uralten, heiligen", 
   "lineNumber": 123
 }
 ```
 
-#### **❌ Example FAILED Verse (NEVER OUTPUT THIS)**
+#### **✅ PERFEKTE STANZA-STRUKTUR:**
 ```typescript
 {
-  "id": "verse-123", 
-  "text": "Heraus in eure Schatten, rege Wipfel 16 Wipfel: Baumkronen vgl. Anm. zu V. 45 (cid:2)", // ❌ GARBAGE
-  "lineNumber": 123
+  "id": "act-1-scene-1-stanza-1",
+  "title": "IPHIGENIE",
+  "verses": [
+    // Nur saubere Verse hier, KEINE Fußnoten!
+  ],
+  "act": 1,
+  "scene": 1
 }
 ```
 
-### 🚨 **FINAL WARNING**
-If ANY of these quality checks fail, DO NOT output the file. Fix the issues first. The React app depends on PERFECT data quality.
+### 🚨 **FINAL ULTIMATUM**
+- Wenn AUCH NUR EIN EINZIGER Qualitätscheck fehlschlägt → **STOPP ALLES**
+- Repariere das Problem BEVOR du die Datei ausgibst
+- Die React-App ist auf PERFEKTE Datenqualität angewiesen
+- Ein einziger HTML-Entity oder Fußnoten-Kontamination = TOTALER FEHLSCHLAG
 
-## Expected Result
-A PERFECT, PRODUCTION-READY TypeScript file with ZERO defects, ready for immediate React e-reader integration!
+### 🎭 **ERWARTETES ENDERGEBNIS**
+Eine MAKELLOSE, PRODUKTIONSTAUGLICHE TypeScript-Datei mit:
+- **ZERO Defekten** in der Textqualität
+- **PERFEKTER Strukturierung** nach unserem exakten Schema  
+- **SOFORT EINSATZBEREIT** für die React e-reader Integration
+- **VOLLSTÄNDIGE KOMPATIBILITÄT** mit unserem bestehenden Code
+
+**🏆 NUR WENN ALLE CHECKS ✅ SIND, DARFST DU DIE DATEI AUSGEBEN!**
