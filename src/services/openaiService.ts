@@ -1,16 +1,34 @@
-import OpenAI from 'openai';
 import type { ExplanationRequest, ExplanationResponse } from '../types';
 import { CacheService } from './cacheService';
 import { GlobalCacheService } from './globalCacheService';
 
-// Note: In a production app, you should use environment variables and a backend API
-// to keep your API key secure. This is for demonstration purposes only.
-const openai = new OpenAI({
-  apiKey: import.meta.env.VITE_OPENAI_API_KEY,
-  dangerouslyAllowBrowser: true // Only for demo - use backend in production
-});
+// API endpoint for our backend
+const API_BASE = import.meta.env.PROD ? '' : 'http://localhost:5173';
+const CHAT_ENDPOINT = `${API_BASE}/api/chat`;
 
 export class OpenAIService {
+  private static async makeRequest(messages: any[], request: ExplanationRequest) {
+    const response = await fetch(CHAT_ENDPOINT, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        messages,
+        context: request.context,
+        text: request.text,
+        actNumber: request.actNumber,
+        sceneNumber: request.sceneNumber
+      })
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    return await response.json();
+  }
+
   static async getExplanation(request: ExplanationRequest): Promise<ExplanationResponse> {
     try {
       // Überspringe Cache nur wenn explizit Regenerierung gewünscht
@@ -52,68 +70,65 @@ export class OpenAIService {
 
       const prompt = this.buildPrompt(request);
       
-      const completion = await openai.chat.completions.create({
-        model: "gpt-3.5-turbo",
-        messages: [
+      const messages = [
+        {
+          role: "system" as const,
+          content: `Du bist ein renommierter Germanistik-Professor mit Spezialisierung auf Goethes Klassik und insbesondere "Iphigenie auf Tauris". 
+          
+          DEINE EXPERTISE:
+          - Tiefes Verständnis der Weimarer Klassik und Goethes dramatischer Sprache
+          - Kenntnisse über antike Mythologie und deren Adaptation
+          - Verständnis für Blankverstechnik und dramatische Strukturen
+          - Kulturhistorischer Kontext der Entstehungszeit (1779-1786)
+          
+          ANTWORT-RICHTLINIEN:
+          - Verwende präzise literaturwissenschaftliche Terminologie
+          - Erkläre komplexe Konzepte verständlich für Schüler/Studenten
+          - Beziehe immer den dramatischen Kontext mit ein
+          - Berücksichtige Goethes Humanitätsideal und klassische Ästhetik
+          - WICHTIG: Identifiziere 2-4 verschiedene Stilmittel pro Analyse
+          - Variiere die Stilmittel stark - verwende NICHT immer dieselben
+          - Analysiere sowohl offensichtliche als auch subtile sprachliche Mittel
+          - Berücksichtige den Blankvers und metrische Besonderheiten
+          
+          PFLICHTSTRUKTUR (Antworte IMMER in diesem exakten JSON-Format):
           {
-            role: "system",
-            content: `Du bist ein renommierter Germanistik-Professor mit Spezialisierung auf Goethes Klassik und insbesondere "Iphigenie auf Tauris". 
-            
-            DEINE EXPERTISE:
-            - Tiefes Verständnis der Weimarer Klassik und Goethes dramatischer Sprache
-            - Kenntnisse über antike Mythologie und deren Adaptation
-            - Verständnis für Blankverstechnik und dramatische Strukturen
-            - Kulturhistorischer Kontext der Entstehungszeit (1779-1786)
-            
-            ANTWORT-RICHTLINIEN:
-            - Verwende präzise literaturwissenschaftliche Terminologie
-            - Erkläre komplexe Konzepte verständlich für Schüler/Studenten
-            - Beziehe immer den dramatischen Kontext mit ein
-            - Berücksichtige Goethes Humanitätsideal und klassische Ästhetik
-            - WICHTIG: Identifiziere 2-4 verschiedene Stilmittel pro Analyse
-            - Variiere die Stilmittel stark - verwende NICHT immer dieselben
-            - Analysiere sowohl offensichtliche als auch subtile sprachliche Mittel
-            - Berücksichtige den Blankvers und metrische Besonderheiten
-            
-            PFLICHTSTRUKTUR (Antworte IMMER in diesem exakten JSON-Format):
-            {
-              "explanation": "Detaillierte literaturwissenschaftliche Analyse (3-4 Sätze)",
-              "summary": "Prägnante Inhaltszusammenfassung (1-2 Sätze)",
-              "background": "Kulturhistorischer/mythologischer Kontext (2-3 Sätze)",
-              "literaryDevices": [
-                {
-                  "name": "Exaktes Stilmittel (variiere zwischen: Metapher, Personifikation, Hyperbel, Chiasmus, Parallelismus, Anapher, Epipher, Klimax, Antiklimax, Oxymoron, Antithese, Synecdoche, Metonymie, Ironie, Rhetorische Frage, Exclamatio, Apostrophe, Ellipse, Polysyndeton, Asyndeton, Alliteration, Assonanz, Onomatopoesie, Enjambement, Zäsur, etc.)",
-                  "example": "Wörtliches Zitat aus dem Text",
-                  "effect": "Spezifische Wirkung auf Leser/Zuschauer und dramatische Funktion",
-                  "category": "rhetoric|sound|structure|imagery|syntax"
-                }
-              ],
-              "themes": ["Zentrales Thema mit Bezug zum Humanitätsideal", "Weiteres relevantes Motiv"],
-              "characterAnalysis": "Charakterpsychologische Einordnung (falls Figurenrede)",
-              "dramaticFunction": "Funktion für Handlungsfortschritt/Spannungsaufbau"
-            }`
-          },
-          {
-            role: "user",
-            content: prompt
-          }
-        ],
-        max_tokens: 1200,
-        temperature: 0.8
-      });
+            "explanation": "Detaillierte literaturwissenschaftliche Analyse (3-4 Sätze)",
+            "summary": "Prägnante Inhaltszusammenfassung (1-2 Sätze)",
+            "background": "Kulturhistorischer/mythologischer Kontext (2-3 Sätze)",
+            "literaryDevices": [
+              {
+                "name": "Exaktes Stilmittel (variiere zwischen: Metapher, Personifikation, Hyperbel, Chiasmus, Parallelismus, Anapher, Epipher, Klimax, Antiklimax, Oxymoron, Antithese, Synecdoche, Metonymie, Ironie, Rhetorische Frage, Exclamatio, Apostrophe, Ellipse, Polysyndeton, Asyndeton, Alliteration, Assonanz, Onomatopoesie, Enjambement, Zäsur, etc.)",
+                "example": "Wörtliches Zitat aus dem Text",
+                "effect": "Spezifische Wirkung auf Leser/Zuschauer und dramatische Funktion",
+                "category": "rhetoric|sound|structure|imagery|syntax"
+              }
+            ],
+            "themes": ["Zentrales Thema mit Bezug zum Humanitätsideal", "Weiteres relevantes Motiv"],
+            "characterAnalysis": "Charakterpsychologische Einordnung (falls Figurenrede)",
+            "dramaticFunction": "Funktion für Handlungsfortschritt/Spannungsaufbau"
+          }`
+        },
+        {
+          role: "user" as const,
+          content: prompt
+        }
+      ];
 
-      const response = completion.choices[0]?.message?.content;
-      if (!response) {
+      const apiResponse = await this.makeRequest(messages, request);
+
+      const responseText = apiResponse.explanation;
+      if (!responseText) {
         throw new Error('Keine Antwort von OpenAI erhalten');
       }
 
       // Try to parse JSON response, fallback to plain text if it fails
       let explanationResponse: ExplanationResponse;
       try {
-        explanationResponse = JSON.parse(response) as ExplanationResponse;
+        explanationResponse = JSON.parse(responseText) as ExplanationResponse;
       } catch {
         explanationResponse = {
-          explanation: response,
+          explanation: responseText,
           summary: "Zusammenfassung nicht verfügbar",
           background: "Hintergrundinformationen nicht verfügbar",
           literaryDevices: [],
@@ -237,37 +252,37 @@ Antworte ausschließlich im vorgegebenen JSON-Format.`;
 
   static async answerCustomQuestion(selectedText: string, question: string): Promise<string> {
     try {
-      const completion = await openai.chat.completions.create({
-        model: "gpt-3.5-turbo",
-        messages: [
-          {
-            role: "system",
-            content: `Du bist ein Germanistik-Professor mit Expertise in Goethes "Iphigenie auf Tauris". 
-            Beantworte Fragen zum ausgewählten Text präzise und wissenschaftlich fundiert.
-            
-            ANTWORT-RICHTLINIEN:
-            - Beziehe dich direkt auf den ausgewählten Text
-            - Verwende literaturwissenschaftliche Terminologie
-            - Erkläre verständlich für Schüler/Studenten
-            - Gib konkrete Textbelege
-            - Berücksichtige den dramatischen Kontext`
-          },
-          {
-            role: "user",
-            content: `AUSGEWÄHLTER TEXT:
+      const messages = [
+        {
+          role: "system" as const,
+          content: `Du bist ein Germanistik-Professor mit Expertise in Goethes "Iphigenie auf Tauris". 
+          Beantworte Fragen zum ausgewählten Text präzise und wissenschaftlich fundiert.
+          
+          ANTWORT-RICHTLINIEN:
+          - Beziehe dich direkt auf den ausgewählten Text
+          - Verwende literaturwissenschaftliche Terminologie
+          - Erkläre verständlich für Schüler/Studenten
+          - Gib konkrete Textbelege
+          - Berücksichtige den dramatischen Kontext`
+        },
+        {
+          role: "user" as const,
+          content: `AUSGEWÄHLTER TEXT:
 "${selectedText}"
 
 FRAGE:
 ${question}
 
 Bitte beantworte die Frage bezogen auf diesen Textausschnitt aus Goethes "Iphigenie auf Tauris".`
-          }
-        ],
-        max_tokens: 800,
-        temperature: 0.7
-      });
+        }
+      ];
 
-      return completion.choices[0]?.message?.content || 'Entschuldigung, ich konnte keine Antwort generieren.';
+      const response = await this.makeRequest(messages, {
+        text: selectedText,
+        context: 'verse' as const
+      } as ExplanationRequest);
+
+      return response.explanation || 'Entschuldigung, ich konnte keine Antwort generieren.';
     } catch (error) {
       console.error('Fehler beim Beantworten der Frage:', error);
       throw new Error('Die Frage konnte nicht beantwortet werden.');
