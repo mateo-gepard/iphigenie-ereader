@@ -1508,3 +1508,161 @@
   animation: spin 1s linear infinite;
   margin: 0 auto 0.5rem;
 }
+
+/* Explanation Background */
+.explanation-background {
+  padding: 2rem;
+  background: var(--bg-primary);
+}
+
+.background-content {
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.background-header {
+  text-align: center;
+  margin-bottom: 3rem;
+  padding-bottom: 2rem;
+  border-bottom: 2px solid var(--border-color);
+}
+
+.background-header h3 {
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+  color: var(--text-primary);
+  font-weight: 700;
+}
+
+.background-header .subtitle {
+  font-size: 1.1rem;
+  color: var(--text-secondary);
+  font-style: italic;
+  margin: 0;
+}
+
+.analysis-features {
+  display: grid;
+  gap: 2rem;
+  margin-bottom: 3rem;
+}
+
+.feature-section {
+  background: var(--bg-secondary);
+  padding: 1.5rem;
+  border-radius: 12px;
+  border-left: 4px solid var(--accent-color);
+  transition: all 0.3s ease;
+}
+
+.feature-section:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.feature-section h4 {
+  color: var(--accent-color);
+  margin: 0 0 0.75rem 0;
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+.feature-section > p {
+  color: var(--text-primary);
+  margin-bottom: 1rem;
+  line-height: 1.6;
+}
+
+.feature-section ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.feature-section li {
+  color: var(--text-secondary);
+  margin-bottom: 0.5rem;
+  padding-left: 1.5rem;
+  position: relative;
+  line-height: 1.5;
+}
+
+.feature-section li::before {
+  content: '▸';
+  color: var(--accent-color);
+  position: absolute;
+  left: 0;
+  font-weight: bold;
+}
+
+.getting-started {
+  background: linear-gradient(135deg, var(--accent-color) 0%, var(--warning-color) 100%);
+  color: white;
+  padding: 2rem;
+  border-radius: 16px;
+  text-align: center;
+  box-shadow: var(--shadow-lg);
+}
+
+.start-tip h4 {
+  margin: 0 0 1rem 0;
+  font-size: 1.3rem;
+  font-weight: 600;
+}
+
+.start-tip p {
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.6;
+  opacity: 0.95;
+}
+
+/* Mobile optimizations for explanation background */
+@media (max-width: 768px) {
+  .explanation-background {
+    padding: 1rem;
+  }
+
+  .background-header h3 {
+    font-size: 1.5rem;
+  }
+
+  .background-header .subtitle {
+    font-size: 1rem;
+  }
+
+  .analysis-features {
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+  }
+
+  .feature-section {
+    padding: 1rem;
+  }
+
+  .feature-section h4 {
+    font-size: 1.1rem;
+  }
+
+  .getting-started {
+    padding: 1.5rem;
+  }
+
+  .start-tip h4 {
+    font-size: 1.1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .analysis-features {
+    gap: 1rem;
+  }
+
+  .feature-section {
+    padding: 0.75rem;
+  }
+
+  .getting-started {
+    padding: 1rem;
+  }
+}

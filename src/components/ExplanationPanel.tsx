@@ -250,6 +250,71 @@ export function ExplanationPanel({
                 </div>
               </div>
             )}
+
+            {/* Hintergrundtext wenn nichts ausgewählt ist */}
+            {!selectedText && !isLoading && !explanation && (
+              <div className="explanation-background">
+                <div className="background-content">
+                  <div className="background-header">
+                    <h3>📖 Literarische Analyse mit KI</h3>
+                    <p className="subtitle">Entdecken Sie die Tiefe von Goethes "Iphigenie auf Tauris"</p>
+                  </div>
+
+                  <div className="analysis-features">
+                    <div className="feature-section">
+                      <h4>🎯 Verse analysieren</h4>
+                      <p>Klicken Sie auf einzelne Verszeilen, um detaillierte Erklärungen zu erhalten:</p>
+                      <ul>
+                        <li>Literarische Stilmittel und deren Wirkung</li>
+                        <li>Historischer und mythologischer Kontext</li>
+                        <li>Sprachliche Besonderheiten und Wortwahl</li>
+                        <li>Bezug zur Gesamthandlung</li>
+                      </ul>
+                    </div>
+
+                    <div className="feature-section">
+                      <h4>📝 Strophen verstehen</h4>
+                      <p>Klicken Sie auf Strophen-Titel für umfassende Analyse:</p>
+                      <ul>
+                        <li>Zusammenfassung des Inhalts</li>
+                        <li>Dramaturgische Funktion</li>
+                        <li>Charakterentwicklung</li>
+                        <li>Thematische Schwerpunkte</li>
+                      </ul>
+                    </div>
+
+                    <div className="feature-section">
+                      <h4>🔍 Multi-Selection</h4>
+                      <p>Halten Sie <strong>Ctrl/Cmd</strong> gedrückt um mehrere Verse auszuwählen:</p>
+                      <ul>
+                        <li>Vergleichende Analyse</li>
+                        <li>Thematische Verbindungen</li>
+                        <li>Stilistische Entwicklung</li>
+                        <li>Dramatische Spannungsbögen</li>
+                      </ul>
+                    </div>
+
+                    <div className="feature-section">
+                      <h4>🎭 Charaktere erforschen</h4>
+                      <p>Klicken Sie auf hervorgehobene Namen im Text:</p>
+                      <ul>
+                        <li>Charakterbeschreibungen und Motivation</li>
+                        <li>Mythologische Hintergründe</li>
+                        <li>Beziehungen zwischen Figuren</li>
+                        <li>Entwicklung im Handlungsverlauf</li>
+                      </ul>
+                    </div>
+                  </div>
+
+                  <div className="getting-started">
+                    <div className="start-tip">
+                      <h4>💡 Schnellstart</h4>
+                      <p>Beginnen Sie mit dem ersten Aufzug und klicken Sie auf Iphigenies Monolog, um die KI-Analyse zu erleben!</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         )}
 

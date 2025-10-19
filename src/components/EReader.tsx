@@ -33,10 +33,50 @@ export function EReader({
   areCharactersVisible,
   isCharacterHighlightingEnabled
 }: EReaderProps) {
-  const [selectedVerseId, setSelectedVerseId] = useState<string>('');
+  const [selectedVerseIds, setSelectedVerseIds] = useState<string[]>([]);
   const [selectedStanzaId, setSelectedStanzaId] = useState<string>('');
 
-    const handleVerseClick = async (verse: any, actNumber: number, sceneNumber: number) => {
+  // Hilfsfunktion um alle ausgewählten Verse zu finden
+  const getAllSelectedVerses = (verseIds: string[]): any[] => {
+    const verses: any[] = [];
+    text.forEach(act => {
+      act.scenes.forEach((scene: any) => {
+        scene.stanzas.forEach((stanza: any) => {
+          stanza.verses.forEach((verse: any) => {
+            if (verseIds.includes(verse.id)) {
+              verses.push(verse);
+            }
+          });
+        });
+      });
+    });
+    return verses;
+  };
+
+  // Funktion für Multi-Verse Erklärungen
+  const handleMultiVerseExplanation = async (verses: any[], actNumber: number, sceneNumber: number, contextInfo: any) => {
+    try {
+      const combinedText = verses.map((v: any) => v.text).join('\n');
+      const explanation = await OpenAIService.getExplanation({
+        text: combinedText,
+        context: 'verse',
+        actNumber,
+        sceneNumber
+      });
+
+      const delay = explanation.fromCache ? 300 : 0;
+      setTimeout(() => {
+        onTextSelection(combinedText, explanation, false, contextInfo);
+      }, delay);
+      
+    } catch (error) {
+      console.error('Fehler beim Laden der Multi-Vers Erklärung:', error);
+      const combinedText = verses.map((v: any) => v.text).join('\n');
+      onTextSelection(combinedText, null, false);
+    }
+  };
+
+  const handleVerseClick = async (verse: any, actNumber: number, sceneNumber: number, event: React.MouseEvent) => {
     
     const contextInfo = {
       type: 'verse' as const,
@@ -44,8 +84,42 @@ export function EReader({
       sceneNumber
     };
 
-    // Setze den Selected State sofort für visuelles Feedback
-    setSelectedVerseId(verse.id);
+    // Multi-selection mit Ctrl/Cmd + Klick
+    if (event.ctrlKey || event.metaKey) {
+      setSelectedVerseIds(prevIds => {
+        if (prevIds.includes(verse.id)) {
+          // Entferne Vers aus Auswahl
+          const newIds = prevIds.filter(id => id !== verse.id);
+          if (newIds.length === 0) {
+            onTextSelection('', null, false);
+            return newIds;
+          }
+          // Aktualisiere Text mit verbleibenden Versen
+          const remainingVerses = getAllSelectedVerses(newIds);
+          const combinedText = remainingVerses.map(v => v.text).join('\n');
+          onTextSelection(combinedText, null, false, contextInfo);
+          return newIds;
+        } else {
+          // Füge Vers zur Auswahl hinzu
+          const newIds = [...prevIds, verse.id];
+          const allSelectedVerses = getAllSelectedVerses(newIds);
+          const combinedText = allSelectedVerses.map(v => v.text).join('\n');
+          
+          // Zeige Loading für kombinierte Erklärung
+          onTextSelection(combinedText, null, true, contextInfo);
+          
+          // Hole Erklärung für alle ausgewählten Verse
+          handleMultiVerseExplanation(allSelectedVerses, actNumber, sceneNumber, contextInfo);
+          
+          return newIds;
+        }
+      });
+      setSelectedStanzaId(''); // Clear stanza selection
+      return;
+    }
+
+    // Normale Einzelauswahl
+    setSelectedVerseIds([verse.id]);
     setSelectedStanzaId(''); // Clear stanza selection
 
     // Zeige immer kurz Loading-Animation für besseres UX
@@ -161,7 +235,7 @@ export function EReader({
     if (selectedStanzaId === stanza.id) {
       // Deselect if clicking the same stanza
       setSelectedStanzaId('');
-      setSelectedVerseId('');
+      setSelectedVerseIds([]);
       onTextSelection('', null, false);
       return;
     }
@@ -176,7 +250,7 @@ export function EReader({
     
     // Setze den Selected State sofort für visuelles Feedback
     setSelectedStanzaId(stanza.id);
-    setSelectedVerseId(''); // Clear verse selection
+    setSelectedVerseIds([]); // Clear verse selection
 
     // Zeige immer kurz Loading-Animation für besseres UX
     onTextSelection(stanzaText, null, true, contextInfo);
@@ -219,6 +293,34 @@ export function EReader({
       )}
 
       <div className="text-content">
+        {/* Multi-Selection Info */}
+        {selectedVerseIds.length > 1 && (
+          <div className="multi-selection-info">
+            <span className="selection-count">
+              {selectedVerseIds.length} Verse ausgewählt
+            </span>
+            <button 
+              className="clear-selection"
+              onClick={() => {
+                setSelectedVerseIds([]);
+                onTextSelection('', null, false);
+              }}
+              title="Auswahl löschen"
+            >
+              ✕
+            </button>
+          </div>
+        )}
+
+        {/* Multi-Selection Help */}
+        {selectedVerseIds.length === 0 && (
+          <div className="multi-selection-help">
+            <span className="help-text">
+              💡 Tipp: Halte Ctrl/Cmd gedrückt um mehrere Verse auszuwählen
+            </span>
+          </div>
+        )}
+        
         {text.map((act: Act) => (
         <div key={act.id} className="act" id={`act-${act.number}`}>
           <h2 
@@ -251,8 +353,8 @@ export function EReader({
                       {stanza.verses.map((verse: any) => (
                         <div
                           key={verse.id}
-                          className={`verse ${selectedVerseId === verse.id ? 'selected-verse' : ''} clickable`}
-                          onClick={() => handleVerseClick(verse, act.number, scene.number)}
+                          className={`verse ${selectedVerseIds.includes(verse.id) ? 'selected-verse' : ''} clickable`}
+                          onClick={(e) => handleVerseClick(verse, act.number, scene.number, e)}
                         >
                           <span className="line-number">{verse.lineNumber}</span>
                           <span 
