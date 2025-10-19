@@ -44,6 +44,10 @@ export function EReader({
       sceneNumber
     };
 
+    // Setze den Selected State sofort für visuelles Feedback
+    setSelectedVerseId(verse.id);
+    setSelectedStanzaId(''); // Clear stanza selection
+
     // Zeige immer kurz Loading-Animation für besseres UX
     onTextSelection(verse.text, null, true, contextInfo);
     
@@ -170,8 +174,9 @@ export function EReader({
       sceneNumber
     };
     
+    // Setze den Selected State sofort für visuelles Feedback
     setSelectedStanzaId(stanza.id);
-    setSelectedVerseId('');
+    setSelectedVerseId(''); // Clear verse selection
 
     // Zeige immer kurz Loading-Animation für besseres UX
     onTextSelection(stanzaText, null, true, contextInfo);
