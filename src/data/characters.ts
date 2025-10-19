@@ -133,7 +133,7 @@ export const characters: Character[] = [
   }
 ];
 
-// Funktion zum Finden von Charakteren im Text
+// Dynamische Charaktererkennung - erkennt automatisch alle Charaktere in jedem Text
 export function findCharactersInText(text: string): Array<{character: Character, matches: string[]}> {
   const foundCharacters: Array<{character: Character, matches: string[]}> = [];
   
@@ -142,23 +142,97 @@ export function findCharactersInText(text: string): Array<{character: Character,
     const matches: string[] = [];
     
     allNames.forEach(name => {
-      // Erstelle Regex für Wort-Grenzen
-      const regex = new RegExp(`\\b${name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'gi');
-      const textMatches = text.match(regex);
-      if (textMatches) {
-        matches.push(...textMatches);
-      }
+      // Erstelle flexible Regex für verschiedene Textformen
+      const escapedName = name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      
+      // Verschiedene Regex-Patterns für maximale Abdeckung
+      const patterns = [
+        // Exakte Wortgrenze
+        new RegExp(`\\b${escapedName}\\b`, 'gi'),
+        // Mit Satzzeichen (für Dialoge)
+        new RegExp(`${escapedName}[.!?:;,]`, 'gi'),
+        // Am Satzanfang
+        new RegExp(`^${escapedName}\\b`, 'gim'),
+        // Nach Leerzeichen/Zeilenumbruch
+        new RegExp(`\\s${escapedName}\\b`, 'gi'),
+        // In Klammern oder Anführungszeichen
+        new RegExp(`[("']${escapedName}[)"']`, 'gi')
+      ];
+      
+      patterns.forEach(regex => {
+        const textMatches = text.match(regex);
+        if (textMatches) {
+          // Bereinige die Matches (entferne Satzzeichen etc.)
+          const cleanMatches = textMatches.map(match => 
+            match.replace(/^[\s("']+|[.!?:;,)"'\s]+$/g, '').trim()
+          ).filter(match => match.length > 0);
+          matches.push(...cleanMatches);
+        }
+      });
     });
     
-    if (matches.length > 0) {
-      foundCharacters.push({ character, matches });
+    // Entferne Duplikate
+    const uniqueMatches = [...new Set(matches)];
+    
+    if (uniqueMatches.length > 0) {
+      foundCharacters.push({ character, matches: uniqueMatches });
     }
   });
   
   return foundCharacters;
 }
 
-// Funktion für Charaktervergleiche
+// Neue Funktion: Automatische Charaktererkennung für unbekannte Texte
+export function discoverCharactersInText(text: string): Array<{name: string, frequency: number, contexts: string[]}> {
+  // Finde alle Eigennamen (Großbuchstaben am Wortanfang)
+  const nameRegex = /\b[A-ZÄÖÜ][a-zäöüß]+(?:\s+[A-ZÄÖÜ][a-zäöüß]+)?\b/g;
+  const potentialNames = text.match(nameRegex) || [];
+  
+  // Zähle Häufigkeiten
+  const nameFrequency: Record<string, {count: number, contexts: string[]}> = {};
+  
+  potentialNames.forEach(name => {
+    if (name.length > 2 && !isCommonWord(name)) {
+      if (!nameFrequency[name]) {
+        nameFrequency[name] = {count: 0, contexts: []};
+      }
+      nameFrequency[name].count++;
+      
+      // Sammle Kontext (Satz um den Namen)
+      const nameIndex = text.indexOf(name);
+      const contextStart = Math.max(0, nameIndex - 50);
+      const contextEnd = Math.min(text.length, nameIndex + name.length + 50);
+      const context = text.slice(contextStart, contextEnd).trim();
+      
+      if (nameFrequency[name].contexts.length < 3) {
+        nameFrequency[name].contexts.push(context);
+      }
+    }
+  });
+  
+  // Sortiere nach Häufigkeit und gib die wahrscheinlichsten Charaktere zurück
+  return Object.entries(nameFrequency)
+    .filter(([, data]) => data.count >= 2) // Mindestens 2x erwähnt
+    .map(([name, data]) => ({
+      name,
+      frequency: data.count,
+      contexts: data.contexts
+    }))
+    .sort((a, b) => b.frequency - a.frequency);
+}
+
+// Hilfsfunktion: Prüfe ob es sich um ein gewöhnliches Wort handelt
+function isCommonWord(word: string): boolean {
+  const commonWords = [
+    'Der', 'Die', 'Das', 'Ein', 'Eine', 'Und', 'Oder', 'Aber', 'Doch', 
+    'Wenn', 'Dann', 'Wie', 'Was', 'Wer', 'Wo', 'Warum', 'Gott', 'Herr',
+    'Frau', 'Mann', 'Kind', 'Vater', 'Mutter', 'Sohn', 'Tochter',
+    'König', 'Königin', 'Prinz', 'Prinzessin', 'Göttin', 'Zeus', 'Apollo'
+  ];
+  return commonWords.includes(word);
+}
+
+// Funktion für Charaktervergleiche - jetzt vollständig dynamisch
 export function getCharacterRelationship(char1Id: string, char2Id: string): string {
   const character1 = characters.find(c => c.id === char1Id);
   const character2 = characters.find(c => c.id === char2Id);
@@ -178,4 +252,78 @@ export function getCharacterRelationship(char1Id: string, char2Id: string): stri
   }
   
   return `Keine direkte Beziehung zwischen ${character1.name} und ${character2.name} definiert.`;
+}
+
+// Neue Funktion: Dynamische Beziehungsanalyse basierend auf Textinhalt
+export function analyzeCharacterRelationshipInText(
+  char1Name: string, 
+  char2Name: string, 
+  textContent: string
+): string {
+  // Finde Textpassagen, wo beide Charaktere erwähnt werden
+  const paragraphs = textContent.split(/\n\s*\n/);
+  const relevantParagraphs: string[] = [];
+  
+  paragraphs.forEach(paragraph => {
+    const hasChar1 = new RegExp(`\\b${char1Name}\\b`, 'gi').test(paragraph);
+    const hasChar2 = new RegExp(`\\b${char2Name}\\b`, 'gi').test(paragraph);
+    
+    if (hasChar1 && hasChar2) {
+      relevantParagraphs.push(paragraph.trim());
+    }
+  });
+  
+  if (relevantParagraphs.length === 0) {
+    return `**${char1Name}** und **${char2Name}** werden nicht gemeinsam im verfügbaren Text erwähnt.`;
+  }
+  
+  // Analysiere die Beziehung basierend auf dem Kontext
+  const relationshipIndicators = analyzeRelationshipContext(relevantParagraphs, char1Name, char2Name);
+  
+  return `**Textbasierte Beziehungsanalyse zwischen ${char1Name} und ${char2Name}:**\n\n${relationshipIndicators}\n\n**Relevante Textpassagen:**\n${relevantParagraphs.slice(0, 3).map(p => `• ${p.substring(0, 200)}...`).join('\n')}`;
+}
+
+// Hilfsfunktion: Analysiere Beziehungskontext
+function analyzeRelationshipContext(paragraphs: string[], _char1: string, _char2: string): string {
+  const indicators: string[] = [];
+  const allText = paragraphs.join(' ').toLowerCase();
+  
+  // Familiäre Beziehungen
+  if (/(bruder|schwester|geschwister)/i.test(allText)) {
+    indicators.push('🔗 **Familiäre Verbindung** - Hinweise auf Geschwisterbeziehung');
+  }
+  if (/(vater|tochter|sohn|mutter|eltern|kind)/i.test(allText)) {
+    indicators.push('👨‍👩‍👧‍👦 **Familiäre Bindung** - Hinweise auf Eltern-Kind-Beziehung');
+  }
+  
+  // Emotionale Beziehungen
+  if (/(liebe|liebst|geliebt|herz)/i.test(allText)) {
+    indicators.push('❤️ **Romantische/Emotionale Verbindung** - Hinweise auf Liebe oder tiefe Zuneigung');
+  }
+  if (/(freund|freundschaft|treue|vertrauen)/i.test(allText)) {
+    indicators.push('🤝 **Freundschaftliche Beziehung** - Hinweise auf Vertrauen und Loyalität');
+  }
+  
+  // Konfliktuelle Beziehungen
+  if (/(feind|hass|zorn|wut|streit|konflikt)/i.test(allText)) {
+    indicators.push('⚔️ **Konfliktuelle Beziehung** - Hinweise auf Spannungen oder Feindschaft');
+  }
+  if (/(verrat|betrug|täuschung|lüge)/i.test(allText)) {
+    indicators.push('💔 **Problematische Beziehung** - Hinweise auf Vertrauensbruch');
+  }
+  
+  // Soziale Hierarchien
+  if (/(könig|herr|diener|gehorsam|befehl)/i.test(allText)) {
+    indicators.push('👑 **Hierarchische Beziehung** - Hinweise auf Macht- oder Statusunterschiede');
+  }
+  
+  // Gesprächsmuster
+  const dialogCount = (allText.match(/[.!?]\s*[A-ZÄÖÜ]/g) || []).length;
+  if (dialogCount > 3) {
+    indicators.push('💬 **Intensive Kommunikation** - Häufige Dialoge und Interaktionen');
+  }
+  
+  return indicators.length > 0 
+    ? indicators.join('\n') 
+    : '🔍 **Neutrale Erwähnung** - Charaktere werden gemeinsam erwähnt, aber ohne erkennbare spezifische Beziehungsdynamik';
 }

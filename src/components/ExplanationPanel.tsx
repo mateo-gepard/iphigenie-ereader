@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import type { ExplanationResponse } from '../types';
 import type { Character } from '../data/characters';
+import { characters } from '../data/characters';
 import { OpenAIService } from '../services/openaiService';
-import { getCharacterRelationship } from '../data/characters';
 import { CacheService } from '../services/cacheService';
 import { GlobalCacheService } from '../services/globalCacheService';
 import './ExplanationPanel.css';
@@ -28,6 +28,12 @@ interface ExplanationPanelProps {
   areCharacterExplanationsVisible: boolean;
   canRegenerate: boolean;
   onRegenerate: () => Promise<void>;
+  onGenerateComparison?: () => void;
+  isGeneratingComparison?: boolean;
+  areCharactersVisible?: boolean;
+  isCharacterHighlightingEnabled?: boolean;
+  onToggleCharacters?: () => void;
+  onToggleHighlighting?: () => void;
 }
 
 export function ExplanationPanel({ 
@@ -39,49 +45,61 @@ export function ExplanationPanel({
   onCharacterComparisonSelect,
   areCharacterExplanationsVisible,
   canRegenerate,
-  onRegenerate
+  onRegenerate,
+  onGenerateComparison,
+  isGeneratingComparison,
+  areCharactersVisible,
+  isCharacterHighlightingEnabled,
+  onToggleCharacters,
+  onToggleHighlighting
 }: ExplanationPanelProps) {
   const [customQuestion, setCustomQuestion] = useState('');
   const [customAnswer, setCustomAnswer] = useState('');
   const [isAnswering, setIsAnswering] = useState(false);
   const [showCacheStats, setShowCacheStats] = useState(false);
-  const [globalStats, setGlobalStats] = useState<any>(null);
+  const [activeTab, setActiveTab] = useState<'question' | 'explanation' | 'summary' | 'characters'>('explanation');
+  const [expandedDevice, setExpandedDevice] = useState<number | null>(null);
 
-  // Reset custom question when new text is selected
+  // Automatisch zum Erklärung-Tab wechseln, wenn eine neue Erklärung generiert wird
   useEffect(() => {
-    setCustomQuestion('');
-    setCustomAnswer('');
-  }, [selectedText]);
+    if (explanation && !isLoading) {
+      setActiveTab('explanation');
+    }
+  }, [explanation, isLoading]);
 
-  const handleQuestionSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!customQuestion.trim() || !selectedText) return;
-
+  const handleCustomQuestion = async () => {
+    if (!customQuestion.trim()) return;
+    
     setIsAnswering(true);
     try {
-      const answer = await OpenAIService.answerCustomQuestion(selectedText, customQuestion);
-      setCustomAnswer(answer);
+      const response = await OpenAIService.answerCustomQuestion(selectedText || '', customQuestion);
+      setCustomAnswer(response);
     } catch (error) {
-      setCustomAnswer('Entschuldigung, die Frage konnte nicht beantwortet werden.');
+      console.error('Fehler beim Stellen der Frage:', error);
+      setCustomAnswer('Entschuldigung, es ist ein Fehler aufgetreten. Bitte versuchen Sie es erneut.');
     } finally {
       setIsAnswering(false);
     }
   };
 
-  if (!selectedText && !selectedCharacter) {
+  // Früher Return für Willkommensbildschirm wenn nichts ausgewählt ist
+  if (!selectedText && !explanation && !selectedCharacter && !isLoading && !customAnswer) {
     return (
-      <div className="explanation-panel empty">
-        <div className="empty-state">
-          <h3>Willkommen zum interaktiven E-Reader</h3>
-          <p>Klicken Sie auf einen Vers oder eine Strophe, um detaillierte Erklärungen, Zusammenfassungen und Hintergrundinformationen zu erhalten.</p>
-          <div className="instructions">
-            <h4>Anleitung:</h4>
-            <ul>
-              <li>🖱️ <strong>Einzelner Vers:</strong> Klicken Sie auf eine Zeile für spezifische Erklärungen</li>
-              <li>📝 <strong>Strophe:</strong> Klicken Sie auf den Titel einer Strophe für Kontext und Zusammenfassung</li>
-              <li>🎭 <strong>Charaktere:</strong> Klicken Sie auf hervorgehobene Namen für Charakterinformationen</li>
-              <li>🤖 <strong>KI-gestützt:</strong> Alle Erklärungen werden von ChatGPT generiert</li>
-            </ul>
+      <div className="explanation-panel">
+        <div className="welcome-screen">
+          <div className="welcome-content">
+            <h2>Willkommen zum interaktiven Iphigenie-Reader</h2>
+            <p>Entdecken Sie Goethes Meisterwerk mit KI-unterstützter Analyse</p>
+            
+            <div className="instructions">
+              <h4>Anleitung:</h4>
+              <ul>
+                <li><strong>Einzelner Vers:</strong> Klicken Sie auf eine Zeile für spezifische Erklärungen</li>
+                <li><strong>Strophe:</strong> Klicken Sie auf den Titel einer Strophe für Kontext und Zusammenfassung</li>
+                <li><strong>Charaktere:</strong> Klicken Sie auf hervorgehobene Namen für Charakterinformationen</li>
+                <li><strong>KI-gestützt:</strong> Alle Erklärungen werden von ChatGPT generiert</li>
+              </ul>
+            </div>
           </div>
         </div>
       </div>
@@ -90,314 +108,420 @@ export function ExplanationPanel({
 
   return (
     <div className="explanation-panel">
-      {/* Character Information Section */}
-      {selectedCharacter && areCharacterExplanationsVisible && (
-        <div className="character-info-section">
-          <div className="character-header">
-            <h3>🎭 {selectedCharacter.name}</h3>
-            {characterForComparison && characterForComparison.id !== selectedCharacter.id && (
-              <button 
-                className="compare-button"
-                onClick={() => {
-                  const relationship = getCharacterRelationship(selectedCharacter.id, characterForComparison.id);
-                  setCustomAnswer(relationship);
-                  setCustomQuestion(`Beziehung zwischen ${selectedCharacter.name} und ${characterForComparison.name}`);
-                }}
-              >
-                Vergleich mit {characterForComparison.name}
-              </button>
-            )}
-          </div>
-
-          <div className="character-content">
-            <div className="character-section">
-              <h4>🎭 Rolle</h4>
-              <p>{selectedCharacter.role}</p>
-            </div>
-
-            <div className="character-section">
-              <h4>📖 Beschreibung</h4>
-              <p>{selectedCharacter.description}</p>
-            </div>
-
-            <div className="character-section">
-              <h4>🏛️ Mythologie</h4>
-              <p>{selectedCharacter.mythology}</p>
-            </div>
-
-            <div className="character-section">
-              <h4>✨ Charakterzüge</h4>
-              <div className="traits-list">
-                {selectedCharacter.keyTraits.map((trait, index) => (
-                  <span key={index} className="trait-tag">{trait}</span>
-                ))}
-              </div>
-            </div>
-
-            <div className="character-actions">
-              <button 
-                className="comparison-select-button"
-                onClick={() => onCharacterComparisonSelect(selectedCharacter)}
-                disabled={characterForComparison?.id === selectedCharacter.id}
-              >
-                {characterForComparison?.id === selectedCharacter.id 
-                  ? 'Bereits für Vergleich ausgewählt' 
-                  : 'Für Vergleich auswählen'}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Text Selection Section */}
-      {selectedText && (
-        <div className="selected-text">
-          <h3>Ausgewählter Text:</h3>
-          <blockquote>{selectedText}</blockquote>
-        </div>
-      )}
-
-      {isLoading && (
-        <div className="loading">
-          <div className="loading-spinner"></div>
-          <p>✨ Literaturanalyse wird vorbereitet...</p>
-          <small>Bitte einen Moment Geduld</small>
-        </div>
-      )}
-
-      {explanation && !isLoading && (
-        <div className="explanation-content">
-          {explanation.fromCache && (
-            <div className="cache-indicator">
-              <div className="cache-info-row">
-                <span className="cache-badge">
-                  {explanation.cacheSource === 'global' ? '🌍 Global Cache' : '� Lokaler Cache'}
-                  {explanation.usageCount && ` (${explanation.usageCount}x verwendet)`}
-                </span>
-                {canRegenerate && (
-                  <button 
-                    className="regenerate-btn"
-                    onClick={onRegenerate}
-                    title="Neue Analyse generieren"
-                  >
-                    🔄 Neu generieren
-                  </button>
-                )}
-              </div>
-              {explanation.generatedAt && (
-                <div className="cache-timestamp">
-                  Erstellt: {new Date(explanation.generatedAt).toLocaleDateString('de-DE', {
-                    year: 'numeric',
-                    month: 'short',
-                    day: 'numeric',
-                    hour: '2-digit',
-                    minute: '2-digit'
-                  })}
-                </div>
-              )}
-            </div>
-          )}
-          
-          <div className="explanation-section">
-            <div className="section-header">
-              <h4>📚 Erklärung</h4>
-              {canRegenerate && (
-                <button 
-                  className="regenerate-btn small"
-                  onClick={onRegenerate}
-                  title={explanation.fromCache ? "Neue Analyse generieren (überschreibt Cache)" : "Alternative Analyse generieren"}
-                >
-                  {explanation.fromCache ? '🔄' : '🎲'} 
-                </button>
-              )}
-            </div>
-            <p>{explanation.explanation}</p>
-          </div>
-
-          <div className="explanation-section">
-            <h4>📋 Zusammenfassung</h4>
-            <p>{explanation.summary}</p>
-          </div>
-
-          <div className="explanation-section">
-            <h4>🏛️ Hintergrund</h4>
-            <p>{explanation.background}</p>
-          </div>
-
-          {explanation.literaryDevices && explanation.literaryDevices.length > 0 && (
-            <div className="explanation-section">
-              <h4>✨ Stilmittel</h4>
-              <div className="literary-devices-grid">
-                {explanation.literaryDevices.map((device, index) => (
-                  <div key={index} className={`literary-device-card ${device.category || 'general'}`}>
-                    <div className="device-header">
-                      <h5 className="device-name">{device.name}</h5>
-                      <span className="device-category">{getCategoryIcon(device.category)}</span>
-                    </div>
-                    <div className="device-example">
-                      <strong>Beispiel:</strong> "{device.example}"
-                    </div>
-                    <div className="device-effect">
-                      <strong>Wirkung:</strong> {device.effect}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {explanation.themes && explanation.themes.length > 0 && (
-            <div className="explanation-section">
-              <h4>🎭 Themen</h4>
-              <ul className="tag-list">
-                {explanation.themes.map((theme, index) => (
-                  <li key={index} className="tag theme">{theme}</li>
-                ))}
-              </ul>
-            </div>
+      <div className="panel-header">
+        <div className="header-left">
+          <h3>Analyse</h3>
+          {canRegenerate && activeTab === 'explanation' && (
+            <button 
+              onClick={onRegenerate}
+              className="regenerate-btn"
+              title="Neue Erklärung generieren"
+            >
+              Regenerieren
+            </button>
           )}
         </div>
-      )}
+        <div className="header-right">
+          <button 
+            onClick={() => setShowCacheStats(!showCacheStats)}
+            className="cache-btn"
+            title="Cache-Statistiken anzeigen"
+          >
+            Stats
+          </button>
+        </div>
+      </div>
 
-      {/* Custom Question Section */}
-      {selectedText && (explanation || !isLoading) && (
-        <div className="custom-question-section">
-          <h4>❓ Eigene Frage zum Text</h4>
-          <form onSubmit={handleQuestionSubmit} className="question-form">
-            <div className="input-group">
+      <div className="tab-navigation">
+        <button 
+          className={`tab-btn ${activeTab === 'question' ? 'active' : ''}`}
+          onClick={() => setActiveTab('question')}
+        >
+          Frage
+        </button>
+        <button 
+          className={`tab-btn ${activeTab === 'explanation' ? 'active' : ''}`}
+          onClick={() => setActiveTab('explanation')}
+        >
+          Erklärung
+        </button>
+        <button 
+          className={`tab-btn ${activeTab === 'summary' ? 'active' : ''}`}
+          onClick={() => setActiveTab('summary')}
+        >
+          Stilmittel
+        </button>
+        <button 
+          className={`tab-btn ${activeTab === 'characters' ? 'active' : ''}`}
+          onClick={() => setActiveTab('characters')}
+        >
+          Charaktere
+        </button>
+      </div>
+
+      <div className="tab-content">
+        {/* Frage Tab */}
+        {activeTab === 'question' && (
+          <div className="question-tab">
+            <div className="custom-question-section">
+              <h4>Stellen Sie eine Frage zum Text</h4>
               <textarea
                 value={customQuestion}
                 onChange={(e) => setCustomQuestion(e.target.value)}
-                placeholder="Stellen Sie hier Ihre Frage zum ausgewählten Text..."
-                className="question-input"
+                placeholder="Stellen Sie hier Ihre Frage zu Iphigenies Dilema, den Charakteren oder dem Text..."
                 rows={3}
-                disabled={isAnswering}
+                className="question-input"
               />
               <button
-                type="submit"
+                onClick={handleCustomQuestion}
                 disabled={!customQuestion.trim() || isAnswering}
                 className="ask-button"
               >
-                {isAnswering ? (
-                  <>
-                    <span className="spinner"></span>
-                    Analysiere...
-                  </>
-                ) : (
-                  <>
-                    🤖 Fragen
-                  </>
-                )}
+                {isAnswering ? 'Wird bearbeitet...' : 'Frage stellen'}
               </button>
-            </div>
-          </form>
 
-          {customAnswer && (
-            <div className="custom-answer">
-              <h5>💡 Antwort:</h5>
-              <div className="answer-content">
-                {customAnswer}
-              </div>
-              <button 
-                onClick={() => {
-                  setCustomAnswer('');
-                  setCustomQuestion('');
-                }}
-                className="clear-button"
-              >
-                Neue Frage stellen
-              </button>
-            </div>
-          )}
-        </div>
-      )}
+              {isAnswering && (
+                <div className="loading">
+                  <div className="loading-spinner"></div>
+                  <p>Analyse läuft...</p>
+                  <small>Bitte einen Moment Geduld</small>
+                </div>
+              )}
 
-      {!explanation && !isLoading && selectedText && (
-        <div className="error-state">
-          <h4>⚠️ Fehler</h4>
-          <p>Die Erklärung konnte nicht geladen werden. Bitte versuchen Sie es erneut.</p>
-        </div>
-      )}
-
-      {/* Cache Status */}
-      <div className="cache-status">
-        <button 
-          className="cache-stats-toggle"
-          onClick={() => setShowCacheStats(!showCacheStats)}
-          title="Cache-Statistiken anzeigen"
-        >
-          💾 Cache ({CacheService.getCacheStats().totalEntries})
-        </button>
-        
-        {showCacheStats && (
-          <div className="cache-stats-details">
-            <div className="cache-tabs">
-              <button 
-                className="cache-tab active"
-                onClick={async () => {
-                  const gStats = await GlobalCacheService.getGlobalCacheStats();
-                  setGlobalStats(gStats);
-                }}
-              >
-                🌍 Global
-              </button>
-              <button className="cache-tab">
-                📱 Lokal
-              </button>
-            </div>
-            
-            {(() => {
-              const localStats = CacheService.getCacheStats();
-              return (
-                <div className="cache-info">
-                  <div className="stats-section">
-                    <h5>🌍 Globaler Cache (alle Nutzer)</h5>
-                    {globalStats ? (
-                      <>
-                        <p><strong>Gesamt Erklärungen:</strong> {globalStats.totalEntries}</p>
-                        <p><strong>Diese Woche neu:</strong> {globalStats.recentEntries}</p>
-                        {globalStats.topUsedEntries.length > 0 && (
-                          <div>
-                            <strong>Beliebteste:</strong>
-                            <ul className="top-entries">
-                              {globalStats.topUsedEntries.map((entry: any, i: number) => (
-                                <li key={i}>{entry.context} ({entry.usageCount}x)</li>
-                              ))}
-                            </ul>
-                          </div>
-                        )}
-                      </>
-                    ) : (
-                      <p>Lade globale Statistiken...</p>
-                    )}
-                  </div>
-                  
-                  <div className="stats-section">
-                    <h5>📱 Lokaler Cache (nur Sie)</h5>
-                    <p><strong>Ihre Erklärungen:</strong> {localStats.totalEntries}</p>
-                    <p><strong>Cache-Größe:</strong> {localStats.cacheSize}</p>
-                    {localStats.oldestEntry && (
-                      <p><strong>Ältester Eintrag:</strong> {localStats.oldestEntry.toLocaleDateString('de-DE')}</p>
-                    )}
-                  </div>
-                  
-                  <div className="cache-actions">
-                    <button 
-                      className="clear-cache-btn"
-                      onClick={() => {
-                        CacheService.clearCache();
-                        setShowCacheStats(false);
-                      }}
-                    >
-                      🗑️ Lokalen Cache leeren
-                    </button>
+              {customAnswer && (
+                <div className="custom-answer">
+                  <h4>Antwort:</h4>
+                  <div className="answer-content">
+                    {customAnswer.split('\n').map((paragraph, index) => (
+                      <p key={index}>{paragraph}</p>
+                    ))}
                   </div>
                 </div>
-              );
-            })()}
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Erklärung Tab */}
+        {activeTab === 'explanation' && (
+          <div className="explanation-tab">
+            {selectedText && (
+              <div className="selected-text">
+                <h3>
+                  {selectedText.startsWith('Charaktervergleich zwischen') ? 
+                    '🎭 Charaktervergleich:' : 
+                    'Ausgewählter Text:'
+                  }
+                </h3>
+                <blockquote>{selectedText}</blockquote>
+              </div>
+            )}
+
+            {isLoading && (
+              <div className="loading">
+                <div className="loading-spinner"></div>
+                <p>
+                  {isGeneratingComparison ? 
+                    '🔄 Charaktervergleich wird generiert...' : 
+                    'Literaturanalyse wird vorbereitet...'
+                  }
+                </p>
+                <small>
+                  {isGeneratingComparison ? 
+                    'Charakterbeziehungen werden analysiert' : 
+                    'Bitte einen Moment Geduld'
+                  }
+                </small>
+              </div>
+            )}
+
+            {explanation && (
+              <div className="explanation">
+                <h3>
+                  {selectedText?.startsWith('Charaktervergleich zwischen') ? 
+                    '🎭 Vergleichsanalyse:' : 
+                    'Erklärung:'
+                  }
+                </h3>
+                <div className="explanation-content">
+                  {explanation.explanation.split('\n').map((paragraph: string, index: number) => (
+                    <p key={index}>{paragraph}</p>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Zusammenfassung Tab */}
+        {activeTab === 'summary' && (
+          <div className="summary-tab">
+            <div className="summary-content">
+              <h3>Stilmittel & Analyse</h3>
+              
+              {explanation && (
+                <div className="text-analysis">
+                  <div className="analysis-section">
+                    <h4>📝 Textanalyse</h4>
+                    <p>{explanation.explanation}</p>
+                  </div>
+                  
+                  {explanation.literaryDevices && explanation.literaryDevices.length > 0 && (
+                    <div className="analysis-section">
+                      <h4>Stilmittel</h4>
+                      <p className="devices-hint">Klicken Sie auf ein Stilmittel für Details:</p>
+                      <div className="devices-grid">
+                        {explanation.literaryDevices.map((device: any, index: number) => (
+                          <div 
+                            key={index} 
+                            className={`device-card ${expandedDevice === index ? 'expanded' : 'compact'}`}
+                            onClick={() => setExpandedDevice(expandedDevice === index ? null : index)}
+                          >
+                            <div className="device-header">
+                              <span className="device-icon">{getCategoryIcon(device.category)}</span>
+                              <strong>{device.name}</strong>
+                            </div>
+                            
+                            {expandedDevice === index && (
+                              <div className="device-details">
+                                <p className="device-description">{device.effect || device.description}</p>
+                                <div className="device-example">
+                                  <strong>Beispiel:</strong> <em>"{device.example}"</em>
+                                </div>
+                              </div>
+                            )}
+                            
+                            {expandedDevice !== index && (
+                              <div className="click-hint">Klicken für Details</div>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+              
+              {!explanation && (
+                <p>Wählen Sie einen Text aus, um eine detaillierte Zusammenfassung und Stilmittel-Analyse zu erhalten.</p>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Personen Tab */}
+        {activeTab === 'characters' && (
+          <div className="characters-tab">
+            <div className="character-controls">
+              <button 
+                onClick={onToggleCharacters}
+                className={`character-toggle-btn ${areCharactersVisible ? 'active' : ''}`}
+              >
+                {areCharactersVisible ? 'Charaktere ausblenden' : 'Charaktere anzeigen'}
+              </button>
+              
+              <button 
+                onClick={onToggleHighlighting}
+                className={`character-toggle-btn ${isCharacterHighlightingEnabled ? 'active' : ''}`}
+              >
+                {isCharacterHighlightingEnabled ? 'Hervorhebung aus' : 'Hervorhebung an'}
+              </button>
+            </div>
+
+            {/* Character Information Section */}
+            {selectedCharacter && areCharacterExplanationsVisible && (
+              <div className="character-info-section">
+                <div className="character-header">
+                  <h3>{selectedCharacter.name}</h3>
+                  {characterForComparison && characterForComparison.id !== selectedCharacter.id && (
+                    <button 
+                      className="compare-button"
+                      onClick={onGenerateComparison}
+                      disabled={isGeneratingComparison}
+                    >
+                      {isGeneratingComparison ? 'Wird generiert...' : `Vergleich mit ${characterForComparison.name}`}
+                    </button>
+                  )}
+                </div>
+                
+                <div className="character-details">
+                  <div className="character-main-info">
+                    <div className="character-section">
+                      <h4>Rolle</h4>
+                      <p>{selectedCharacter.role}</p>
+                    </div>
+                    
+                    <div className="character-section">
+                      <h4>Beschreibung</h4>
+                      <p>{selectedCharacter.description}</p>  
+                    </div>
+
+                    <div className="character-section">
+                      <h4>Bedeutung</h4>
+                      <p>{selectedCharacter.mythology}</p>
+                    </div>
+                  </div>
+
+                  <div className="character-comparison-section">
+                    <h4>Beziehungen zu anderen Charakteren</h4>
+                    <div className="character-buttons">
+                      {characters
+                        .filter(char => char.id !== selectedCharacter.id)
+                        .map(char => (
+                          <button
+                            key={char.id}
+                            className={`character-select-btn ${characterForComparison?.id === char.id ? 'selected' : ''}`}
+                            onClick={() => onCharacterComparisonSelect(char)}
+                          >
+                            {char.name}
+                          </button>
+                        ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Character Generation Loading */}
+            {isGeneratingComparison && (
+              <div className="loading">
+                <div className="loading-spinner"></div>
+                <p>Charakterbeziehung wird analysiert...</p>
+                <small>Bitte einen Moment Geduld</small>
+              </div>
+            )}
+
+            {/* Character Comparison Result */}
+            {customAnswer && customQuestion.includes('Beziehung zwischen') && (
+              <div className="character-comparison-result">
+                <h4>{customQuestion}</h4>
+                <div className="comparison-content">
+                  {customAnswer.split('\n').map((paragraph, index) => (
+                    <p key={index}>{paragraph}</p>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {!selectedCharacter && (
+              <div className="no-character-selected">
+                <p>Klicken Sie auf einen Charakternamen im Text, um Informationen zu erhalten.</p>
+              </div>
+            )}
           </div>
         )}
       </div>
+
+      {/* Cache Statistics */}
+      {showCacheStats && (
+        <div className="cache-stats">
+          <h4>📊 Cache-Statistiken</h4>
+          {(() => {
+            const [stats, setStats] = useState<any>(null);
+            const [loading, setLoading] = useState(true);
+            
+            useEffect(() => {
+              const loadStats = async () => {
+                try {
+                  const globalStats = await GlobalCacheService.getGlobalCacheStats();
+                  const localStats = CacheService.getCacheStats();
+                  setStats({ global: globalStats, local: localStats });
+                } catch (error) {
+                  console.error('Stats load error:', error);
+                } finally {
+                  setLoading(false);
+                }
+              };
+              loadStats();
+            }, []);
+
+            if (loading) {
+              return (
+                <div className="loading">
+                  <div className="loading-spinner-small"></div>
+                  <p>Statistiken laden...</p>
+                </div>
+              );
+            }
+
+            return (
+              <div>
+                <div className="stats-section">
+                  <h5>🌐 Globaler Cache</h5>
+                  <div className="stats-grid">
+                    <div className="stat-item">
+                      <strong>{stats?.global?.totalEntries || 0}</strong>
+                      <span>Einträge</span>
+                    </div>
+                    <div className="stat-item">
+                      <strong>{stats?.global?.recentEntries || 0}</strong>
+                      <span>Diese Woche</span>
+                    </div>
+                    <div className="stat-item">
+                      <strong>{stats?.global?.cacheSize || '0 Bytes'}</strong>
+                      <span>Größe</span>
+                    </div>
+                  </div>
+                  
+                  {stats?.global?.topUsedEntries?.length > 0 && (
+                    <div className="top-entries">
+                      <h6>🔥 Meistgenutzt:</h6>
+                      {stats.global.topUsedEntries.map((entry: any, index: number) => (
+                        <div key={index} className="top-entry">
+                          <span className="context-tag">{entry.context}</span>
+                          <span className="usage-count">{entry.usageCount}× verwendet</span>
+                          <span className="age">{entry.age} alt</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                <div className="stats-section">
+                  <h5>📱 Lokaler Cache</h5>
+                  <div className="stats-grid">
+                    <div className="stat-item">
+                      <strong>{stats?.local?.totalEntries || 0}</strong>
+                      <span>Einträge</span>
+                    </div>
+                    <div className="stat-item">
+                      <strong>{stats?.local?.cacheSize || '0 Bytes'}</strong>
+                      <span>Größe</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="cache-actions">
+                  <button 
+                    className="clear-cache-btn"
+                    onClick={async () => {
+                      GlobalCacheService.clearCache();
+                      CacheService.clearCache();
+                      setShowCacheStats(false);
+                      // Statistiken neu laden
+                      setTimeout(() => setShowCacheStats(true), 100);
+                    }}
+                  >
+                    🗑️ Alle Caches leeren
+                  </button>
+                  <button 
+                    className="cleanup-cache-btn"
+                    onClick={async () => {
+                      const deleted = await GlobalCacheService.cleanupOldEntries();
+                      alert(`${deleted} alte Einträge gelöscht`);
+                      // Statistiken neu laden
+                      setShowCacheStats(false);
+                      setTimeout(() => setShowCacheStats(true), 100);
+                    }}
+                  >
+                    🧹 Alte Einträge bereinigen
+                  </button>
+                </div>
+              </div>
+            );
+          })()}
+        </div>
+      )}
     </div>
   );
 }

@@ -29,4 +29,14 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Deployment
 .vercel
+
+# Development artifacts
+*.tmp
+*.temp
+
+# Cache
+.cache
+.parcel-cache

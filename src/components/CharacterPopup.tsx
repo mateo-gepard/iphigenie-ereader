@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import type { Character } from '../data/characters';
-import { getCharacterRelationship } from '../data/characters';
+import { getCharacterRelationship, analyzeCharacterRelationshipInText } from '../data/characters';
 import './CharacterPopup.css';
 
 interface CharacterPopupProps {
@@ -9,6 +9,7 @@ interface CharacterPopupProps {
   onClose: () => void;
   onSelectForComparison: (character: Character) => void;
   selectedForComparison?: Character;
+  currentTextContent?: string; // Neuer Parameter für dynamische Analyse
 }
 
 export function CharacterPopup({ 
@@ -16,7 +17,8 @@ export function CharacterPopup({
   position, 
   onClose, 
   onSelectForComparison,
-  selectedForComparison 
+  selectedForComparison,
+  currentTextContent = '' // Neuer Parameter mit Default-Wert
 }: CharacterPopupProps) {
   const [showRelationship, setShowRelationship] = useState(false);
   const [relationshipText, setRelationshipText] = useState('');
@@ -29,7 +31,18 @@ export function CharacterPopup({
       
       // Simuliere kurze Verzögerung für glatte Animation
       setTimeout(() => {
-        const relationship = getCharacterRelationship(character.id, selectedForComparison.id);
+        // Versuche zuerst vordefinierte Beziehung zu finden
+        let relationship = getCharacterRelationship(character.id, selectedForComparison.id);
+        
+        // Falls keine vordefinierte Beziehung existiert, nutze dynamische Textanalyse
+        if (relationship.includes('Keine direkte Beziehung') && currentTextContent) {
+          relationship = analyzeCharacterRelationshipInText(
+            character.name, 
+            selectedForComparison.name, 
+            currentTextContent
+          );
+        }
+        
         setRelationshipText(relationship);
         setIsLoadingRelationship(false);
       }, 800);

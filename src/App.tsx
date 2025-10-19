@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { EReader } from './components/EReader';
-import { ExplanationPanel } from './components/ExplanationPanelNew';
+import { ExplanationPanel } from './components/ExplanationPanel';
 import { iphigenieText } from './data/iphigenieText';
 import type { ExplanationResponse } from './types';
 import type { Character } from './data/characters';
