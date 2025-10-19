@@ -10,16 +10,16 @@
 }
 
 .character-popup {
-  position: fixed;
-  width: 320px;
-  max-width: 90vw;
-  max-height: 80vh;
-  background: white;
+  position: absolute;
+  z-index: 1000;
+  background: var(--bg-primary);
+  border: 1px solid var(--border-color);
   border-radius: 12px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-  z-index: 999;
-  overflow: hidden;
-  animation: popupSlideIn 0.2s ease-out;
+  padding: 1.5rem;
+  box-shadow: var(--shadow-lg);
+  max-width: 400px;
+  backdrop-filter: blur(10px);
+  color: var(--text-primary);
 }
 
 @keyframes popupSlideIn {

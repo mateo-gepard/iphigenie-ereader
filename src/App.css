@@ -1,22 +1,46 @@
 .app {
   min-height: 100vh;
-  background: #f8fafc;
+  background: var(--bg-tertiary);
 }
 
 .app-header {
-  background: #ffffff;
-  color: #1e293b;
+  background: var(--bg-primary);
+  color: var(--text-primary);
   padding: 1rem 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+  box-shadow: var(--shadow-sm);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.app-header-content {
+  flex: 1;
   text-align: center;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  border-bottom: 1px solid #e2e8f0;
+}
+
+.app-header-controls {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 768px) {
+  .app-header-controls {
+    width: 100%;
+    justify-content: center;
+    gap: 0.5rem;
+  }
 }
 
 .app-header h1 {
   margin: 0;
   font-size: 1.75rem;
   font-weight: 600;
-  color: #0f172a;
+  color: var(--text-primary);
   letter-spacing: -0.025em;
 }
 
@@ -76,21 +100,21 @@
 }
 
 .reader-container {
-  background: white;
+  background: var(--bg-primary);
   border-radius: 16px;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+  box-shadow: var(--shadow-lg);
   overflow: hidden;
-  border: 1px solid rgba(0, 0, 0, 0.05);
+  border: 1px solid var(--border-color);
 }
 
 .explanation-container {
-  background: white;
+  background: var(--bg-primary);
   border-radius: 16px;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+  box-shadow: var(--shadow-lg);
   overflow: hidden;
   position: sticky;
   top: 3rem;
-  border: 1px solid rgba(0, 0, 0, 0.05);
+  border: 1px solid var(--border-color);
   max-height: calc(100vh - 4rem);
   animation: slideIn 0.3s ease-out;
   transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
@@ -291,15 +315,21 @@
 @media (max-width: 768px) {
   .app-header {
     padding: 1rem;
+    flex-direction: column;
+    gap: 1rem;
   }
   
-  .app-header h1 {
+  .app-header-content h1 {
     font-size: 1.8rem;
     line-height: 1.2;
   }
   
-  .subtitle {
+  .app-header-content .subtitle {
     font-size: 0.9rem;
+  }
+  
+  .app-header-controls {
+    justify-content: center;
   }
   
   .app-main {

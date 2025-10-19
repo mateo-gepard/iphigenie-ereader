@@ -215,16 +215,22 @@ export function EReader({
 
       <div className="text-content">
         {text.map((act: Act) => (
-          <div key={act.id} className="act">
-            <h2 className="act-title">{act.title}</h2>
-            
-            {act.scenes.map((scene: any) => (
-              <div key={scene.id} className="scene">
+        <div key={act.id} className="act" id={`act-${act.number}`}>
+          <h2 
+            className="act-title clickable" 
+            onClick={() => {
+              // Optional: Handle act click if needed
+            }}
+          >
+            {act.title}
+          </h2>            {act.scenes.map((scene: any) => (
+              <div key={scene.id} className="scene" id={scene.id}>
                 <h3 className="scene-title">{scene.title}</h3>
                 
                 {scene.stanzas.map((stanza: any) => (
                   <div 
                     key={stanza.id} 
+                    id={stanza.id}
                     className={`stanza ${selectedStanzaId === stanza.id ? 'selected-stanza' : ''}`}
                   >
                     <div className="stanza-header">

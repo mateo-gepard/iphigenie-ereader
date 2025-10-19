@@ -1,6 +1,9 @@
 import { useState } from 'react';
 import { EReader } from './components/EReader';
 import { ExplanationPanel } from './components/ExplanationPanel';
+import { SettingsPanel } from './components/SettingsPanel';
+import { QuickNavigation } from './components/QuickNavigation';
+import { SearchBox } from './components/SearchBox';
 import { iphigenieText } from './data/iphigenieText';
 import type { ExplanationResponse } from './types';
 import type { Character } from './data/characters';
@@ -24,6 +27,25 @@ function App() {
     sceneNumber?: number;
   } | null>(null);
   const [isGeneratingComparison, setIsGeneratingComparison] = useState(false);
+  const [currentAct, setCurrentAct] = useState<number>(1);
+  
+  // Panel states
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [isNavigationOpen, setIsNavigationOpen] = useState(false);
+
+  const handleSettingsToggle = () => {
+    setIsSettingsOpen(!isSettingsOpen);
+    if (!isSettingsOpen) {
+      setIsNavigationOpen(false); // Close navigation when opening settings
+    }
+  };
+
+  const handleNavigationToggle = () => {
+    setIsNavigationOpen(!isNavigationOpen);
+    if (!isNavigationOpen) {
+      setIsSettingsOpen(false); // Close settings when opening navigation
+    }
+  };
 
   const handleTextSelection = (
     text: string, 
@@ -135,10 +157,68 @@ function App() {
   };
 
   return (
-    <div className="app">
+        <div className="app" onClick={(e) => {
+          // Close panels when clicking outside
+          const target = e.target as HTMLElement;
+          const isSettingsClick = target.closest('.settings-panel');
+          const isNavigationClick = target.closest('.quick-navigation');
+          
+          if (!isSettingsClick && !isNavigationClick) {
+            setIsSettingsOpen(false);
+            setIsNavigationOpen(false);
+          }
+        }}>
       <header className="app-header">
-        <h1>Iphigenie auf Tauris</h1>
-        <p className="subtitle">Interaktiver E-Reader - Johann Wolfgang von Goethe</p>
+        <div className="app-header-content">
+          <h1>Iphigenie auf Tauris</h1>
+          <p className="subtitle">Ein interaktiver eReader mit KI-unterstützter Analyse</p>
+        </div>
+        <div className="app-header-controls">
+          <SearchBox 
+            text={iphigenieText}
+            onResultSelect={(result) => {
+              // Close panels when searching
+              setIsSettingsOpen(false);
+              setIsNavigationOpen(false);
+              
+              // Scroll to the selected element
+              const element = document.getElementById(result.id);
+              if (element) {
+                element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                // Highlight the element briefly
+                element.style.backgroundColor = 'var(--accent-color)';
+                element.style.color = 'white';
+                setTimeout(() => {
+                  element.style.backgroundColor = '';
+                  element.style.color = '';
+                }, 2000);
+              }
+            }}
+          />
+          <QuickNavigation 
+            acts={iphigenieText.map(act => ({
+              id: act.id,
+              title: act.title,
+              number: act.number
+            }))}
+            currentAct={currentAct}
+            isExpanded={isNavigationOpen}
+            onToggle={handleNavigationToggle}
+            onActSelect={(actNumber) => {
+              setCurrentAct(actNumber);
+              setIsNavigationOpen(false); // Close navigation after selection
+              // Scroll to act
+              const actElement = document.getElementById(`act-${actNumber}`);
+              if (actElement) {
+                actElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+              }
+            }}
+          />
+          <SettingsPanel 
+            isOpen={isSettingsOpen}
+            onToggle={handleSettingsToggle}
+          />
+        </div>
       </header>
       
       <main className="app-main">
