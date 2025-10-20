@@ -8,9 +8,22 @@ export default defineConfig({
   build: {
     outDir: 'dist',
     assetsDir: 'assets',
+    chunkSizeWarningLimit: 1000, // Erhöhe das Limit auf 1MB
     rollupOptions: {
       output: {
-        manualChunks: undefined,
+        manualChunks: {
+          // Vendor chunks für bessere Caching-Performance
+          'react-vendor': ['react', 'react-dom'],
+          'openai-vendor': ['openai'],
+          // Große Daten-Files separat
+          'text-data': [
+            './src/data/IphigenieText1',
+            './src/data/IphigenieText2', 
+            './src/data/IphigenieText3',
+            './src/data/IphigenieText4',
+            './src/data/IphigenieText5'
+          ]
+        },
       },
     },
   },
