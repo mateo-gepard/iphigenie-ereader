@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useRef } from 'react';
 import type { Act, ExplanationResponse } from '../types';
 import type { Character } from '../data/characters';
 import { OpenAIService } from '../services/openaiService';
@@ -40,43 +40,7 @@ export function EReader({
     type: 'verse' | 'stanza';
     text: string;
   } | null>(null);
-  const [showBackToVerseButton, setShowBackToVerseButton] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
-
-  // Überprüfe ob das analysierte Element sichtbar ist
-  useEffect(() => {
-    if (!lastAnalyzedElement) {
-      setShowBackToVerseButton(false);
-      return;
-    }
-
-    const checkVisibility = () => {
-      const element = document.getElementById(lastAnalyzedElement.id);
-      if (!element || !containerRef.current) {
-        setShowBackToVerseButton(false);
-        return;
-      }
-
-      const containerRect = containerRef.current.getBoundingClientRect();
-      const elementRect = element.getBoundingClientRect();
-      
-      // Element ist sichtbar wenn es mindestens teilweise im Container zu sehen ist
-      const isVisible = elementRect.bottom > containerRect.top && 
-                       elementRect.top < containerRect.bottom;
-      
-      setShowBackToVerseButton(!isVisible);
-    };
-
-    // Initial check
-    checkVisibility();
-
-    // Check bei Scroll
-    const container = containerRef.current;
-    if (container) {
-      container.addEventListener('scroll', checkVisibility);
-      return () => container.removeEventListener('scroll', checkVisibility);
-    }
-  }, [lastAnalyzedElement]);
 
   // Scrolle zurück zum analysierten Element
   const scrollToAnalyzedElement = () => {
@@ -357,7 +321,7 @@ export function EReader({
   return (
     <div className="e-reader" ref={containerRef}>
       {/* Zurück zum analysierten Vers Button */}
-      {showBackToVerseButton && lastAnalyzedElement && (
+      {lastAnalyzedElement && (
         <button 
           className="back-to-verse-btn"
           onClick={scrollToAnalyzedElement}
