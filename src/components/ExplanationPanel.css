@@ -1698,48 +1698,56 @@
   padding: 1.5rem;
   background: var(--bg-secondary);
   border-radius: 12px;
-  border-left: 4px solid var(--accent-color);
+  border: 1px solid var(--border-color);
   transition: all 0.3s ease;
 }
 
 .analysis-section:hover {
-  transform: translateY(-2px);
+  border-color: var(--accent-color);
   box-shadow: var(--shadow-md);
 }
 
 .analysis-section h4 {
-  margin-bottom: 1rem;
-  color: var(--accent-color);
-  font-weight: 700;
+  margin: 0 0 1rem 0;
   font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--accent-color);
   display: flex;
   align-items: center;
   gap: 0.5rem;
 }
 
 .analysis-section p {
-  line-height: 1.7;
+  line-height: 1.6;
   color: var(--text-primary);
-  margin-bottom: 0;
+  margin: 0;
 }
 
-/* Mobile responsive for analysis sections */
+/* Spezielle Styling für verschiedene Hintergrund-Sektionen */
+.analysis-section h4:has-text("🏛️") {
+  color: #8b5a2b;
+}
+
+.analysis-section h4:has-text("⚡") {
+  color: #7c3aed;
+}
+
+.analysis-section h4:has-text("📏") {
+  color: #059669;
+}
+
+.analysis-section h4:has-text("🌟") {
+  color: #dc2626;
+}
+
+/* Mobile responsive für analysis sections */
 @media (max-width: 768px) {
   .analysis-section {
     padding: 1rem;
-    margin-bottom: 1rem;
+    margin-bottom: 1.5rem;
   }
   
   .analysis-section h4 {
     font-size: 1rem;
-  }
-  
-  .no-devices {
-    padding: 1.5rem;
-  }
-  
-  .no-devices-message,
-  .no-devices-explanation {
-    font-size: 0.85rem;
   }
 }

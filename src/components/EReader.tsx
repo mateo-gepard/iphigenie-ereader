@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import type { Act, ExplanationResponse } from '../types';
 import type { Character } from '../data/characters';
 import { OpenAIService } from '../services/openaiService';
@@ -35,6 +35,62 @@ export function EReader({
 }: EReaderProps) {
   const [selectedVerseIds, setSelectedVerseIds] = useState<string[]>([]);
   const [selectedStanzaId, setSelectedStanzaId] = useState<string>('');
+  const [lastAnalyzedElement, setLastAnalyzedElement] = useState<{
+    id: string;
+    type: 'verse' | 'stanza';
+    text: string;
+  } | null>(null);
+  const [showBackToVerseButton, setShowBackToVerseButton] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  // Überprüfe ob das analysierte Element sichtbar ist
+  useEffect(() => {
+    if (!lastAnalyzedElement) {
+      setShowBackToVerseButton(false);
+      return;
+    }
+
+    const checkVisibility = () => {
+      const element = document.getElementById(lastAnalyzedElement.id);
+      if (!element || !containerRef.current) {
+        setShowBackToVerseButton(false);
+        return;
+      }
+
+      const containerRect = containerRef.current.getBoundingClientRect();
+      const elementRect = element.getBoundingClientRect();
+      
+      // Element ist sichtbar wenn es mindestens teilweise im Container zu sehen ist
+      const isVisible = elementRect.bottom > containerRect.top && 
+                       elementRect.top < containerRect.bottom;
+      
+      setShowBackToVerseButton(!isVisible);
+    };
+
+    // Initial check
+    checkVisibility();
+
+    // Check bei Scroll
+    const container = containerRef.current;
+    if (container) {
+      container.addEventListener('scroll', checkVisibility);
+      return () => container.removeEventListener('scroll', checkVisibility);
+    }
+  }, [lastAnalyzedElement]);
+
+  // Scrolle zurück zum analysierten Element
+  const scrollToAnalyzedElement = () => {
+    if (!lastAnalyzedElement) return;
+    
+    const element = document.getElementById(lastAnalyzedElement.id);
+    if (element) {
+      element.scrollIntoView({ 
+        behavior: 'smooth', 
+        block: 'center',
+        inline: 'center'
+      });
+    }
+  };
 
   // Hilfsfunktion um alle ausgewählten Verse zu finden
   const getAllSelectedVerses = (verseIds: string[]): any[] => {
@@ -108,6 +164,13 @@ export function EReader({
           // Zeige Loading für kombinierte Erklärung
           onTextSelection(combinedText, null, true, contextInfo);
           
+          // Speichere letztes analysiertes Element für Back-Button (verwende ersten Vers der Auswahl)
+          setLastAnalyzedElement({
+            id: newIds[0], // Nimm den ersten ausgewählten Vers
+            type: 'verse',
+            text: combinedText
+          });
+          
           // Hole Erklärung für alle ausgewählten Verse
           handleMultiVerseExplanation(allSelectedVerses, actNumber, sceneNumber, contextInfo);
           
@@ -121,6 +184,13 @@ export function EReader({
     // Normale Einzelauswahl
     setSelectedVerseIds([verse.id]);
     setSelectedStanzaId(''); // Clear stanza selection
+
+    // Speichere letztes analysiertes Element für Back-Button
+    setLastAnalyzedElement({
+      id: verse.id,
+      type: 'verse',
+      text: verse.text
+    });
 
     // Zeige immer kurz Loading-Animation für besseres UX
     onTextSelection(verse.text, null, true, contextInfo);
@@ -252,6 +322,13 @@ export function EReader({
     setSelectedStanzaId(stanza.id);
     setSelectedVerseIds([]); // Clear verse selection
 
+    // Speichere letztes analysiertes Element für Back-Button
+    setLastAnalyzedElement({
+      id: stanza.id,
+      type: 'stanza',
+      text: stanzaText
+    });
+
     // Zeige immer kurz Loading-Animation für besseres UX
     onTextSelection(stanzaText, null, true, contextInfo);
     
@@ -278,7 +355,21 @@ export function EReader({
   };
 
   return (
-    <div className="e-reader">
+    <div className="e-reader" ref={containerRef}>
+      {/* Zurück zum analysierten Vers Button */}
+      {showBackToVerseButton && lastAnalyzedElement && (
+        <button 
+          className="back-to-verse-btn"
+          onClick={scrollToAnalyzedElement}
+          title={`Zurück zu "${lastAnalyzedElement.text.substring(0, 50)}..."`}
+        >
+          <span className="back-icon">↑</span>
+          <span className="back-text">
+            Zurück zum {lastAnalyzedElement.type === 'verse' ? 'Vers' : 'Abschnitt'}
+          </span>
+        </button>
+      )}
+
       {/* Character Comparison Status */}
       {characterForComparison && (
         <div className="character-comparison-status">
