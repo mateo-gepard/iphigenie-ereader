@@ -370,7 +370,9 @@ export function EReader({
                                 if (character) {
                                   handleCharacterClick(character, e as any);
                                 }
+                                return; // Verhindert weitere Event-Propagation
                               }
+                              // Für alle anderen Klicks: Event durchlassen (nicht stoppen)
                             }}
                           />
                         </div>

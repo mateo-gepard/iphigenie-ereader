@@ -2,6 +2,7 @@ import OpenAI from 'openai';
 import type { ExplanationRequest, ExplanationResponse } from '../types';
 import { CacheService } from './cacheService';
 import { GlobalCacheService } from './globalCacheService';
+import { iphigenieText } from '../data/iphigenieText';
 
 // Note: In a production app, you should use environment variables and a backend API
 // to keep your API key secure. This is for demonstration purposes only.
@@ -12,8 +13,157 @@ const openai = new OpenAI({
 
 export class OpenAIService {
 
+  // Hilfsfunktion um eine Szene zu finden
+  private static getSceneByNumbers(actNumber: number, sceneNumber: number) {
+    const act = iphigenieText.find(act => act.number === actNumber);
+    return act?.scenes.find(scene => scene.number === sceneNumber);
+  }
+
+  // Erweitert den Request um wertvollen Kontext für bessere ChatGPT-Antworten
+  private static async enrichRequestWithContext(request: ExplanationRequest): Promise<ExplanationRequest & { 
+    textualContext?: string; 
+    sceneContext?: string; 
+    characterContext?: string;
+    surroundingText?: string;
+  }> {
+    // Keine dynamischen Imports mehr nötig - direkter Import oben
+    
+    let textualContext = '';
+    let sceneContext = '';
+    let characterContext = '';
+    let surroundingText = '';
+
+    try {
+      if (request.actNumber && request.sceneNumber) {
+        const scene = this.getSceneByNumbers(request.actNumber, request.sceneNumber);
+        
+        if (scene) {
+          // 1. SZENENKONTEXT - Grundlegende Szeneninformationen
+          const totalStanzas = scene.stanzas.length;
+          const speakers = [...new Set(scene.stanzas.map((s: any) => s.title))].filter(Boolean);
+          sceneContext = `Szene: ${scene.title} (${totalStanzas} Textabschnitte). Aktive Sprecher: ${speakers.join(', ').replace(/:/g, '')}`;
+
+          // 2. UMGEBUNGSTEXT - 2-3 Verse vor und nach dem ausgewählten Text
+          if (request.context === 'verse') {
+            surroundingText = this.extractSurroundingVerses(scene, request.text, 2);
+          } else if (request.context === 'stanza') {
+            surroundingText = this.extractSurroundingStanzas(scene, request.text, 1);
+          }
+
+          // 3. CHARAKTERKONTEXT - Informationen zu sprechenden Charakteren
+          const { characters } = await import('../data/characters');
+          const findCharacterByName = (name: string) => {
+            const normalizedName = name.toLowerCase().trim();
+            return characters.find(char => 
+              char.name.toLowerCase() === normalizedName || 
+              char.aliases.some(alias => alias.toLowerCase() === normalizedName)
+            );
+          };
+
+          const currentSpeakers = (speakers as string[]).map((speaker: string) => {
+            const cleanName = speaker.replace(':', '').trim();
+            return findCharacterByName(cleanName);
+          }).filter(Boolean);
+
+          if (currentSpeakers.length > 0) {
+            characterContext = currentSpeakers.map(char => 
+              `${char?.name}: ${char?.role} - ${char?.description?.substring(0, 100)}...`
+            ).join('; ');
+          }
+
+          // 4. TEXTKONTEXT - Dramaturgie und Handlungsposition
+          const actProgress = ((request.sceneNumber - 1) / Math.max(scene.number, 1)) * 100;
+          textualContext = `Handlungsposition: ${actProgress.toFixed(0)}% des ${request.actNumber}. Aufzugs. ${this.getDramaticMoment(request.actNumber, request.sceneNumber)}`;
+        }
+      }
+    } catch (error) {
+      console.warn('Kontext-Extraktion teilweise fehlgeschlagen:', error);
+    }
+
+    return {
+      ...request,
+      textualContext: textualContext.trim(),
+      sceneContext: sceneContext.trim(),
+      characterContext: characterContext.trim(),
+      surroundingText: surroundingText.trim()
+    };
+  }
+
+  // Extrahiert umgebende Verse für besseren Kontext
+  private static extractSurroundingVerses(scene: any, targetText: string, contextRange: number): string {
+    const allVerses: any[] = [];
+    scene.stanzas.forEach((stanza: any) => {
+      stanza.verses.forEach((verse: any) => {
+        allVerses.push({ ...verse, speaker: stanza.title });
+      });
+    });
+
+    // Finde den Zielvers
+    const targetIndex = allVerses.findIndex(verse => 
+      verse.text.trim() === targetText.trim() || targetText.includes(verse.text.trim())
+    );
+
+    if (targetIndex === -1) return '';
+
+    // Extrahiere Kontext
+    const start = Math.max(0, targetIndex - contextRange);
+    const end = Math.min(allVerses.length, targetIndex + contextRange + 1);
+    
+    return allVerses.slice(start, end)
+      .map(verse => `${verse.lineNumber}: ${verse.text}`)
+      .join('\n');
+  }
+
+  // Extrahiert umgebende Strophen für besseren Kontext
+  private static extractSurroundingStanzas(scene: any, targetText: string, contextRange: number): string {
+    const targetStanzaIndex = scene.stanzas.findIndex((stanza: any) => {
+      const stanzaText = stanza.verses.map((v: any) => v.text).join('\n');
+      return targetText.includes(stanzaText) || stanzaText.includes(targetText);
+    });
+
+    if (targetStanzaIndex === -1) return '';
+
+    const start = Math.max(0, targetStanzaIndex - contextRange);
+    const end = Math.min(scene.stanzas.length, targetStanzaIndex + contextRange + 1);
+    
+    return scene.stanzas.slice(start, end)
+      .map((stanza: any) => {
+        const verses = stanza.verses.map((v: any) => `${v.lineNumber}: ${v.text}`).slice(0, 3);
+        return `${stanza.title}\n${verses.join('\n')}${stanza.verses.length > 3 ? '\n...' : ''}`;
+      })
+      .join('\n\n');
+  }
+
+  // Bestimmt den dramatischen Moment für bessere Kontextualisierung
+  private static getDramaticMoment(actNumber?: number, sceneNumber?: number): string {
+    const moments: Record<string, string> = {
+      '1-1': 'Exposition und Charaktereinführung',
+      '1-2': 'Konfliktetablierung',
+      '1-3': 'Problemvertiefung',
+      '2-1': 'Wendepunkt und neue Figuren',
+      '2-2': 'Spannungssteigerung',
+      '3-1': 'Krisenhöhepunkt',
+      '3-2': 'Emotionaler Höhepunkt',
+      '3-3': 'Strategieentwicklung',
+      '4-1': 'Moralisches Dilemma',
+      '4-2': 'Vertrauensbruch',
+      '4-3': 'Heilung und Erkenntnis',
+      '4-4': 'Handlungsvorbereitung',
+      '5-1': 'Finale Konfrontation',
+      '5-2': 'Loyalitätsprüfung',
+      '5-3': 'Wahrheitsmoment',
+      '5-4': 'Versöhnung',
+      '5-6': 'Harmonische Auflösung'
+    };
+    
+    return moments[`${actNumber}-${sceneNumber}`] || 'Dramatischer Entwicklungsmoment';
+  }
+
   static async getExplanation(request: ExplanationRequest): Promise<ExplanationResponse> {
     try {
+      // Erweiterte Kontextgenerierung für bessere Antwortqualität
+      const enrichedRequest = await this.enrichRequestWithContext(request);
+      
       // Überspringe Cache nur wenn explizit Regenerierung gewünscht
       if (!request.forceRegenerate) {
         // Überprüfe globalen Cache zuerst
@@ -51,7 +201,7 @@ export class OpenAIService {
         console.log('🔄 Force regeneration requested, skipping cache');
       }
 
-      const prompt = this.buildPrompt(request);
+      const prompt = this.buildPrompt(enrichedRequest);
       
       const completion = await openai.chat.completions.create({
         model: "gpt-3.5-turbo",
@@ -71,27 +221,33 @@ export class OpenAIService {
             - Erkläre komplexe Konzepte verständlich für Schüler/Studenten
             - Beziehe immer den dramatischen Kontext mit ein
             - Berücksichtige Goethes Humanitätsideal und klassische Ästhetik
-            - WICHTIG: Identifiziere 2-4 verschiedene Stilmittel pro Analyse
-            - Variiere die Stilmittel stark - verwende NICHT immer dieselben
-            - Analysiere sowohl offensichtliche als auch subtile sprachliche Mittel
-            - Berücksichtige den Blankvers und metrische Besonderheiten
+            - KRITISCH: Identifiziere nur TATSÄCHLICH VORHANDENE Stilmittel
+            - Erfinde KEINE Stilmittel - wenn keine klaren vorhanden sind, gib eine leere Liste zurück
+            - Blankvers ist KEIN Stilmittel - erwähne Metrik separat in der Erklärung
+            - Analysiere präzise: Stilmittel müssen konkret im Text nachweisbar sein
+            - Variiere zwischen verschiedenen Kategorien: Rhetorik, Klang, Struktur, Bildsprache
+            - NUTZE DEN BEREITGESTELLTEN KONTEXT für präzisere Analysen
+            - Liefere umfassende Hintergrundinformationen zu historischem und mythologischem Kontext
             
             PFLICHTSTRUKTUR (Antworte IMMER in diesem exakten JSON-Format):
             {
               "explanation": "Detaillierte literaturwissenschaftliche Analyse (3-4 Sätze)",
               "summary": "Prägnante Inhaltszusammenfassung (1-2 Sätze)",
               "background": "Kulturhistorischer/mythologischer Kontext (2-3 Sätze)",
+              "historicalContext": "Historischer Hintergrund der Entstehungszeit und Goethes Intention",
+              "mythologicalBackground": "Bezüge zur antiken Mythologie und deren Bedeutung",
               "literaryDevices": [
                 {
-                  "name": "Exaktes Stilmittel (variiere zwischen: Metapher, Personifikation, Hyperbel, Chiasmus, Parallelismus, Anapher, Epipher, Klimax, Antiklimax, Oxymoron, Antithese, Synecdoche, Metonymie, Ironie, Rhetorische Frage, Exclamatio, Apostrophe, Ellipse, Polysyndeton, Asyndeton, Alliteration, Assonanz, Onomatopoesie, Enjambement, Zäsur, etc.)",
-                  "example": "Wörtliches Zitat aus dem Text",
+                  "name": "NUR TATSÄCHLICH VORHANDENES Stilmittel - wenn keines eindeutig identifizierbar ist, gib leere Liste [] zurück",
+                  "example": "Exaktes wörtliches Zitat aus dem analysierten Text",
                   "effect": "Spezifische Wirkung auf Leser/Zuschauer und dramatische Funktion",
                   "category": "rhetoric|sound|structure|imagery|syntax"
                 }
               ],
               "themes": ["Zentrales Thema mit Bezug zum Humanitätsideal", "Weiteres relevantes Motiv"],
               "characterAnalysis": "Charakterpsychologische Einordnung (falls Figurenrede)",
-              "dramaticFunction": "Funktion für Handlungsfortschritt/Spannungsaufbau"
+              "dramaticFunction": "Funktion für Handlungsfortschritt/Spannungsaufbau",
+              "metricAnalysis": "Analyse von Blankvers, Rhythmus und metrischen Besonderheiten (falls relevant)"
             }`
           },
           {
@@ -99,7 +255,7 @@ export class OpenAIService {
             content: prompt
           }
         ],
-        max_tokens: 1200,
+        max_tokens: 1500,
         temperature: 0.8
       });
 
@@ -117,10 +273,13 @@ export class OpenAIService {
           explanation: response,
           summary: "Zusammenfassung nicht verfügbar",
           background: "Hintergrundinformationen nicht verfügbar",
+          historicalContext: "Historischer Kontext nicht verfügbar",
+          mythologicalBackground: "Mythologischer Hintergrund nicht verfügbar",
           literaryDevices: [],
           themes: [],
           characterAnalysis: "Charakteranalyse nicht verfügbar",
-          dramaticFunction: "Dramatische Funktion nicht verfügbar"
+          dramaticFunction: "Dramatische Funktion nicht verfügbar",
+          metricAnalysis: "Metrische Analyse nicht verfügbar"
         };
       }
 
@@ -162,15 +321,23 @@ export class OpenAIService {
         explanation: "Entschuldigung, es gab einen Fehler beim Abrufen der Erklärung. Bitte versuchen Sie es später erneut.",
         summary: "Fehler",
         background: "Fehler beim Laden der Hintergrundinformationen",
+        historicalContext: "Fehler beim Laden des historischen Kontexts",
+        mythologicalBackground: "Fehler beim Laden des mythologischen Hintergrunds",
         literaryDevices: [],
         themes: [],
         characterAnalysis: "Fehler bei der Charakteranalyse",
-        dramaticFunction: "Fehler bei der Funktionsanalyse"
+        dramaticFunction: "Fehler bei der Funktionsanalyse",
+        metricAnalysis: "Fehler bei der metrischen Analyse"
       };
     }
   }
 
-  private static buildPrompt(request: ExplanationRequest): string {
+  private static buildPrompt(request: ExplanationRequest & {
+    textualContext?: string; 
+    sceneContext?: string; 
+    characterContext?: string;
+    surroundingText?: string;
+  }): string {
     // Spezielle Behandlung für Charaktervergleiche
     if (request.isCharacterComparison && request.character1 && request.character2) {
       return this.buildCharacterComparisonPrompt(request.character1, request.character2);
@@ -185,28 +352,67 @@ export class OpenAIService {
 
     const dramaticContext = this.getDramaticContext(request.actNumber, request.sceneNumber);
 
+    // Erweiterte Kontextinformationen aufbauen
+    let contextSection = '';
+    if (request.textualContext || request.sceneContext || request.characterContext || request.surroundingText) {
+      contextSection = '\n--- ERWEITERTER KONTEXT FÜR PRÄZISERE ANALYSE ---\n';
+      
+      if (request.textualContext) {
+        contextSection += `\nDRAMATURGISCHE EINORDNUNG: ${request.textualContext}`;
+      }
+      
+      if (request.sceneContext) {
+        contextSection += `\nSZENENINFORMATION: ${request.sceneContext}`;
+      }
+      
+      if (request.characterContext) {
+        contextSection += `\nAKTIVE CHARAKTERE: ${request.characterContext}`;
+      }
+      
+      if (request.surroundingText) {
+        contextSection += `\nUMGEBENDER TEXT (zur besseren Einordnung):
+${request.surroundingText}`;
+      }
+      
+      contextSection += '\n--- ENDE ERWEITETER KONTEXT ---\n';
+    }
+
     return `ANALYSE-AUFTRAG: Literaturwissenschaftliche Textanalyse
 
 TEXTQUELLE: Goethes "Iphigenie auf Tauris" (${contextInfo})
 ANALYSEEBENE: ${contextType}
-DRAMATISCHER KONTEXT: ${dramaticContext}
+DRAMATISCHER KONTEXT: ${dramaticContext}${contextSection}
 
-TEXTPASSAGE:
+TEXTPASSAGE ZU ANALYSIEREN:
 "${request.text}"
 
 SPEZIFISCHE ANALYSE-SCHWERPUNKTE:
-1. SPRACHLICHE GESTALTUNG: Blankvers-Technik, Syntax, Wortwahl, Rhythmus
-2. FIGURENPSYCHOLOGIE: Charaktermotivation, innere Konflikte, Entwicklung
-3. DRAMATURGISCHE FUNKTION: Handlungsfortschritt, Spannungsaufbau, Wendepunkte
-4. KLASSISCHE POETIK: Einheit von Handlung/Zeit/Ort, Katharsis-Konzept
-5. HUMANITÄTSIDEAL: Goethes Menschenbild, Aufklärung vs. Tradition
-6. MYTHOLOGIE: Antike Quellen, moderne Adaptation, symbolische Bedeutung
+1. SPRACHLICHE GESTALTUNG: Präzise Stilmittel-Identifikation, Syntax, Wortwahl
+2. METRISCHE ANALYSE: Blankvers-Technik, Rhythmus, Zäsuren (separat von Stilmitteln!)
+3. FIGURENPSYCHOLOGIE: Charaktermotivation, innere Konflikte, Entwicklung
+4. DRAMATURGISCHE FUNKTION: Handlungsfortschritt, Spannungsaufbau, Wendepunkte
+5. HISTORISCHER KONTEXT: Entstehungszeit, Goethes Intentions, Weimarer Klassik
+6. MYTHOLOGISCHER HINTERGRUND: Antike Quellen, moderne Adaptation, symbolische Bedeutung
+7. HUMANITÄTSIDEAL: Goethes Menschenbild, Aufklärung vs. Tradition
 
-WICHTIG: 
-- Erkenne Blankverse und analysiere deren Wirkung
-- Identifiziere Schlüsselwörter des klassischen Wortschatzes
-- Beachte Iphigenies Rolle als "schöne Seele"
-- Analysiere Konflikt zwischen Pflicht und Neigung
+KRITISCHE STILMITTEL-ANALYSE:
+- NUR tatsächlich vorhandene und eindeutig identifizierbare Stilmittel benennen
+- KEIN "Blankvers" als Stilmittel - das gehört zur Metrik!
+- Präzise Textbelege mit exakten Zitaten erforderlich
+- Wenn keine klaren Stilmittel erkennbar: literaryDevices = []
+- Variation zwischen Kategorien: Rhetorik, Klang, Struktur, Bildsprache, Syntax
+
+ERWEITERTE HINTERGRUND-ANALYSE:
+- Historischer Kontext: Entstehungsgeschichte, Zeitgeist der 1780er Jahre
+- Mythologischer Bezug: Griechische Quellen, Goethes Adaptation
+- Kulturelle Bedeutung: Humanitätsideal, Aufklärung, klassische Ästhetik
+
+WICHTIGE ANALYSEHINWEISE: 
+- Nutze den bereitgestellten Kontext für präzisere Einordnung
+- Trenne klar zwischen Metrik (Blankvers) und Stilmitteln
+- Gib umfassende historische und mythologische Hintergründe
+- Berücksichtige Sprecher und Gesprächssituation
+- Beziehe umgebenden Text in die Analyse ein
 
 Antworte ausschließlich im vorgegebenen JSON-Format.`;
   }
@@ -236,22 +442,56 @@ Antworte ausschließlich im vorgegebenen JSON-Format.`;
     return contexts[key] || 'Allgemeiner dramatischer Kontext von Goethes klassischem Drama';
   }
 
-  static async answerCustomQuestion(selectedText: string, question: string): Promise<string> {
+  static async answerCustomQuestion(selectedText: string, question: string, contextInfo?: {
+    actNumber?: number;
+    sceneNumber?: number;
+  }): Promise<string> {
     try {
+      // Erweiterten Kontext für Custom Questions generieren
+      let additionalContext = '';
+      
+      if (contextInfo?.actNumber && contextInfo?.sceneNumber) {
+        try {
+          const scene = this.getSceneByNumbers(contextInfo.actNumber, contextInfo.sceneNumber);
+          
+          if (scene) {
+            const speakers = [...new Set(scene.stanzas.map((s: any) => s.title))].filter(Boolean);
+            const dramaticMoment = this.getDramaticMoment(contextInfo.actNumber, contextInfo.sceneNumber);
+            
+            additionalContext = `\n\nKONTEXT ZUR BESSEREN EINORDNUNG:
+- Szene: ${scene.title} (${contextInfo.actNumber}. Aufzug, ${contextInfo.sceneNumber}. Szene)
+- Dramatischer Moment: ${dramaticMoment}  
+- Aktive Sprecher: ${speakers.join(', ').replace(/:/g, '')}
+- Handlungsposition: ${((contextInfo.sceneNumber - 1) / Math.max(scene.number, 1) * 100).toFixed(0)}% des Aufzugs`;
+          }
+        } catch (error) {
+          console.warn('Kontext für Custom Question konnte nicht geladen werden:', error);
+        }
+      }
+
       const completion = await openai.chat.completions.create({
         model: "gpt-3.5-turbo",
         messages: [
           {
             role: "system",
-            content: `Du bist ein Germanistik-Professor mit Expertise in Goethes "Iphigenie auf Tauris". 
+            content: `Du bist ein renommierter Germanistik-Professor mit Expertise in Goethes "Iphigenie auf Tauris". 
             Beantworte Fragen zum ausgewählten Text präzise und wissenschaftlich fundiert.
             
             ANTWORT-RICHTLINIEN:
-            - Beziehe dich direkt auf den ausgewählten Text
+            - Nutze den bereitgestellten Kontext für präzisere Antworten
+            - Beziehe dich direkt auf den ausgewählten Text  
             - Verwende literaturwissenschaftliche Terminologie
             - Erkläre verständlich für Schüler/Studenten
-            - Gib konkrete Textbelege
-            - Berücksichtige den dramatischen Kontext`
+            - Gib konkrete Textbelege und Beispiele
+            - Berücksichtige den dramatischen Kontext und die Szeneninformation
+            - Beziehe umgebende Handlung und Charakterentwicklung ein
+            - Erkläre literarische Stilmittel und deren Wirkung
+            
+            EXPERTISE-SCHWERPUNKTE:
+            - Weimarer Klassik und Goethes Humanitätsideal
+            - Blankvers-Technik und dramatische Sprache
+            - Antike Mythologie und deren moderne Adaptation
+            - Charakterpsychologie und Figurenentwicklung`
           },
           {
             role: "user",
@@ -259,12 +499,12 @@ Antworte ausschließlich im vorgegebenen JSON-Format.`;
 "${selectedText}"
 
 FRAGE:
-${question}
+${question}${additionalContext}
 
-Bitte beantworte die Frage bezogen auf diesen Textausschnitt aus Goethes "Iphigenie auf Tauris".`
+Bitte beantworte die Frage präzise und wissenschaftlich fundiert, bezogen auf diesen Textausschnitt aus Goethes "Iphigenie auf Tauris". Nutze den bereitgestellten Kontext für eine bessere Einordnung.`
           }
         ],
-        max_tokens: 800,
+        max_tokens: 1000,
         temperature: 0.7
       });
 

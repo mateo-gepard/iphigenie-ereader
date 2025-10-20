@@ -54,10 +54,13 @@ export interface ExplanationResponse {
   explanation: string;
   summary: string;
   background: string;
+  historicalContext?: string;
+  mythologicalBackground?: string;
   literaryDevices?: LiteraryDevice[];
   themes?: string[];
   characterAnalysis?: string;
   dramaticFunction?: string;
+  metricAnalysis?: string;
   fromCache?: boolean;
   cacheSource?: 'global' | 'local' | 'none';
   generatedAt?: string;

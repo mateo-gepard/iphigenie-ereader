@@ -1666,3 +1666,80 @@
     padding: 1rem;
   }
 }
+
+/* No devices message styling */
+.no-devices {
+  text-align: center;
+  padding: 2rem;
+  background: var(--bg-secondary);
+  border-radius: 12px;
+  border: 2px dashed var(--border-color);
+  margin: 1rem 0;
+}
+
+.no-devices-message {
+  font-size: 1rem;
+  color: var(--text-primary);
+  margin-bottom: 0.75rem;
+  font-weight: 500;
+}
+
+.no-devices-explanation {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  line-height: 1.5;
+  margin: 0;
+  font-style: italic;
+}
+
+/* Enhanced analysis sections with icons */
+.analysis-section {
+  margin-bottom: 2rem;
+  padding: 1.5rem;
+  background: var(--bg-secondary);
+  border-radius: 12px;
+  border-left: 4px solid var(--accent-color);
+  transition: all 0.3s ease;
+}
+
+.analysis-section:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.analysis-section h4 {
+  margin-bottom: 1rem;
+  color: var(--accent-color);
+  font-weight: 700;
+  font-size: 1.1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.analysis-section p {
+  line-height: 1.7;
+  color: var(--text-primary);
+  margin-bottom: 0;
+}
+
+/* Mobile responsive for analysis sections */
+@media (max-width: 768px) {
+  .analysis-section {
+    padding: 1rem;
+    margin-bottom: 1rem;
+  }
+  
+  .analysis-section h4 {
+    font-size: 1rem;
+  }
+  
+  .no-devices {
+    padding: 1.5rem;
+  }
+  
+  .no-devices-message,
+  .no-devices-explanation {
+    font-size: 0.85rem;
+  }
+}

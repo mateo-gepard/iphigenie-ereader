@@ -4,7 +4,6 @@ import type { Character } from '../data/characters';
 import { characters } from '../data/characters';
 import { OpenAIService } from '../services/openaiService';
 import { CacheService } from '../services/cacheService';
-import { GlobalCacheService } from '../services/globalCacheService';
 import './ExplanationPanel.css';
 
 const getCategoryIcon = (category?: string): string => {
@@ -250,71 +249,6 @@ export function ExplanationPanel({
                 </div>
               </div>
             )}
-
-            {/* Hintergrundtext wenn nichts ausgewählt ist */}
-            {!selectedText && !isLoading && !explanation && (
-              <div className="explanation-background">
-                <div className="background-content">
-                  <div className="background-header">
-                    <h3>📖 Literarische Analyse mit KI</h3>
-                    <p className="subtitle">Entdecken Sie die Tiefe von Goethes "Iphigenie auf Tauris"</p>
-                  </div>
-
-                  <div className="analysis-features">
-                    <div className="feature-section">
-                      <h4>🎯 Verse analysieren</h4>
-                      <p>Klicken Sie auf einzelne Verszeilen, um detaillierte Erklärungen zu erhalten:</p>
-                      <ul>
-                        <li>Literarische Stilmittel und deren Wirkung</li>
-                        <li>Historischer und mythologischer Kontext</li>
-                        <li>Sprachliche Besonderheiten und Wortwahl</li>
-                        <li>Bezug zur Gesamthandlung</li>
-                      </ul>
-                    </div>
-
-                    <div className="feature-section">
-                      <h4>📝 Strophen verstehen</h4>
-                      <p>Klicken Sie auf Strophen-Titel für umfassende Analyse:</p>
-                      <ul>
-                        <li>Zusammenfassung des Inhalts</li>
-                        <li>Dramaturgische Funktion</li>
-                        <li>Charakterentwicklung</li>
-                        <li>Thematische Schwerpunkte</li>
-                      </ul>
-                    </div>
-
-                    <div className="feature-section">
-                      <h4>🔍 Multi-Selection</h4>
-                      <p>Halten Sie <strong>Ctrl/Cmd</strong> gedrückt um mehrere Verse auszuwählen:</p>
-                      <ul>
-                        <li>Vergleichende Analyse</li>
-                        <li>Thematische Verbindungen</li>
-                        <li>Stilistische Entwicklung</li>
-                        <li>Dramatische Spannungsbögen</li>
-                      </ul>
-                    </div>
-
-                    <div className="feature-section">
-                      <h4>🎭 Charaktere erforschen</h4>
-                      <p>Klicken Sie auf hervorgehobene Namen im Text:</p>
-                      <ul>
-                        <li>Charakterbeschreibungen und Motivation</li>
-                        <li>Mythologische Hintergründe</li>
-                        <li>Beziehungen zwischen Figuren</li>
-                        <li>Entwicklung im Handlungsverlauf</li>
-                      </ul>
-                    </div>
-                  </div>
-
-                  <div className="getting-started">
-                    <div className="start-tip">
-                      <h4>💡 Schnellstart</h4>
-                      <p>Beginnen Sie mit dem ersten Aufzug und klicken Sie auf Iphigenies Monolog, um die KI-Analyse zu erleben!</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
           </div>
         )}
 
@@ -331,77 +265,37 @@ export function ExplanationPanel({
                     <p>{explanation.explanation}</p>
                   </div>
                   
-                  <div className="analysis-section">
-                    <h4>🎨 Stilmittel</h4>
-                    {explanation.literaryDevices && explanation.literaryDevices.length > 0 ? (
-                      <>
-                        <p className="devices-hint">Klicken Sie auf ein Stilmittel für Details:</p>
-                        <div className="devices-grid">
-                          {explanation.literaryDevices.map((device: any, index: number) => (
-                            <div 
-                              key={index} 
-                              className={`device-card ${expandedDevice === index ? 'expanded' : 'compact'}`}
-                              onClick={() => setExpandedDevice(expandedDevice === index ? null : index)}
-                            >
-                              <div className="device-header">
-                                <span className="device-icon">{getCategoryIcon(device.category)}</span>
-                                <strong>{device.name}</strong>
-                              </div>
-                              
-                              {expandedDevice === index && (
-                                <div className="device-details">
-                                  <p className="device-description">{device.effect || device.description}</p>
-                                  <div className="device-example">
-                                    <strong>Beispiel:</strong> <em>"{device.example}"</em>
-                                  </div>
-                                </div>
-                              )}
-                              
-                              {expandedDevice !== index && (
-                                <div className="click-hint">Klicken für Details</div>
-                              )}
+                  {explanation.literaryDevices && explanation.literaryDevices.length > 0 && (
+                    <div className="analysis-section">
+                      <h4>Stilmittel</h4>
+                      <p className="devices-hint">Klicken Sie auf ein Stilmittel für Details:</p>
+                      <div className="devices-grid">
+                        {explanation.literaryDevices.map((device: any, index: number) => (
+                          <div 
+                            key={index} 
+                            className={`device-card ${expandedDevice === index ? 'expanded' : 'compact'}`}
+                            onClick={() => setExpandedDevice(expandedDevice === index ? null : index)}
+                          >
+                            <div className="device-header">
+                              <span className="device-icon">{getCategoryIcon(device.category)}</span>
+                              <strong>{device.name}</strong>
                             </div>
-                          ))}
-                        </div>
-                      </>
-                    ) : (
-                      <div className="no-devices">
-                        <p className="no-devices-message">
-                          ✨ In diesem Textabschnitt wurden keine eindeutigen Stilmittel identifiziert.
-                        </p>
-                        <p className="no-devices-explanation">
-                          Das ist vollkommen normal - nicht jeder Vers enthält spezifische rhetorische Figuren. 
-                          Die sprachliche Schönheit liegt oft in der natürlichen, unverzierten Ausdrucksweise.
-                        </p>
+                            
+                            {expandedDevice === index && (
+                              <div className="device-details">
+                                <p className="device-description">{device.effect || device.description}</p>
+                                <div className="device-example">
+                                  <strong>Beispiel:</strong> <em>"{device.example}"</em>
+                                </div>
+                              </div>
+                            )}
+                            
+                            {expandedDevice !== index && (
+                              <div className="click-hint">Klicken für Details</div>
+                            )}
+                          </div>
+                        ))}
                       </div>
-                    )}
-                  </div>
-                  
-                  {explanation.metricAnalysis && (
-                    <div className="analysis-section">
-                      <h4>📏 Metrische Analyse</h4>
-                      <p>{explanation.metricAnalysis}</p>
-                    </div>
-                  )}
-                  
-                  {explanation.historicalContext && (
-                    <div className="analysis-section">
-                      <h4>🏛️ Historischer Kontext</h4>
-                      <p>{explanation.historicalContext}</p>
-                    </div>
-                  )}
-                  
-                  {explanation.mythologicalBackground && (
-                    <div className="analysis-section">
-                      <h4>⚡ Mythologischer Hintergrund</h4>
-                      <p>{explanation.mythologicalBackground}</p>
-                    </div>
-                  )}
-                  
-                  {explanation.background && (
-                    <div className="analysis-section">
-                      <h4>🌟 Weitere Hintergründe</h4>
-                      <p>{explanation.background}</p>
                     </div>
                   )}
                 </div>
@@ -520,106 +414,23 @@ export function ExplanationPanel({
       {/* Cache Statistics */}
       {showCacheStats && (
         <div className="cache-stats">
-          <h4>📊 Cache-Statistiken</h4>
+          <h4>Cache-Statistiken</h4>
           {(() => {
-            const [stats, setStats] = useState<any>(null);
-            const [loading, setLoading] = useState(true);
-            
-            useEffect(() => {
-              const loadStats = async () => {
-                try {
-                  const globalStats = await GlobalCacheService.getGlobalCacheStats();
-                  const localStats = CacheService.getCacheStats();
-                  setStats({ global: globalStats, local: localStats });
-                } catch (error) {
-                  console.error('Stats load error:', error);
-                } finally {
-                  setLoading(false);
-                }
-              };
-              loadStats();
-            }, []);
-
-            if (loading) {
-              return (
-                <div className="loading">
-                  <div className="loading-spinner-small"></div>
-                  <p>Statistiken laden...</p>
-                </div>
-              );
-            }
-
             return (
               <div>
                 <div className="stats-section">
-                  <h5>🌐 Globaler Cache</h5>
-                  <div className="stats-grid">
-                    <div className="stat-item">
-                      <strong>{stats?.global?.totalEntries || 0}</strong>
-                      <span>Einträge</span>
-                    </div>
-                    <div className="stat-item">
-                      <strong>{stats?.global?.recentEntries || 0}</strong>
-                      <span>Diese Woche</span>
-                    </div>
-                    <div className="stat-item">
-                      <strong>{stats?.global?.cacheSize || '0 Bytes'}</strong>
-                      <span>Größe</span>
-                    </div>
-                  </div>
-                  
-                  {stats?.global?.topUsedEntries?.length > 0 && (
-                    <div className="top-entries">
-                      <h6>🔥 Meistgenutzt:</h6>
-                      {stats.global.topUsedEntries.map((entry: any, index: number) => (
-                        <div key={index} className="top-entry">
-                          <span className="context-tag">{entry.context}</span>
-                          <span className="usage-count">{entry.usageCount}× verwendet</span>
-                          <span className="age">{entry.age} alt</span>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-
-                <div className="stats-section">
-                  <h5>📱 Lokaler Cache</h5>
-                  <div className="stats-grid">
-                    <div className="stat-item">
-                      <strong>{stats?.local?.totalEntries || 0}</strong>
-                      <span>Einträge</span>
-                    </div>
-                    <div className="stat-item">
-                      <strong>{stats?.local?.cacheSize || '0 Bytes'}</strong>
-                      <span>Größe</span>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="cache-actions">
+                  <h5>Cache-Verwaltung</h5>
+                  <p>Cache-Statistiken werden hier angezeigt</p>
                   <button 
                     className="clear-cache-btn"
-                    onClick={async () => {
-                      GlobalCacheService.clearCache();
-                      CacheService.clearCache();
+                    onClick={() => {
+                      if (CacheService.clearCache) {
+                        CacheService.clearCache();
+                      }
                       setShowCacheStats(false);
-                      // Statistiken neu laden
-                      setTimeout(() => setShowCacheStats(true), 100);
                     }}
                   >
-                    🗑️ Alle Caches leeren
-                  </button>
-                  <button 
-                    className="cleanup-cache-btn"
-                    onClick={async () => {
-                      const deleted = await GlobalCacheService.cleanupOldEntries();
-                      alert(`${deleted} alte Einträge gelöscht`);
-                      // Statistiken neu laden
-                      setShowCacheStats(false);
-                      setTimeout(() => setShowCacheStats(true), 100);
-                    }}
-                  >
-                    🧹 Alte Einträge bereinigen
+                    Cache leeren
                   </button>
                 </div>
               </div>
