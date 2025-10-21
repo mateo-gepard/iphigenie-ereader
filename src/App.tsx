@@ -40,11 +40,6 @@ function App() {
   useEffect(() => {
     // Track page view on component mount
     analyticsService.trackPageView();
-    
-    // Track user interactions
-    const trackEvent = (eventName: string, data?: any) => {
-      analyticsService.trackEvent(eventName, data);
-    };
 
     // Global event listeners für erweiterte Analytics
     window.addEventListener('beforeunload', () => {
