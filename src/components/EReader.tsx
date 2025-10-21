@@ -44,15 +44,31 @@ export function EReader({
 
   // Scrolle zurück zum analysierten Element
   const scrollToAnalyzedElement = () => {
-    if (!lastAnalyzedElement) return;
+    if (!lastAnalyzedElement || !containerRef.current) return;
     
     const element = document.getElementById(lastAnalyzedElement.id);
     if (element) {
-      element.scrollIntoView({ 
-        behavior: 'smooth', 
-        block: 'center',
-        inline: 'center'
+      // Berechne die Position des Elements relativ zum Container
+      const containerRect = containerRef.current.getBoundingClientRect();
+      const elementRect = element.getBoundingClientRect();
+      
+      // Scrolle den Container so, dass das Element in der Mitte sichtbar ist
+      const scrollTop = element.offsetTop - containerRef.current.offsetTop - (containerRect.height / 2) + (elementRect.height / 2);
+      
+      containerRef.current.scrollTo({
+        top: scrollTop,
+        behavior: 'smooth'
       });
+      
+      // Zusätzliche visuelle Hervorhebung
+      element.style.transition = 'all 0.3s ease';
+      element.style.transform = 'scale(1.02)';
+      element.style.boxShadow = '0 0 20px rgba(255, 193, 7, 0.4)';
+      
+      setTimeout(() => {
+        element.style.transform = '';
+        element.style.boxShadow = '';
+      }, 1000);
     }
   };
 
@@ -324,7 +340,10 @@ export function EReader({
       {lastAnalyzedElement && (
         <button 
           className="back-to-verse-btn"
-          onClick={scrollToAnalyzedElement}
+          onClick={() => {
+            console.log('Back to verse button clicked:', lastAnalyzedElement);
+            scrollToAnalyzedElement();
+          }}
           title={`Zurück zu "${lastAnalyzedElement.text.substring(0, 50)}..."`}
         >
           <span className="back-icon">↑</span>
