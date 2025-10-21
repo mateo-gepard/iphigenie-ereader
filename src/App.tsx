@@ -1,13 +1,15 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { EReader } from './components/EReader';
 import { ExplanationPanel } from './components/ExplanationPanel';
 import { SettingsPanel } from './components/SettingsPanel';
 import { QuickNavigation } from './components/QuickNavigation';
 import { SearchBox } from './components/SearchBox';
+import AnalyticsDashboard from './components/AnalyticsDashboard';
 import { iphigenieText } from './data/iphigenieText';
 import type { ExplanationResponse } from './types';
 import type { Character } from './data/characters';
 import { OpenAIService } from './services/openaiService';
+import { analyticsService } from './services/analyticsService';
 import './App.css';
 
 function App() {
@@ -32,6 +34,27 @@ function App() {
   // Panel states
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isNavigationOpen, setIsNavigationOpen] = useState(false);
+  const [isAnalyticsOpen, setIsAnalyticsOpen] = useState(false);
+
+  // Analytics Setup
+  useEffect(() => {
+    // Track page view on component mount
+    analyticsService.trackPageView();
+    
+    // Track user interactions
+    const trackEvent = (eventName: string, data?: any) => {
+      analyticsService.trackEvent(eventName, data);
+    };
+
+    // Global event listeners für erweiterte Analytics
+    window.addEventListener('beforeunload', () => {
+      analyticsService.endSession();
+    });
+
+    return () => {
+      // Cleanup if needed
+    };
+  }, []);
 
   const handleSettingsToggle = () => {
     setIsSettingsOpen(!isSettingsOpen);
@@ -61,6 +84,16 @@ function App() {
     setExplanation(explanation);
     setIsLoading(loading);
     
+    // Track text selection event
+    if (text) {
+      analyticsService.trackEvent('text_selected', {
+        textLength: text.length,
+        context: context?.type,
+        actNumber: context?.actNumber,
+        sceneNumber: context?.sceneNumber
+      });
+    }
+    
     // Speichere Kontext für Regenerierung
     if (context) {
       setCurrentContext({
@@ -77,6 +110,10 @@ function App() {
 
   const handleCharacterSelection = (character: Character) => {
     setSelectedCharacter(character);
+    analyticsService.trackEvent('character_selected', {
+      characterName: character.name,
+      characterId: character.id
+    });
   };
 
   const handleCharacterComparison = (character: Character) => {
@@ -130,6 +167,11 @@ function App() {
     setSelectedText('');
     setExplanation(null);
     
+    analyticsService.trackEvent('character_comparison_generated', {
+      character1: selectedCharacter.name,
+      character2: characterForComparison.name
+    });
+    
     try {
       // Erstelle einen Vergleichstext für die API
       const comparisonText = `Charaktervergleich zwischen ${selectedCharacter.name} und ${characterForComparison.name}`;
@@ -180,6 +222,12 @@ function App() {
               // Close panels when searching
               setIsSettingsOpen(false);
               setIsNavigationOpen(false);
+              setIsAnalyticsOpen(false);
+              
+              analyticsService.trackEvent('search_result_selected', {
+                resultId: result.id,
+                resultText: result.text.substring(0, 50)
+              });
               
               // Scroll to the selected element
               const element = document.getElementById(result.id);
@@ -207,6 +255,7 @@ function App() {
             onActSelect={(actNumber) => {
               setCurrentAct(actNumber);
               setIsNavigationOpen(false); // Close navigation after selection
+              analyticsService.trackEvent('act_navigation', { actNumber });
               // Scroll to act
               const actElement = document.getElementById(`act-${actNumber}`);
               if (actElement) {
@@ -214,6 +263,18 @@ function App() {
               }
             }}
           />
+          <button 
+            className="analytics-btn"
+            onClick={() => {
+              setIsAnalyticsOpen(!isAnalyticsOpen);
+              setIsSettingsOpen(false);
+              setIsNavigationOpen(false);
+              analyticsService.trackEvent('analytics_dashboard_opened');
+            }}
+            title="Website Analytics anzeigen"
+          >
+            📊
+          </button>
           <SettingsPanel 
             isOpen={isSettingsOpen}
             onToggle={handleSettingsToggle}
@@ -255,6 +316,12 @@ function App() {
         </div>
 
       </main>
+
+      {/* Analytics Dashboard */}
+      <AnalyticsDashboard 
+        isVisible={isAnalyticsOpen}
+        onClose={() => setIsAnalyticsOpen(false)}
+      />
     </div>
   );
 }

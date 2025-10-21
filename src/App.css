@@ -28,6 +28,34 @@
   flex-wrap: wrap;
 }
 
+/* Analytics Button */
+.analytics-btn {
+  background: linear-gradient(135deg, var(--accent-color) 0%, var(--warning-color) 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 0.75rem;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  height: 44px;
+}
+
+.analytics-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  background: linear-gradient(135deg, var(--accent-hover) 0%, var(--warning-color) 100%);
+}
+
+.analytics-btn:active {
+  transform: translateY(0);
+}
+
 @media (max-width: 768px) {
   .app-header-controls {
     width: 100%;
