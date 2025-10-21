@@ -44,31 +44,73 @@ export function EReader({
 
   // Scrolle zurück zum analysierten Element
   const scrollToAnalyzedElement = () => {
-    if (!lastAnalyzedElement || !containerRef.current) return;
+    console.log('scrollToAnalyzedElement called with:', lastAnalyzedElement);
+    
+    if (!lastAnalyzedElement) {
+      console.log('No lastAnalyzedElement found');
+      return;
+    }
+    
+    if (!containerRef.current) {
+      console.log('No containerRef found');
+      return;
+    }
     
     const element = document.getElementById(lastAnalyzedElement.id);
+    console.log('Found element:', element);
+    
     if (element) {
-      // Berechne die Position des Elements relativ zum Container
-      const containerRect = containerRef.current.getBoundingClientRect();
-      const elementRect = element.getBoundingClientRect();
-      
-      // Scrolle den Container so, dass das Element in der Mitte sichtbar ist
-      const scrollTop = element.offsetTop - containerRef.current.offsetTop - (containerRect.height / 2) + (elementRect.height / 2);
-      
-      containerRef.current.scrollTo({
-        top: scrollTop,
-        behavior: 'smooth'
-      });
-      
-      // Zusätzliche visuelle Hervorhebung
-      element.style.transition = 'all 0.3s ease';
-      element.style.transform = 'scale(1.02)';
-      element.style.boxShadow = '0 0 20px rgba(255, 193, 7, 0.4)';
-      
-      setTimeout(() => {
-        element.style.transform = '';
-        element.style.boxShadow = '';
-      }, 1000);
+      try {
+        // Methode 1: Einfaches scrollIntoView (als Fallback)
+        element.scrollIntoView({ 
+          behavior: 'smooth', 
+          block: 'center',
+          inline: 'nearest'
+        });
+        
+        // Methode 2: Container-basiertes Scrollen
+        const container = containerRef.current;
+        const elementTop = element.offsetTop;
+        const containerHeight = container.clientHeight;
+        const elementHeight = element.offsetHeight;
+        
+        // Zentriere das Element im Container
+        const scrollPosition = elementTop - (containerHeight / 2) + (elementHeight / 2);
+        
+        console.log('Scroll calculation:', {
+          elementTop,
+          containerHeight,
+          elementHeight,
+          scrollPosition
+        });
+        
+        // Scrolle mit beiden Methoden für maximale Kompatibilität
+        container.scrollTo({
+          top: Math.max(0, scrollPosition),
+          behavior: 'smooth'
+        });
+        
+        // Visuelle Hervorhebung
+        element.style.transition = 'all 0.5s ease';
+        element.style.backgroundColor = 'rgba(255, 193, 7, 0.2)';
+        element.style.transform = 'scale(1.02)';
+        element.style.boxShadow = '0 0 20px rgba(255, 193, 7, 0.4)';
+        element.style.borderRadius = '8px';
+        
+        setTimeout(() => {
+          element.style.backgroundColor = '';
+          element.style.transform = '';
+          element.style.boxShadow = '';
+          element.style.borderRadius = '';
+        }, 2000);
+        
+        console.log('Scroll completed successfully');
+        
+      } catch (error) {
+        console.error('Error during scroll:', error);
+      }
+    } else {
+      console.error('Element not found with ID:', lastAnalyzedElement.id);
     }
   };
 
@@ -336,22 +378,56 @@ export function EReader({
 
   return (
     <div className="e-reader" ref={containerRef}>
-      {/* Zurück zum analysierten Vers Button */}
-      {lastAnalyzedElement && (
-        <button 
-          className="back-to-verse-btn"
-          onClick={() => {
-            console.log('Back to verse button clicked:', lastAnalyzedElement);
-            scrollToAnalyzedElement();
-          }}
-          title={`Zurück zu "${lastAnalyzedElement.text.substring(0, 50)}..."`}
-        >
-          <span className="back-icon">↑</span>
-          <span className="back-text">
-            Zurück zum {lastAnalyzedElement.type === 'verse' ? 'Vers' : 'Abschnitt'}
-          </span>
-        </button>
+      {/* Debug Info */}
+      {process.env.NODE_ENV === 'development' && (
+        <div style={{
+          position: 'fixed',
+          top: '10px',
+          left: '10px',
+          background: 'black',
+          color: 'white',
+          padding: '10px',
+          fontSize: '12px',
+          zIndex: 9999,
+          borderRadius: '4px'
+        }}>
+          <div>LastAnalyzedElement: {lastAnalyzedElement ? 'YES' : 'NO'}</div>
+          {lastAnalyzedElement && (
+            <>
+              <div>ID: {lastAnalyzedElement.id}</div>
+              <div>Type: {lastAnalyzedElement.type}</div>
+              <div>Text: {lastAnalyzedElement.text.substring(0, 30)}...</div>
+            </>
+          )}
+        </div>
       )}
+
+      {/* Zurück zum analysierten Vers Button - IMMER SICHTBAR FÜR TEST */}
+      <button 
+        className="back-to-verse-btn"
+        onClick={() => {
+          console.log('Back to verse button clicked:', lastAnalyzedElement);
+          if (lastAnalyzedElement) {
+            scrollToAnalyzedElement();
+          } else {
+            console.log('No element to scroll to');
+            alert('Kein analysiertes Element gefunden. Klicke erst auf einen Vers!');
+          }
+        }}
+        title={lastAnalyzedElement ? `Zurück zu "${lastAnalyzedElement.text.substring(0, 50)}..."` : 'Klicke erst auf einen Vers'}
+        style={{
+          opacity: lastAnalyzedElement ? 1 : 0.5,
+          pointerEvents: 'all' // Immer klickbar für Debug
+        }}
+      >
+        <span className="back-icon">↑</span>
+        <span className="back-text">
+          {lastAnalyzedElement 
+            ? `Zurück zum ${lastAnalyzedElement.type === 'verse' ? 'Vers' : 'Abschnitt'}`
+            : 'Wähle einen Vers'
+          }
+        </span>
+      </button>
 
       {/* Character Comparison Status */}
       {characterForComparison && (
