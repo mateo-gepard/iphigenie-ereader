@@ -503,6 +503,7 @@ export function EReader({
                       {stanza.verses.map((verse: any) => (
                         <div
                           key={verse.id}
+                          id={verse.id}
                           className={`verse ${selectedVerseIds.includes(verse.id) ? 'selected-verse' : ''} clickable`}
                           onClick={(e) => handleVerseClick(verse, act.number, scene.number, e)}
                         >
