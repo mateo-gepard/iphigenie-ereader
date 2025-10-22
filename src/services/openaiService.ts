@@ -221,6 +221,9 @@ export class OpenAIService {
             - Erkläre komplexe Konzepte verständlich für Schüler/Studenten
             - Beziehe immer den dramatischen Kontext mit ein
             - Berücksichtige Goethes Humanitätsideal und klassische Ästhetik
+            - ERKLÄRE WAS GERADE PASSIERT: Was sagt/tut der Charakter in diesem Moment und WARUM?
+            - SCHWERE WÖRTER ERLÄUTERN: Erkläre archäische/komplexe Begriffe sofort im Kontext
+            - SITUATIONSBEZOGEN: Nutze den umgebenden Text für präzise Situationserklärung
             - KRITISCH: Identifiziere nur TATSÄCHLICH VORHANDENE Stilmittel
             - Erfinde KEINE Stilmittel - wenn keine klaren vorhanden sind, gib eine leere Liste zurück
             - Blankvers ist KEIN Stilmittel - erwähne Metrik separat in der Erklärung
@@ -231,11 +234,11 @@ export class OpenAIService {
             
             PFLICHTSTRUKTUR (Antworte IMMER in diesem exakten JSON-Format):
             {
-              "explanation": "Detaillierte literaturwissenschaftliche Analyse (3-4 Sätze)",
-              "summary": "Prägnante Inhaltszusammenfassung (1-2 Sätze)",
-              "background": "Kulturhistorischer/mythologischer Kontext (2-3 Sätze)",
-              "historicalContext": "Historischer Hintergrund der Entstehungszeit und Goethes Intention",
-              "mythologicalBackground": "Bezüge zur antiken Mythologie und deren Bedeutung",
+              "explanation": "WAS PASSIERT HIER? Erkläre die konkrete Situation: Was sagt/tut die Figur gerade und warum? Erkläre schwere Wörter sofort. Dann literaturwissenschaftliche Einordnung (4-5 Sätze)",
+              "summary": "Prägnante Zusammenfassung: Was ist der Kern dieser Textpassage? (1-2 Sätze)",
+              "background": "EIN zusammenhängender Hintergrund-Text: Vereine historischen und mythologischen Kontext zu EINER umfassenden Erklärung (4-5 Sätze)",
+              "historicalContext": "ENTFÄLLT - wird in 'background' integriert",
+              "mythologicalBackground": "ENTFÄLLT - wird in 'background' integriert", 
               "literaryDevices": [
                 {
                   "name": "NUR TATSÄCHLICH VORHANDENES Stilmittel - wenn keines eindeutig identifizierbar ist, gib leere Liste [] zurück",
@@ -273,8 +276,6 @@ export class OpenAIService {
           explanation: response,
           summary: "Zusammenfassung nicht verfügbar",
           background: "Hintergrundinformationen nicht verfügbar",
-          historicalContext: "Historischer Kontext nicht verfügbar",
-          mythologicalBackground: "Mythologischer Hintergrund nicht verfügbar",
           literaryDevices: [],
           themes: [],
           characterAnalysis: "Charakteranalyse nicht verfügbar",
@@ -321,8 +322,6 @@ export class OpenAIService {
         explanation: "Entschuldigung, es gab einen Fehler beim Abrufen der Erklärung. Bitte versuchen Sie es später erneut.",
         summary: "Fehler",
         background: "Fehler beim Laden der Hintergrundinformationen",
-        historicalContext: "Fehler beim Laden des historischen Kontexts",
-        mythologicalBackground: "Fehler beim Laden des mythologischen Hintergrunds",
         literaryDevices: [],
         themes: [],
         characterAnalysis: "Fehler bei der Charakteranalyse",
@@ -387,13 +386,13 @@ TEXTPASSAGE ZU ANALYSIEREN:
 "${request.text}"
 
 SPEZIFISCHE ANALYSE-SCHWERPUNKTE:
-1. SPRACHLICHE GESTALTUNG: Präzise Stilmittel-Identifikation, Syntax, Wortwahl
-2. METRISCHE ANALYSE: Blankvers-Technik, Rhythmus, Zäsuren (separat von Stilmitteln!)
-3. FIGURENPSYCHOLOGIE: Charaktermotivation, innere Konflikte, Entwicklung
-4. DRAMATURGISCHE FUNKTION: Handlungsfortschritt, Spannungsaufbau, Wendepunkte
-5. HISTORISCHER KONTEXT: Entstehungszeit, Goethes Intentions, Weimarer Klassik
-6. MYTHOLOGISCHER HINTERGRUND: Antike Quellen, moderne Adaptation, symbolische Bedeutung
-7. HUMANITÄTSIDEAL: Goethes Menschenbild, Aufklärung vs. Tradition
+1. SOFORTIGES SITUATIONSVERSTÄNDNIS: Was passiert in diesem Moment? Wer spricht/handelt und warum?
+2. WORTSCHATZERKLÄRUNG: Erkläre ALLE schweren, archäischen oder komplexen Begriffe sofort
+3. EMOTIONALE LAGE: Wie fühlt sich die Figur? Was sind ihre Gedanken und Motive?
+4. SPRACHLICHE GESTALTUNG: Präzise Stilmittel-Identifikation, Syntax, Wortwahl
+5. METRISCHE ANALYSE: Blankvers-Technik, Rhythmus, Zäsuren (separat von Stilmitteln!)
+6. DRAMATURGISCHE FUNKTION: Handlungsfortschritt, Spannungsaufbau, Wendepunkte
+7. EIN UMFASSENDER HINTERGRUND: Vereinige historischen und mythologischen Kontext in EINER zusammenhängenden Erklärung
 
 KRITISCHE STILMITTEL-ANALYSE:
 - NUR tatsächlich vorhandene und eindeutig identifizierbare Stilmittel benennen
@@ -403,15 +402,17 @@ KRITISCHE STILMITTEL-ANALYSE:
 - Variation zwischen Kategorien: Rhetorik, Klang, Struktur, Bildsprache, Syntax
 
 ERWEITERTE HINTERGRUND-ANALYSE:
-- Historischer Kontext: Entstehungsgeschichte, Zeitgeist der 1780er Jahre
-- Mythologischer Bezug: Griechische Quellen, Goethes Adaptation
-- Kulturelle Bedeutung: Humanitätsideal, Aufklärung, klassische Ästhetik
+- VEREINHEITLICHTER HINTERGRUND: Kombiniere historischen, mythologischen und kulturellen Kontext zu EINER zusammenhängenden Erklärung
+- Entstehungsgeschichte + antike Quellen + Goethes Humanitätsideal in einem Text
+- Erkläre die Relevanz für das Verständnis dieser spezifischen Textpassage
 
 WICHTIGE ANALYSEHINWEISE: 
-- Nutze den bereitgestellten Kontext für präzisere Einordnung
+- BEGINNE IMMER mit: "Was passiert hier gerade?" - erkläre die konkrete Situation
+- ERKLÄRE SCHWERE WÖRTER sofort beim ersten Auftreten
+- Nutze den bereitgestellten Kontext für präzisere Einordnung der aktuellen Szene
 - Trenne klar zwischen Metrik (Blankvers) und Stilmitteln
-- Gib umfassende historische und mythologische Hintergründe
-- Berücksichtige Sprecher und Gesprächssituation
+- VEREINHEITLICHE alle Hintergrundinformationen zu EINER zusammenhängenden Erklärung
+- Berücksichtige Sprecher und emotionale Lage der Figuren
 - Beziehe umgebenden Text in die Analyse ein
 
 Antworte ausschließlich im vorgegebenen JSON-Format.`;

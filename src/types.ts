@@ -54,8 +54,6 @@ export interface ExplanationResponse {
   explanation: string;
   summary: string;
   background: string;
-  historicalContext?: string;
-  mythologicalBackground?: string;
   literaryDevices?: LiteraryDevice[];
   themes?: string[];
   characterAnalysis?: string;
@@ -65,4 +63,7 @@ export interface ExplanationResponse {
   cacheSource?: 'global' | 'local' | 'none';
   generatedAt?: string;
   usageCount?: number;
+  // Legacy properties for backward compatibility
+  historicalContext?: string;
+  mythologicalBackground?: string;
 }
