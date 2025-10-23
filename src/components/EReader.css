@@ -264,6 +264,11 @@
   }
 }
 
+/* Sequential line numbering across all acts */
+.text-content {
+  counter-reset: sequential-line-number;
+}
+
 .line-number {
   color: var(--text-muted);
   font-size: calc(var(--font-size-base, 16px) * 0.85);
@@ -274,6 +279,11 @@
   font-family: monospace;
   flex-shrink: 0;
   transition: all 0.3s ease;
+  counter-increment: sequential-line-number;
+}
+
+.line-number::before {
+  content: counter(sequential-line-number);
 }
 
 .verse.selected-verse .line-number {
