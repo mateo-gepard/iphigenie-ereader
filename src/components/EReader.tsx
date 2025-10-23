@@ -507,7 +507,7 @@ export function EReader({
                           className={`verse ${selectedVerseIds.includes(verse.id) ? 'selected-verse' : ''} clickable`}
                           onClick={(e) => handleVerseClick(verse, act.number, scene.number, e)}
                         >
-                          <span className="line-number">{verse.lineNumber}</span>
+                          <span className="line-number"></span>
                           <span 
                             className="verse-text"
                             dangerouslySetInnerHTML={{ __html: highlightCharacters(verse.text) }}

@@ -264,9 +264,13 @@
   }
 }
 
-/* Sequential line numbering across all acts */
+/* Sequential verse numbering across all acts */
 .text-content {
-  counter-reset: sequential-line-number;
+  counter-reset: verse-counter;
+}
+
+.verse {
+  counter-increment: verse-counter;
 }
 
 .line-number {
@@ -279,11 +283,10 @@
   font-family: monospace;
   flex-shrink: 0;
   transition: all 0.3s ease;
-  counter-increment: sequential-line-number;
 }
 
 .line-number::before {
-  content: counter(sequential-line-number);
+  content: counter(verse-counter) ": ";
 }
 
 .verse.selected-verse .line-number {
