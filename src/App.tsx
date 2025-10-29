@@ -17,7 +17,7 @@ function App() {
   const [explanation, setExplanation] = useState<ExplanationResponse | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  const [selectedCharacter, setSelectedCharacter] = useState<Character | null>(null);
+  const [selectedCharacter] = useState<Character | null>(null);
   const [characterForComparison, setCharacterForComparison] = useState<Character | null>(null);
   const [areCharactersVisible, setAreCharactersVisible] = useState(true);
   const [isCharacterHighlightingEnabled, setIsCharacterHighlightingEnabled] = useState(true);
@@ -35,6 +35,10 @@ function App() {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isNavigationOpen, setIsNavigationOpen] = useState(false);
   const [isAnalyticsOpen, setIsAnalyticsOpen] = useState(false);
+  
+  // Header auto-hide
+  const [isHeaderVisible, setIsHeaderVisible] = useState(true);
+  const [lastScrollY, setLastScrollY] = useState(0);
 
   // Analytics Setup
   useEffect(() => {
@@ -50,6 +54,39 @@ function App() {
       // Cleanup if needed
     };
   }, []);
+
+  // Header auto-hide on scroll
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      const isScrollingDown = currentScrollY > lastScrollY;
+      const shouldHideHeader = isScrollingDown && currentScrollY > 100;
+      
+      // Show header when mouse is at top of screen
+      const mouseHandler = (e: MouseEvent) => {
+        if (e.clientY < 60) {
+          setIsHeaderVisible(true);
+        }
+      };
+
+      if (shouldHideHeader) {
+        setIsHeaderVisible(false);
+      } else if (currentScrollY < 50) {
+        setIsHeaderVisible(true);
+      }
+
+      setLastScrollY(currentScrollY);
+      
+      // Add mouse listener when header is hidden
+      if (!isHeaderVisible) {
+        window.addEventListener('mousemove', mouseHandler);
+        return () => window.removeEventListener('mousemove', mouseHandler);
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [lastScrollY, isHeaderVisible]);
 
   const handleSettingsToggle = () => {
     setIsSettingsOpen(!isSettingsOpen);
@@ -103,13 +140,7 @@ function App() {
     
   };
 
-  const handleCharacterSelection = (character: Character) => {
-    setSelectedCharacter(character);
-    analyticsService.trackEvent('character_selected', {
-      characterName: character.name,
-      characterId: character.id
-    });
-  };
+  
 
   const handleCharacterComparison = (character: Character) => {
     if (characterForComparison?.id === character.id) {
@@ -205,7 +236,7 @@ function App() {
             setIsNavigationOpen(false);
           }
         }}>
-      <header className="app-header">
+      <header className={`app-header ${isHeaderVisible ? 'visible' : 'hidden'}`}>
         <div className="app-header-content">
           <h1>Iphigenie auf Tauris</h1>
           <p className="subtitle">Ein interaktiver eReader mit KI-unterstützter Analyse</p>
@@ -282,7 +313,6 @@ function App() {
           <EReader 
             text={iphigenieText} 
             onTextSelection={handleTextSelection}
-            onCharacterSelection={handleCharacterSelection}
             onCharacterComparison={handleCharacterComparison}
             characterForComparison={characterForComparison}
             areCharactersVisible={areCharactersVisible}

@@ -208,29 +208,31 @@ export class OpenAIService {
         messages: [
           {
             role: "system",
-            content: `Du bist ein renommierter Germanistik-Professor mit Spezialisierung auf Goethes Klassik und insbesondere "Iphigenie auf Tauris". 
-            
+            content: `Du bist ein erfahrener Deutschlehrer mit 20 Jahren Unterrichtserfahrung und Spezialisierung auf Goethes "Iphigenie auf Tauris". Deine Mission: Schülern verständlich erklären, was im Text passiert.
+
             DEINE EXPERTISE:
-            - Tiefes Verständnis der Weimarer Klassik und Goethes dramatischer Sprache
-            - Kenntnisse über antike Mythologie und deren Adaptation
-            - Verständnis für Blankverstechnik und dramatische Strukturen
-            - Kulturhistorischer Kontext der Entstehungszeit (1779-1786)
+            - Verständliche Erklärung klassischer Literatur für Schüler (15-18 Jahre)
+            - Fokus auf Handlungsverständnis und Charaktermotivation  
+            - Praktische Textanalyse ohne übermäßige Fachbegriffe
+            - Verbindung zwischen Text und Lebenswelt der Schüler
             
-            ANTWORT-RICHTLINIEN:
-            - Verwende präzise literaturwissenschaftliche Terminologie
-            - Erkläre komplexe Konzepte verständlich für Schüler/Studenten
-            - Beziehe immer den dramatischen Kontext mit ein
-            - Berücksichtige Goethes Humanitätsideal und klassische Ästhetik
-            - ERKLÄRE WAS GERADE PASSIERT: Was sagt/tut der Charakter in diesem Moment und WARUM?
-            - SCHWERE WÖRTER ERLÄUTERN: Erkläre archäische/komplexe Begriffe sofort im Kontext
-            - SITUATIONSBEZOGEN: Nutze den umgebenden Text für präzise Situationserklärung
-            - KRITISCH: Identifiziere nur TATSÄCHLICH VORHANDENE Stilmittel
-            - Erfinde KEINE Stilmittel - wenn keine klaren vorhanden sind, gib eine leere Liste zurück
-            - Blankvers ist KEIN Stilmittel - erwähne Metrik separat in der Erklärung
-            - Analysiere präzise: Stilmittel müssen konkret im Text nachweisbar sein
-            - Variiere zwischen verschiedenen Kategorien: Rhetorik, Klang, Struktur, Bildsprache
-            - NUTZE DEN BEREITGESTELLTEN KONTEXT für präzisere Analysen
-            - Liefere umfassende Hintergrundinformationen zu historischem und mythologischem Kontext
+            CRITICAL TEACHING APPROACH:
+            1. START IMMER MIT: "In diesem Moment passiert folgendes..." - erkläre die KONKRETE SITUATION
+            2. SPRECHER IDENTIFIZIEREN: "Hier spricht [NAME] und sagt/tut..." - WER handelt gerade?
+            3. EMOTIONALE LAGE: "Die Figur fühlt sich [EMOTION], weil..." - WARUM reagiert sie so?
+            4. SCHWERE WÖRTER: Erkläre SOFORT jeden archäischen/komplexen Begriff mit moderner Entsprechung
+            5. SITUATION EINORDNEN: "Das passiert, nachdem..." - Bezug zur vorherigen Handlung
+            6. BEDEUTUNG KLÄREN: "Das bedeutet für die Geschichte..." - Relevanz für den Handlungsverlauf
+            
+            ANTWORT-RICHTLINIEN FÜR SCHÜLER:
+            - EINFACHE SPRACHE: Vermeide übermäßige Fachterminologie
+            - KONKRETE BEISPIELE: Nutze Vergleiche aus der Lebenswelt der Schüler
+            - HANDLUNGSBEZUG: Fokus auf "Was passiert?" statt nur "Wie ist es geschrieben?"
+            - CHARAKTERPSYCHOLOGIE: Erkläre Motivationen und Gefühle verständlich
+            - NUTZE KONTEXT: Der bereitgestellte Szenen-/Charakterkontext ist ESSENTIAL für präzise Erklärungen
+            - KEINE ERFINDUNGEN: Nur analysieren, was tatsächlich im Text steht
+            - VERHINDERE WIEDERHOLUNGEN: Nicht einfach den Text mit fancy Wörtern umschreiben
+            - PRAKTISCHE RELEVANZ: Erkläre, warum diese Stelle für das Verständnis wichtig ist
             
             PFLICHTSTRUKTUR (Antworte IMMER in diesem exakten JSON-Format):
             {
@@ -385,35 +387,34 @@ DRAMATISCHER KONTEXT: ${dramaticContext}${contextSection}
 TEXTPASSAGE ZU ANALYSIEREN:
 "${request.text}"
 
-SPEZIFISCHE ANALYSE-SCHWERPUNKTE:
-1. SOFORTIGES SITUATIONSVERSTÄNDNIS: Was passiert in diesem Moment? Wer spricht/handelt und warum?
-2. WORTSCHATZERKLÄRUNG: Erkläre ALLE schweren, archäischen oder komplexen Begriffe sofort
-3. EMOTIONALE LAGE: Wie fühlt sich die Figur? Was sind ihre Gedanken und Motive?
-4. SPRACHLICHE GESTALTUNG: Präzise Stilmittel-Identifikation, Syntax, Wortwahl
-5. METRISCHE ANALYSE: Blankvers-Technik, Rhythmus, Zäsuren (separat von Stilmitteln!)
-6. DRAMATURGISCHE FUNKTION: Handlungsfortschritt, Spannungsaufbau, Wendepunkte
-7. EIN UMFASSENDER HINTERGRUND: Vereinige historischen und mythologischen Kontext in EINER zusammenhängenden Erklärung
+SCHÜLER-ORIENTIERTE ANALYSE-SCHWERPUNKTE:
+1. HANDLUNGSVERSTÄNDNIS: "In diesem Moment passiert folgendes..." - konkrete Situationsbeschreibung
+2. SPRECHER-IDENTIFIKATION: "Hier spricht [NAME] und..." - WER sagt/tut WAS und WARUM?
+3. EMOTIONSANALYSE: "Die Figur fühlt sich [EMOTION], weil..." - Gefühlslage und Motivation erklären
+4. WORTSCHATZ-HILFE: Schwere/archäische Wörter SOFORT mit moderner Bedeutung erklären
+5. HANDLUNGS-EINORDNUNG: "Das geschieht, nachdem..." - Bezug zur vorherigen Handlung herstellen
+6. STILMITTEL: NUR wenn eindeutig erkennbar und für Verständnis relevant
+7. PRAKTISCHE BEDEUTUNG: "Das ist wichtig für die Geschichte, weil..." - Relevanz erklären
 
-KRITISCHE STILMITTEL-ANALYSE:
-- NUR tatsächlich vorhandene und eindeutig identifizierbare Stilmittel benennen
-- KEIN "Blankvers" als Stilmittel - das gehört zur Metrik!
-- Präzise Textbelege mit exakten Zitaten erforderlich
-- Wenn keine klaren Stilmittel erkennbar: literaryDevices = []
-- Variation zwischen Kategorien: Rhetorik, Klang, Struktur, Bildsprache, Syntax
+ANTI-WIEDERHOLUNGS-REGELN:
+- NICHT den Text mit fancy Synonymen umformulieren
+- NICHT einfach wiederholen, was bereits da steht
+- NICHT abstrakte Interpretationen ohne konkreten Textbezug
+- ANALYSIERE die Situation, ERKLÄRE nicht nur Wörter
+- NUTZE den bereitgestellten Kontext (Sprecher, Szene, umgebender Text) für präzise Erklärungen
 
-ERWEITERTE HINTERGRUND-ANALYSE:
-- VEREINHEITLICHTER HINTERGRUND: Kombiniere historischen, mythologischen und kulturellen Kontext zu EINER zusammenhängenden Erklärung
-- Entstehungsgeschichte + antike Quellen + Goethes Humanitätsideal in einem Text
-- Erkläre die Relevanz für das Verständnis dieser spezifischen Textpassage
+KONKRETE ANALYSE-METHODIK:
+- SPRECHER NUTZEN: "Weil hier [CHARAKTER] spricht, bedeutet das..."
+- KONTEXT NUTZEN: "Da dies in [SZENE] passiert, zeigt es..."
+- UMGEBUNGSTEXT NUTZEN: "Im Zusammenhang mit dem vorherigen/folgenden Vers..."
+- CHARAKTERINFO NUTZEN: "Aufgrund [CHARAKTERS] Rolle als [ROLLE] reagiert er so..."
 
-WICHTIGE ANALYSEHINWEISE: 
-- BEGINNE IMMER mit: "Was passiert hier gerade?" - erkläre die konkrete Situation
-- ERKLÄRE SCHWERE WÖRTER sofort beim ersten Auftreten
-- Nutze den bereitgestellten Kontext für präzisere Einordnung der aktuellen Szene
-- Trenne klar zwischen Metrik (Blankvers) und Stilmitteln
-- VEREINHEITLICHE alle Hintergrundinformationen zu EINER zusammenhängenden Erklärung
-- Berücksichtige Sprecher und emotionale Lage der Figuren
-- Beziehe umgebenden Text in die Analyse ein
+KRITISCHE QUALITÄTSKONTROLLE:
+- Stilmittel nur wenn 100% eindeutig identifizierbar
+- Keine erfundenen Interpretationen
+- Berücksichtige die bereitgestellten Charakterinformationen
+- Nutze den Szenenkontext für präzisere Aussagen
+- Fokus auf Handlungsverständnis, nicht nur Stilanalyse
 
 Antworte ausschließlich im vorgegebenen JSON-Format.`;
   }

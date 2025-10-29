@@ -308,23 +308,17 @@
 }
 
 .verse.selected-verse .verse-text {
-  /* Fallback für Browser ohne background-clip: text Unterstützung */
+  /* Solid color solution that works in both light and dark mode */
   color: var(--warning-color);
   font-weight: 600;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
   animation: text-highlight 0.8s ease-out;
   transform: scale(1.02);
-  
-  /* Gradient text für unterstützende Browser */
-  background: linear-gradient(90deg, var(--warning-color), var(--accent-color));
-  background-clip: text;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  
-  /* Zusätzliche Hervorhebung */
   padding: 0.5rem;
   border-radius: 6px;
   position: relative;
+  /* Remove gradient text to prevent blur issues */
+  background: rgba(var(--warning-color-rgb, 255, 193, 7), 0.1);
 }
 
 .verse.selected-verse .verse-text::before {
@@ -332,19 +326,10 @@
   position: absolute;
   inset: 0;
   background: linear-gradient(90deg, var(--warning-color) 0%, transparent 100%);
-  opacity: 0.1;
+  opacity: 0.08;
   border-radius: 6px;
   pointer-events: none;
   z-index: -1;
-}
-
-/* Fallback für Safari und ältere Browser */
-@supports not (-webkit-background-clip: text) {
-  .verse.selected-verse .verse-text {
-    background: none;
-    color: var(--warning-color);
-    -webkit-text-fill-color: unset;
-  }
 }
 
 .clickable {

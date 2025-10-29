@@ -5,7 +5,7 @@ export type Theme = 'light' | 'dark' | 'auto';
 export function useTheme() {
   const [theme, setTheme] = useState<Theme>(() => {
     const saved = localStorage.getItem('iphigenie-theme');
-    return (saved as Theme) || 'auto';
+    return (saved as Theme) || 'dark';  // Dark mode als default
   });
 
   const [resolvedTheme, setResolvedTheme] = useState<'light' | 'dark'>('light');

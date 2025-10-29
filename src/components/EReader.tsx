@@ -3,6 +3,7 @@ import type { Act, ExplanationResponse } from '../types';
 import type { Character } from '../data/characters';
 import { OpenAIService } from '../services/openaiService';
 import { findCharactersInText } from '../data/characters';
+import { CharacterPopup } from './CharacterPopup';
 import './EReader.css';
 
 interface EReaderProps {
@@ -17,7 +18,6 @@ interface EReaderProps {
       sceneNumber?: number;
     }
   ) => void;
-  onCharacterSelection: (character: Character) => void;
   onCharacterComparison: (character: Character) => void;
   characterForComparison: Character | null;
   areCharactersVisible: boolean;
@@ -27,7 +27,6 @@ interface EReaderProps {
 export function EReader({ 
   text, 
   onTextSelection, 
-  onCharacterSelection,
   onCharacterComparison,
   characterForComparison,
   areCharactersVisible,
@@ -40,6 +39,9 @@ export function EReader({
     type: 'verse' | 'stanza';
     text: string;
   } | null>(null);
+  const [showCharacterPopup, setShowCharacterPopup] = useState(false);
+  const [selectedCharacter, setSelectedCharacter] = useState<Character | null>(null);
+  const [popupPosition, setPopupPosition] = useState({ x: 0, y: 0 });
   const containerRef = useRef<HTMLDivElement>(null);
 
   // Scrolle zurück zum analysierten Element
@@ -241,7 +243,9 @@ export function EReader({
 
   const handleCharacterClick = (character: Character, event: React.MouseEvent) => {
     event.stopPropagation();
-    onCharacterSelection(character);
+    setSelectedCharacter(character);
+    setPopupPosition({ x: event.clientX, y: event.clientY });
+    setShowCharacterPopup(true);
   };
 
   // Funktion zum Bereinigen von HTML aus Text - sehr aggressiv
@@ -538,6 +542,17 @@ export function EReader({
 
 
       </div>
+
+      {/* Character Popup */}
+      {showCharacterPopup && selectedCharacter && (
+        <CharacterPopup
+          character={selectedCharacter}
+          position={popupPosition}
+          onClose={() => setShowCharacterPopup(false)}
+          onSelectForComparison={onCharacterComparison}
+          selectedForComparison={characterForComparison || undefined}
+        />
+      )}
     </div>
   );
 }
