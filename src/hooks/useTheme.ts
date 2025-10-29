@@ -12,11 +12,19 @@ export function useTheme() {
 
   const [resolvedTheme, setResolvedTheme] = useState<'light' | 'dark'>(() => {
     const saved = localStorage.getItem('iphigenie-theme');
-    if (saved === 'dark') return 'dark';
-    if (saved === 'auto') {
-      return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    let resolved: 'light' | 'dark';
+    
+    if (saved === 'dark') {
+      resolved = 'dark';
+    } else if (saved === 'auto') {
+      resolved = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    } else {
+      resolved = 'dark'; // Default für neue Nutzer
     }
-    return 'dark'; // Default für neue Nutzer, auch alte light-Nutzer bekommen dark
+    
+    // Setze das Theme sofort beim initialisieren
+    document.documentElement.setAttribute('data-theme', resolved);
+    return resolved;
   });
 
   useEffect(() => {
