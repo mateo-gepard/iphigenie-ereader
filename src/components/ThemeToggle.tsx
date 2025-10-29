@@ -5,7 +5,7 @@ export function ThemeToggle() {
   const { theme, setTheme, resolvedTheme } = useTheme();
 
   const toggleTheme = () => {
-    const themes: Theme[] = ['light', 'dark', 'auto'];
+    const themes: Theme[] = ['dark', 'auto'];
     const currentIndex = themes.indexOf(theme);
     const nextIndex = (currentIndex + 1) % themes.length;
     setTheme(themes[nextIndex]);
@@ -13,19 +13,17 @@ export function ThemeToggle() {
 
   const getIcon = () => {
     switch (theme) {
-      case 'light': return '☀️';
       case 'dark': return '🌙';
       case 'auto': return '🌓';
-      default: return '🌓';
+      default: return '�';
     }
   };
 
   const getLabel = () => {
     switch (theme) {
-      case 'light': return 'Hell';
       case 'dark': return 'Dunkel';
       case 'auto': return 'Auto';
-      default: return 'Auto';
+      default: return 'Dunkel';
     }
   };
 

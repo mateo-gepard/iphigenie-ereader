@@ -1,21 +1,22 @@
 import { useState, useEffect } from 'react';
 
-export type Theme = 'light' | 'dark' | 'auto';
+export type Theme = 'dark' | 'auto';
 
 export function useTheme() {
   const [theme, setTheme] = useState<Theme>(() => {
     const saved = localStorage.getItem('iphigenie-theme');
+    // Konvertiere alte 'light' Einstellungen zu 'dark'
+    if (saved === 'light') return 'dark';
     return (saved as Theme) || 'dark';  // Dark mode als default
   });
 
   const [resolvedTheme, setResolvedTheme] = useState<'light' | 'dark'>(() => {
-    const saved = localStorage.getItem('iphigenie-theme') as Theme;
-    if (saved === 'light') return 'light';
+    const saved = localStorage.getItem('iphigenie-theme');
     if (saved === 'dark') return 'dark';
     if (saved === 'auto') {
       return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
     }
-    return 'dark'; // Default für neue Nutzer
+    return 'dark'; // Default für neue Nutzer, auch alte light-Nutzer bekommen dark
   });
 
   useEffect(() => {
