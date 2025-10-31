@@ -29,11 +29,11 @@
 @keyframes popupSlideIn {
   from {
     opacity: 0;
-    transform: scale(0.9) translateY(-10px);
+    transform: translate(-50%, -50%) scale(0.9);
   }
   to {
     opacity: 1;
-    transform: scale(1) translateY(0);
+    transform: translate(-50%, -50%) scale(1);
   }
 }
 
@@ -123,19 +123,25 @@
 }
 
 .trait-tag {
-  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
-  color: #0c4a6e;
+  background: linear-gradient(135deg, var(--bg-secondary, #f0f9ff) 0%, var(--bg-tertiary, #e0f2fe) 100%);
+  color: var(--text-accent, #0c4a6e);
   padding: 0.25rem 0.75rem;
   border-radius: 20px;
   font-size: 0.8rem;
   font-weight: 500;
-  border: 1px solid #bae6fd;
+  border: 1px solid var(--border-accent, #bae6fd);
+  transition: all 0.2s ease;
+}
+
+.trait-tag:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .character-popup-actions {
   margin-top: 1.5rem;
   padding-top: 1rem;
-  border-top: 1px solid #e5e7eb;
+  border-top: 1px solid var(--border-light, #e5e7eb);
 }
 
 .comparison-button,

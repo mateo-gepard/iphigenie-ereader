@@ -101,7 +101,7 @@ export function CharacterPopup({
         style={{
           left: '50%',
           top: '50%',
-          transform: 'translate(-50%, -50%)', // Zentriert im Viewport
+          // transform wird durch CSS-Animation gehandhabt
         }}
       >
         <div className="character-popup-header">
