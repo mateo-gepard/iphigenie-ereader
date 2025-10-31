@@ -72,8 +72,8 @@ export function CharacterPopup({
         className="character-popup"
         style={{
           left: Math.max(10, Math.min(position.x - 200, window.innerWidth - 410)), // Zentriert über dem Element
-          top: Math.max(10, position.y - 10), // Direkt über dem Element
-          transform: position.y < 300 ? 'translateY(0)' : 'translateY(-100%)' // Flip wenn zu nah am oberen Rand
+          top: Math.max(10, position.y), // Verwende position.y direkt da es bereits 10px über dem Element ist
+          transform: position.y < 250 ? 'translateY(0)' : 'translateY(-100%)' // Flip wenn zu nah am oberen Rand
         }}
       >
         <div className="character-popup-header">

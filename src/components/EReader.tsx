@@ -248,9 +248,18 @@ export function EReader({
     const target = event.currentTarget as HTMLElement;
     const rect = target.getBoundingClientRect();
     
-    // Position direkt über dem geklickten Character-Namen
+    // Verwende Viewport-Koordinaten für fixed positioning 
     const x = rect.left + rect.width / 2;
     const y = rect.top - 10; // 10px über dem Element
+    
+    console.log('Character Click:', {
+      character: character.name,
+      rect: rect,
+      x: x,
+      y: y,
+      windowWidth: window.innerWidth,
+      windowHeight: window.innerHeight
+    });
     
     setSelectedCharacter(character);
     setPopupPosition({ x, y });

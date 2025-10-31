@@ -9,16 +9,17 @@
 }
 
 .character-popup {
-  position: absolute;
+  position: fixed; /* Fixed positioning für genaueste Kontrolle */
   z-index: 1000;
   background: var(--bg-primary);
   border: 1px solid var(--border-color);
-  border-radius: 12px;
+  border-radius: 20px; /* Abgerundete Ecken */
   padding: 0;
-  box-shadow: var(--shadow-lg);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
   max-width: 400px;
   color: var(--text-primary);
   animation: popupSlideIn 0.3s ease-out;
+  overflow: hidden; /* Für saubere abgerundete Ecken */
 }
 
 @keyframes popupSlideIn {
@@ -39,6 +40,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  border-radius: 20px 20px 0 0; /* Obere Ecken abgerundet */
 }
 
 .character-popup-header h3 {
@@ -126,7 +128,7 @@
   color: white;
   border: none;
   padding: 0.75rem 1rem;
-  border-radius: 8px;
+  border-radius: 12px; /* Abgerundete Button-Ecken */
   font-size: 0.9rem;
   font-weight: 500;
   cursor: pointer;
@@ -171,7 +173,7 @@
 .relationship-content {
   background: #f8fafc;
   padding: 1rem;
-  border-radius: 8px;
+  border-radius: 12px; /* Abgerundete Ecken für Relationship-Box */
   border-left: 4px solid #3b82f6;
 }
 
@@ -191,7 +193,7 @@
   justify-content: center;
   padding: 2.5rem 1.5rem;
   background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
-  border-radius: 12px;
+  border-radius: 16px; /* Noch mehr abgerundete Ecken für Loading-Box */
   border: 1px solid #e2e8f0;
   text-align: center;
   min-height: 120px;
