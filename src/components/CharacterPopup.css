@@ -21,9 +21,12 @@
   max-width: 400px;
   min-width: 350px;
   color: var(--text-primary);
-  animation: popupSlideIn 0.3s ease-out;
+  animation: popupSlideIn 0.3s ease-out forwards; /* forwards behält den Endzustand */
   overflow: hidden; /* Für saubere abgerundete Ecken */
   pointer-events: auto;
+  /* Animation-Startzustand */
+  transform: translate(-50%, -50%) scale(0.9);
+  opacity: 0;
 }
 
 @keyframes popupSlideIn {
@@ -123,13 +126,13 @@
 }
 
 .trait-tag {
-  background: linear-gradient(135deg, var(--bg-secondary, #f0f9ff) 0%, var(--bg-tertiary, #e0f2fe) 100%);
-  color: var(--text-accent, #0c4a6e);
+  background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%);
+  color: var(--text-accent);
   padding: 0.25rem 0.75rem;
   border-radius: 20px;
   font-size: 0.8rem;
   font-weight: 500;
-  border: 1px solid var(--border-accent, #bae6fd);
+  border: 1px solid var(--border-accent);
   transition: all 0.2s ease;
 }
 
@@ -141,7 +144,7 @@
 .character-popup-actions {
   margin-top: 1.5rem;
   padding-top: 1rem;
-  border-top: 1px solid var(--border-light, #e5e7eb);
+  border-top: 1px solid var(--border-color);
 }
 
 .comparison-button,
@@ -194,11 +197,11 @@
 }
 
 .relationship-content {
-  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  background: var(--bg-secondary);
   padding: 1.25rem;
   border-radius: 12px; /* Abgerundete Ecken für Relationship-Box */
-  border-left: 4px solid #6366f1; /* Schönere Akzentfarbe */
-  border: 1px solid #e2e8f0;
+  border-left: 4px solid var(--accent-color); /* Theme-angepasste Akzentfarbe */
+  border: 1px solid var(--border-color);
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
@@ -217,9 +220,9 @@
   align-items: center;
   justify-content: center;
   padding: 2.5rem 1.5rem;
-  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  background: var(--bg-secondary);
   border-radius: 16px; /* Noch mehr abgerundete Ecken für Loading-Box */
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--border-color);
   text-align: center;
   min-height: 120px;
 }
@@ -227,9 +230,9 @@
 .loading-spinner-small {
   width: 32px;
   height: 32px;
-  border: 2.5px solid #e2e8f0;
-  border-top: 2.5px solid #3b82f6;
-  border-right: 2.5px solid #8b5cf6;
+  border: 2.5px solid var(--border-color);
+  border-top: 2.5px solid var(--accent-color);
+  border-right: 2.5px solid var(--accent-secondary);
   border-radius: 50%;
   animation: spin 1s linear infinite, pulse-small 1.8s ease-in-out infinite;
   margin-bottom: 1rem;
