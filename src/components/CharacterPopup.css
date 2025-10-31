@@ -11,22 +11,25 @@
 }
 
 .character-popup {
-  position: fixed; /* Fixed positioning für absolute Sichtbarkeit */
-  z-index: 9999; /* Höchste Priorität */
-  background: var(--bg-primary);
-  border: 2px solid var(--border-color); /* Dickerer Border für Debug */
+  position: fixed !important; /* Fixed positioning für absolute Sichtbarkeit */
+  z-index: 99999 !important; /* Ultra-hohe Priorität */
+  background: #ff0000 !important; /* MEGA SICHTBAR: Rot für Debug */
+  border: 5px solid #00ff00 !important; /* MEGA SICHTBAR: Grüner Border */
   border-radius: 20px; /* Abgerundete Ecken */
-  padding: 0;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.1); /* Stärkerer Schatten */
-  max-width: 400px;
-  min-width: 350px; /* Minimum width für Konsistenz */
-  color: var(--text-primary);
-  animation: popupSlideIn 0.3s ease-out;
-  overflow: hidden; /* Für saubere abgerundete Ecken */
-  pointer-events: auto; /* Sicherstellen dass das Popup klickbar ist */
-  /* DEBUG: Temporär sichtbare Farbe */
-  background: #ffffff !important;
-  border-color: #ff0000 !important; /* Roter Border für Debug */
+  padding: 20px !important;
+  box-shadow: 0 0 50px rgba(255, 0, 0, 0.8) !important; /* Mega-Schatten */
+  width: 400px !important; /* Feste Breite */
+  height: 300px !important; /* Feste Höhe */
+  color: #ffffff !important; /* Weißer Text */
+  font-size: 24px !important; /* Große Schrift */
+  font-weight: bold !important;
+  animation: none !important; /* Keine Animation */
+  overflow: visible !important;
+  pointer-events: auto !important;
+  /* ULTRA DEBUG POSITION */
+  top: 50px !important;
+  left: 50px !important;
+  transform: none !important;
 }
 
 @keyframes popupSlideIn {
