@@ -38,13 +38,26 @@
 }
 
 .character-popup-header {
-  background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+  background: linear-gradient(135deg, #1e40af 0%, #3b82f6 50%, #6366f1 100%); /* Schönerer Gradient */
   color: white;
   padding: 1.5rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
   border-radius: 20px 20px 0 0; /* Obere Ecken abgerundet */
+  position: relative;
+  overflow: hidden;
+}
+
+.character-popup-header::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(45deg, rgba(255,255,255,0.1) 0%, transparent 100%);
+  pointer-events: none;
 }
 
 .character-popup-header h3 {
@@ -88,7 +101,7 @@
 
 .character-section h4 {
   margin: 0 0 1rem 0;
-  color: #1e293b;
+  color: var(--text-primary); /* Theme-angepasste Farbe */
   font-size: 1rem;
   font-weight: 600;
   display: flex;
@@ -98,8 +111,8 @@
 
 .character-section p {
   margin: 0;
-  color: #374151;
-  line-height: 1.5;
+  color: var(--text-secondary); /* Theme-angepasste Sekundärfarbe */
+  line-height: 1.6; /* Besserer Zeilenabstand */
   font-size: 0.9rem;
 }
 
@@ -175,10 +188,12 @@
 }
 
 .relationship-content {
-  background: #f8fafc;
-  padding: 1rem;
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  padding: 1.25rem;
   border-radius: 12px; /* Abgerundete Ecken für Relationship-Box */
-  border-left: 4px solid #3b82f6;
+  border-left: 4px solid #6366f1; /* Schönere Akzentfarbe */
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .relationship-content p {
@@ -224,12 +239,12 @@
   font-size: 1rem;
   font-weight: 600;
   margin: 0 0 0.5rem 0;
-  color: #1e293b;
+  color: var(--text-primary); /* Theme-angepasst */
 }
 
 .relationship-loading small {
   font-size: 0.85rem;
-  color: #64748b;
+  color: var(--text-secondary); /* Theme-angepasst */
   opacity: 0.9;
 }
 

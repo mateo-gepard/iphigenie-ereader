@@ -3,6 +3,20 @@ import type { Character } from '../data/characters';
 import { getCharacterRelationship, analyzeCharacterRelationshipInText } from '../data/characters';
 import './CharacterPopup.css';
 
+// Cache für Charakterbeziehungen
+const relationshipCache = new Map<string, string>();
+
+const getCachedRelationship = (char1Id: string, char2Id: string): string | null => {
+  const key1 = `${char1Id}-${char2Id}`;
+  const key2 = `${char2Id}-${char1Id}`;
+  return relationshipCache.get(key1) || relationshipCache.get(key2) || null;
+};
+
+const setCachedRelationship = (char1Id: string, char2Id: string, relationship: string): void => {
+  const key = `${char1Id}-${char2Id}`;
+  relationshipCache.set(key, relationship);
+};
+
 interface CharacterPopupProps {
   character: Character;
   position: { x: number; y: number };
@@ -29,23 +43,37 @@ export function CharacterPopup({
       setIsLoadingRelationship(true);
       setShowRelationship(true);
       
-      // Simuliere kurze Verzögerung für glatte Animation
-      setTimeout(() => {
-        // Versuche zuerst vordefinierte Beziehung zu finden
-        let relationship = getCharacterRelationship(character.id, selectedForComparison.id);
-        
-        // Falls keine vordefinierte Beziehung existiert, nutze dynamische Textanalyse
-        if (relationship.includes('Keine direkte Beziehung') && currentTextContent) {
-          relationship = analyzeCharacterRelationshipInText(
-            character.name, 
-            selectedForComparison.name, 
-            currentTextContent
-          );
-        }
-        
-        setRelationshipText(relationship);
-        setIsLoadingRelationship(false);
-      }, 800);
+      // Prüfe Cache zuerst
+      const cachedRelationship = getCachedRelationship(character.id, selectedForComparison.id);
+      
+      if (cachedRelationship) {
+        // Cache hit - sofortige Anzeige
+        setTimeout(() => {
+          setRelationshipText(cachedRelationship);
+          setIsLoadingRelationship(false);
+        }, 300); // Kurze Verzögerung für UX
+      } else {
+        // Cache miss - Beziehung berechnen
+        setTimeout(() => {
+          // Versuche zuerst vordefinierte Beziehung zu finden
+          let relationship = getCharacterRelationship(character.id, selectedForComparison.id);
+          
+          // Falls keine vordefinierte Beziehung existiert, nutze dynamische Textanalyse
+          if (relationship.includes('Keine direkte Beziehung') && currentTextContent) {
+            relationship = analyzeCharacterRelationshipInText(
+              character.name, 
+              selectedForComparison.name, 
+              currentTextContent
+            );
+          }
+          
+          // Cache die Beziehung für zukünftige Verwendung
+          setCachedRelationship(character.id, selectedForComparison.id, relationship);
+          
+          setRelationshipText(relationship);
+          setIsLoadingRelationship(false);
+        }, 800);
+      }
     } else {
       onSelectForComparison(character);
     }
