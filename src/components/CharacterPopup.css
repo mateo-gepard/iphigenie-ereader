@@ -4,12 +4,14 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.3); /* Weniger aufdringlich */
   z-index: 998;
+  backdrop-filter: blur(2px); /* Moderner Blur-Effekt */
+  -webkit-backdrop-filter: blur(2px); /* Safari Support */
 }
 
 .character-popup {
-  position: fixed; /* Fixed positioning für genaueste Kontrolle */
+  position: absolute; /* Absolute positioning für bulletproof scroll handling */
   z-index: 1000;
   background: var(--bg-primary);
   border: 1px solid var(--border-color);
@@ -17,9 +19,11 @@
   padding: 0;
   box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
   max-width: 400px;
+  min-width: 350px; /* Minimum width für Konsistenz */
   color: var(--text-primary);
   animation: popupSlideIn 0.3s ease-out;
   overflow: hidden; /* Für saubere abgerundete Ecken */
+  pointer-events: auto; /* Sicherstellen dass das Popup klickbar ist */
 }
 
 @keyframes popupSlideIn {

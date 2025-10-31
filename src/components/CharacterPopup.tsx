@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import type { Character } from '../data/characters';
 import { getCharacterRelationship, analyzeCharacterRelationshipInText } from '../data/characters';
+import { Portal } from './Portal';
 import './CharacterPopup.css';
 
 interface CharacterPopupProps {
@@ -63,7 +64,7 @@ export function CharacterPopup({
   };
 
   return (
-    <>
+    <Portal containerId="character-popup-portal">
       {/* Backdrop */}
       <div className="character-popup-backdrop" onClick={onClose} />
       
@@ -71,9 +72,10 @@ export function CharacterPopup({
       <div 
         className="character-popup"
         style={{
-          left: Math.max(10, Math.min(position.x - 200, window.innerWidth - 410)), // Zentriert über dem Element
-          top: Math.max(10, position.y), // Verwende position.y direkt da es bereits 10px über dem Element ist
-          transform: position.y < 250 ? 'translateY(0)' : 'translateY(-100%)' // Flip wenn zu nah am oberen Rand
+          left: Math.max(10, Math.min(position.x - 175, window.innerWidth - 360)), // Zentriert über dem Element (175px = halbe Popup-Breite)
+          top: Math.max(10, position.y), // Verwende position.y direkt 
+          transform: position.y < 300 ? 'translateY(0)' : 'translateY(-100%)', // Flip wenn zu nah am oberen Rand
+          willChange: 'transform', // Optimierung für bessere Performance
         }}
       >
         <div className="character-popup-header">
@@ -153,6 +155,6 @@ export function CharacterPopup({
           )}
         </div>
       </div>
-    </>
+    </Portal>
   );
 }

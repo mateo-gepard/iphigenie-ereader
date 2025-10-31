@@ -244,21 +244,26 @@ export function EReader({
   const handleCharacterClick = (character: Character, event: React.MouseEvent) => {
     event.stopPropagation();
     
-    // Berechne Position basierend auf dem geklickten Element
+    // Bulletproof positioning: Use page coordinates instead of viewport
     const target = event.currentTarget as HTMLElement;
     const rect = target.getBoundingClientRect();
     
-    // Verwende Viewport-Koordinaten für fixed positioning 
-    const x = rect.left + rect.width / 2;
-    const y = rect.top - 10; // 10px über dem Element
+    // Calculate position with scroll offset for absolute positioning
+    const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+    const scrollLeft = window.pageXOffset || document.documentElement.scrollLeft;
     
-    console.log('Character Click:', {
+    // Position popup centered above the clicked element
+    const x = rect.left + scrollLeft + (rect.width / 2);
+    const y = rect.top + scrollTop - 20; // 20px above the element
+    
+    console.log('Character Click (Bulletproof):', {
       character: character.name,
       rect: rect,
-      x: x,
-      y: y,
-      windowWidth: window.innerWidth,
-      windowHeight: window.innerHeight
+      scrollTop,
+      scrollLeft,
+      finalX: x,
+      finalY: y,
+      elementText: target.textContent
     });
     
     setSelectedCharacter(character);
