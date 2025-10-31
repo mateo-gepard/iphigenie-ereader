@@ -14,7 +14,7 @@ interface CharacterPopupProps {
 
 export function CharacterPopup({ 
   character, 
-  position,
+  // position, // Temporary disabled for center positioning
   onClose, 
   onSelectForComparison,
   selectedForComparison,
@@ -71,9 +71,9 @@ export function CharacterPopup({
       <div 
         className="character-popup"
         style={{
-          left: Math.max(10, Math.min(position.x - 175, window.innerWidth - 360)), // Zentriert über dem Element
-          top: Math.max(10, position.y), // Position direkt über dem Element
-          transform: position.y < 250 ? 'translateY(0)' : 'translateY(-100%)', // Smart Flip-Verhalten
+          left: '50%',
+          top: '50%',
+          transform: 'translate(-50%, -50%)', // Zentriert im Viewport
         }}
       >
         <div className="character-popup-header">
