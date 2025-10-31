@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="de">
+<html lang="de" data-theme="dark">
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
@@ -26,6 +26,26 @@
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="Iphigenie auf Tauris - Interaktiver E-Reader" />
     <meta name="twitter:description" content="Interaktiver E-Reader mit KI-Analysen für Goethes Meisterwerk" />
+    
+    <!-- Immediate Dark Theme Application -->
+    <script>
+      (function() {
+        const saved = localStorage.getItem('iphigenie-theme');
+        let theme = 'dark'; // Default to dark
+        
+        if (saved === 'dark') {
+          theme = 'dark';
+        } else if (saved === 'auto') {
+          theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        } else if (saved === 'light') {
+          // Convert old light mode users to dark mode
+          theme = 'dark';
+          localStorage.setItem('iphigenie-theme', 'dark');
+        }
+        
+        document.documentElement.setAttribute('data-theme', theme);
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

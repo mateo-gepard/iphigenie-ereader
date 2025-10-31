@@ -248,84 +248,100 @@ export function EReader({
     setShowCharacterPopup(true);
   };
 
-  // Funktion zum Bereinigen von HTML aus Text - sehr aggressiv
-  const cleanHTML = (text: string): string => {
-    let cleanText = text;
-    
-    // Mehrfache Bereinigung für hartnäckige HTML-Reste
-    for (let i = 0; i < 3; i++) {
-      cleanText = cleanText
-        .replace(/<span[^>]*class="character-name[^"]*"[^>]*>(.*?)<\/span>/gi, '$1')
-        .replace(/<span[^>]*data-character-[^>]*>(.*?)<\/span>/gi, '$1')
-        .replace(/<span[^>]*data-character-color[^>]*>(.*?)<\/span>/gi, '$1')
-        .replace(/<span[^>]*style="[^"]*"[^>]*>(.*?)<\/span>/gi, '$1')
-        .replace(/<span[^>]*class="footnote"[^>]*>(.*?)<\/span>/gi, '$1')
-        .replace(/<span[^>]*>(.*?)<\/span>/gi, '$1')
-        .replace(/<[^>]*>/g, '')
-        .replace(/&gt;/g, '>')
-        .replace(/&lt;/g, '<')
-        .replace(/&amp;/g, '&')
-        .replace(/&quot;/g, '"');
+  // Neue Funktion: Rendert Text mit klickbaren Charakternamen als React-Komponenten
+  const renderTextWithCharacters = (text: string): React.ReactNode[] => {
+    if (!areCharactersVisible) {
+      return [text];
     }
-    
-    return cleanText.trim();
-  };
 
-  // Funktion zum Formatieren von Fußnoten im Text
-  const formatFootnotes = (text: string): string => {
-    // Erkenne Muster wie "16 Gram: Kummer" - einfacherer, robusterer Regex
-    return text.replace(/\s(\d{1,4})\s+([A-Za-zäöüÄÖÜß]+):\s*([^0-9]+?)(?=\s+\d{1,4}\s+[A-Za-zäöüÄÖÜß]+:|$)/g, 
-      ' <span class="footnote" title="$2: $3">[$1]</span>'
-    );
-  };
+    const foundCharacters = findCharactersInText(text);
+    if (foundCharacters.length === 0) {
+      return [text];
+    }
 
-  // Funktion zum Markieren von Charakternamen im Text
-  const highlightCharacters = (text: string) => {
-    // Bereinige den Text zuerst komplett von HTML
-    let cleanText = cleanHTML(text);
-    
-    // Formatiere Fußnoten als Tooltips
-    cleanText = formatFootnotes(cleanText);
-    
-    if (!areCharactersVisible) return cleanText;
-    
-    const foundCharacters = findCharactersInText(cleanText);
-    if (foundCharacters.length === 0) return cleanText;
+    // Sammle alle Character-Matches mit Positionen
+    const allMatches: Array<{
+      character: Character;
+      match: string;
+      start: number;
+      end: number;
+    }> = [];
 
-    let highlightedText = cleanText;
-    
-    // Sortiere nach Länge (längste zuerst) um Überschneidungen zu vermeiden
-    const allMatches: Array<{character: Character, match: string}> = [];
     foundCharacters.forEach(({ character, matches }) => {
-      matches.forEach(match => allMatches.push({ character, match }));
+      matches.forEach(match => {
+        const regex = new RegExp(`\\b${match.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'gi');
+        let execResult;
+        while ((execResult = regex.exec(text)) !== null) {
+          allMatches.push({
+            character,
+            match: execResult[0],
+            start: execResult.index,
+            end: execResult.index + execResult[0].length
+          });
+        }
+      });
     });
+
+    // Sortiere nach Position und entferne Überschneidungen
+    allMatches.sort((a, b) => a.start - b.start);
     
-    allMatches.sort((a, b) => b.match.length - a.match.length);
-    
-    allMatches.forEach(({ character, match }) => {
-      const isSelected = characterForComparison?.id === character.id;
-      const className = `character-name${isSelected ? ' selected-for-comparison' : ''}`;
-      
-      const regex = new RegExp(`\\b${match.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'gi');
-      
-      const styleAttributes = isCharacterHighlightingEnabled 
-        ? `style="background-color: ${character.color}20; border-color: ${character.color}; color: ${character.color};"` 
-        : '';
-      
-      highlightedText = highlightedText.replace(regex, (matched) => 
-        `<span class="${className}" data-character-id="${character.id}" data-character-name="${character.name}" data-character-color="${character.color}" ${styleAttributes}>${matched}</span>`
+    // Entferne überschneidende Matches (behalte den ersten)
+    const nonOverlappingMatches = allMatches.filter((match, index) => {
+      for (let i = 0; i < index; i++) {
+        if (allMatches[i].end > match.start) {
+          return false;
+        }
+      }
+      return true;
+    });
+
+    // Baue React-Elemente auf
+    const elements: React.ReactNode[] = [];
+    let lastIndex = 0;
+
+    nonOverlappingMatches.forEach((match, index) => {
+      // Text vor dem Character-Namen
+      if (match.start > lastIndex) {
+        elements.push(text.slice(lastIndex, match.start));
+      }
+
+      // Character-Name als klickbares Element
+      const isSelected = characterForComparison?.id === match.character.id;
+      elements.push(
+        <span
+          key={`char-${index}`}
+          className={`character-name${isSelected ? ' selected-for-comparison' : ''}`}
+          data-character-id={match.character.id}
+          style={{
+            backgroundColor: isCharacterHighlightingEnabled ? `${match.character.color}20` : 'transparent',
+            borderColor: match.character.color,
+            color: match.character.color,
+            cursor: 'pointer',
+            padding: '1px 3px',
+            borderRadius: '3px',
+            border: '1px solid',
+            textDecoration: 'underline'
+          }}
+          onClick={(e) => handleCharacterClick(match.character, e)}
+        >
+          {match.match}
+        </span>
       );
+
+      lastIndex = match.end;
     });
 
-    // Finale Sicherheitsbereinigung - entferne alle problematischen HTML-Reste
-    highlightedText = highlightedText
-      .replace(/&gt;/g, '>')
-      .replace(/&lt;/g, '<')
-      .replace(/&amp;/g, '&')
-      .replace(/&quot;/g, '"');
+    // Restlicher Text
+    if (lastIndex < text.length) {
+      elements.push(text.slice(lastIndex));
+    }
 
-    return highlightedText;
+    return elements;
   };
+
+
+
+
 
   const handleStanzaClick = async (stanza: any, actNumber: number, sceneNumber: number) => {
     if (selectedStanzaId === stanza.id) {
@@ -512,24 +528,9 @@ export function EReader({
                           onClick={(e) => handleVerseClick(verse, act.number, scene.number, e)}
                         >
                           <span className="line-number"></span>
-                          <span 
-                            className="verse-text"
-                            dangerouslySetInnerHTML={{ __html: highlightCharacters(verse.text) }}
-                            onClick={(e) => {
-                              const target = e.target as HTMLElement;
-                              if (target.classList.contains('character-name')) {
-                                e.stopPropagation();
-                                const characterId = target.getAttribute('data-character-id');
-                                const character = findCharactersInText(verse.text)
-                                  .find(c => c.character.id === characterId)?.character;
-                                if (character) {
-                                  handleCharacterClick(character, e as any);
-                                }
-                                return; // Verhindert weitere Event-Propagation
-                              }
-                              // Für alle anderen Klicks: Event durchlassen (nicht stoppen)
-                            }}
-                          />
+                          <span className="verse-text">
+                            {renderTextWithCharacters(verse.text)}
+                          </span>
                         </div>
                       ))}
                     </div>
