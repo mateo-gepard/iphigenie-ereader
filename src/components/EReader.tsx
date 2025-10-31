@@ -243,8 +243,17 @@ export function EReader({
 
   const handleCharacterClick = (character: Character, event: React.MouseEvent) => {
     event.stopPropagation();
+    
+    // Berechne Position basierend auf dem geklickten Element
+    const target = event.currentTarget as HTMLElement;
+    const rect = target.getBoundingClientRect();
+    
+    // Position direkt über dem geklickten Character-Namen
+    const x = rect.left + rect.width / 2;
+    const y = rect.top - 10; // 10px über dem Element
+    
     setSelectedCharacter(character);
-    setPopupPosition({ x: event.clientX, y: event.clientY });
+    setPopupPosition({ x, y });
     setShowCharacterPopup(true);
   };
 
