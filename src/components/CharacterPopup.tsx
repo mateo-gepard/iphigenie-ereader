@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import type { Character } from '../data/characters';
 import { getCharacterRelationship, analyzeCharacterRelationshipInText } from '../data/characters';
-import { Portal } from './Portal';
 import './CharacterPopup.css';
 
 interface CharacterPopupProps {
@@ -64,7 +63,7 @@ export function CharacterPopup({
   };
 
   return (
-    <Portal containerId="character-popup-portal">
+    <>
       {/* Backdrop */}
       <div className="character-popup-backdrop" onClick={onClose} />
       
@@ -155,6 +154,6 @@ export function CharacterPopup({
           )}
         </div>
       </div>
-    </Portal>
+    </>
   );
 }

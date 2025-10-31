@@ -18,7 +18,8 @@ export function Portal({ children, containerId = 'portal-root' }: PortalProps) {
       portalContainer = document.createElement('div');
       portalContainer.id = containerId;
       portalContainer.style.position = 'relative';
-      portalContainer.style.zIndex = '1000';
+      portalContainer.style.zIndex = '9999'; // Sehr hoher z-index
+      portalContainer.style.pointerEvents = 'none'; // Portal selbst nicht klickbar
       document.body.appendChild(portalContainer);
     }
 
