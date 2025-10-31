@@ -14,7 +14,7 @@ interface CharacterPopupProps {
 
 export function CharacterPopup({ 
   character, 
-  // position, // Temporär deaktiviert für Debug
+  position,
   onClose, 
   onSelectForComparison,
   selectedForComparison,
@@ -71,18 +71,9 @@ export function CharacterPopup({
       <div 
         className="character-popup"
         style={{
-          /* ULTRA DEBUG: Fixe Position */
-          position: 'fixed',
-          top: '100px',
-          left: '100px',
-          zIndex: 99999,
-          background: 'red',
-          color: 'white',
-          width: '400px',
-          height: '300px',
-          border: '5px solid lime',
-          fontSize: '24px',
-          padding: '20px'
+          left: Math.max(10, Math.min(position.x - 175, window.innerWidth - 360)), // Zentriert über dem Element
+          top: Math.max(10, position.y), // Position direkt über dem Element
+          transform: position.y < 250 ? 'translateY(0)' : 'translateY(-100%)', // Smart Flip-Verhalten
         }}
       >
         <div className="character-popup-header">

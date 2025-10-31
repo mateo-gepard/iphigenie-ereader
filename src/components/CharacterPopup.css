@@ -4,32 +4,26 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.5); /* Sichtbarer für Debug */
-  z-index: 9998; /* Viel höher */
-  backdrop-filter: blur(2px); /* Moderner Blur-Effekt */
-  -webkit-backdrop-filter: blur(2px); /* Safari Support */
+  background: rgba(0, 0, 0, 0.4); /* Eleganter halbtransparenter Backdrop */
+  z-index: 9998;
+  backdrop-filter: blur(3px); /* Schöner Blur-Effekt */
+  -webkit-backdrop-filter: blur(3px); /* Safari Support */
 }
 
 .character-popup {
-  position: fixed !important; /* Fixed positioning für absolute Sichtbarkeit */
-  z-index: 99999 !important; /* Ultra-hohe Priorität */
-  background: #ff0000 !important; /* MEGA SICHTBAR: Rot für Debug */
-  border: 5px solid #00ff00 !important; /* MEGA SICHTBAR: Grüner Border */
-  border-radius: 20px; /* Abgerundete Ecken */
-  padding: 20px !important;
-  box-shadow: 0 0 50px rgba(255, 0, 0, 0.8) !important; /* Mega-Schatten */
-  width: 400px !important; /* Feste Breite */
-  height: 300px !important; /* Feste Höhe */
-  color: #ffffff !important; /* Weißer Text */
-  font-size: 24px !important; /* Große Schrift */
-  font-weight: bold !important;
-  animation: none !important; /* Keine Animation */
-  overflow: visible !important;
-  pointer-events: auto !important;
-  /* ULTRA DEBUG POSITION */
-  top: 50px !important;
-  left: 50px !important;
-  transform: none !important;
+  position: fixed; /* Fixed positioning für zuverlässige Sichtbarkeit */
+  z-index: 9999; /* Hohe Priorität */
+  background: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 20px; /* Schöne abgerundete Ecken */
+  padding: 0;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  max-width: 400px;
+  min-width: 350px;
+  color: var(--text-primary);
+  animation: popupSlideIn 0.3s ease-out;
+  overflow: hidden; /* Für saubere abgerundete Ecken */
+  pointer-events: auto;
 }
 
 @keyframes popupSlideIn {
