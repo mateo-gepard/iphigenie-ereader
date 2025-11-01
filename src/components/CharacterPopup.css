@@ -24,17 +24,17 @@
   animation: popupSlideIn 0.3s ease-out forwards; /* forwards behält den Endzustand */
   overflow: hidden; /* Für saubere abgerundete Ecken */
   pointer-events: auto;
-  /* Animation-Startzustand */
-  transform: translate(-50%, -50%) scale(0.9);
-  opacity: 0;
+  /* Startzustand für Animation - wird von keyframes überschrieben */
+  transform: translate(-50%, -50%) scale(1);
+  opacity: 1;
 }
 
 @keyframes popupSlideIn {
-  from {
+  0% {
     opacity: 0;
     transform: translate(-50%, -50%) scale(0.9);
   }
-  to {
+  100% {
     opacity: 1;
     transform: translate(-50%, -50%) scale(1);
   }
