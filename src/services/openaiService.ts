@@ -134,6 +134,37 @@ export class OpenAIService {
       .join('\n\n');
   }
 
+  // Bestimmt das Werk basierend auf verfügbaren Informationen
+  private static determineWorkInfo(request: ExplanationRequest): string {
+    // TODO: Hier könnte später eine dynamische Werkerkennung implementiert werden
+    // basierend auf einer Werk-Konfiguration oder Metadaten
+    
+    // Für jetzt universelle Kategorisierung für alle Werke
+    if (request.actNumber && request.sceneNumber) {
+      return "Dramatisches Werk";
+    }
+    
+    // Hier könnten weitere Erkennungslogiken hinzugefügt werden:
+    // - Strophen-basierte Werke (Lyrik)
+    // - Kapitel-basierte Werke (Epik)
+    // - etc.
+    
+    return "Literarisches Werk";
+  }
+
+  // Universelle Kontext-Bestimmung für alle Werke
+  private static getUniversalContext(actNumber?: number, sceneNumber?: number): string {
+    if (actNumber && sceneNumber) {
+      // Prozentuale Position im Werk berechnen
+      const actProgress = actNumber <= 3 ? "Exposition/Aufbau" : 
+                         actNumber <= 4 ? "Höhepunkt/Krise" : "Auflösung/Schluss";
+      
+      return `${actProgress} - Struktureller Kontext: ${actNumber}. Teil, ${sceneNumber}. Abschnitt`;
+    }
+    
+    return "Allgemeiner literarischer Kontext";
+  }
+
   // Bestimmt den dramatischen Moment für bessere Kontextualisierung
   private static getDramaticMoment(actNumber?: number, sceneNumber?: number): string {
     const moments: Record<string, string> = {
@@ -208,59 +239,57 @@ export class OpenAIService {
         messages: [
           {
             role: "system",
-            content: `Du bist ein Germanistik-Professor mit 30 Jahren Erfahrung in klassischer deutscher Literatur. Du analysierst Texte mit wissenschaftlicher Präzision und erklärst sie verständlich.
+            content: `Du bist ein erfahrener Literaturwissenschaftler mit Expertise in deutscher Literatur aller Epochen. Du analysierst Texte präzise und erklärst sie verständlich für Schüler und Studenten.
 
-            🚨 ABSOLUTES VERBOT VON BULLSHIT-ANALYSEN:
+            🚨 ABSOLUTES VERBOT VON SPEKULATIVEN ANALYSEN:
             - NIEMALS den Wortlaut falsch interpretieren
             - NIEMALS Bedeutungen erfinden, die nicht im Text stehen
-            - NIEMALS moderne Psychologie in historische Texte hineininterpretieren
-            - NIEMALS oberflächliche "Feel-Good"-Erklärungen ohne Textbasis
+            - NIEMALS anachronistische Interpretationen (moderne Sicht auf historische Texte)
+            - NIEMALS oberflächliche Erklärungen ohne Textbasis
             
-            🎯 EXAKTE TEXTANALYSE-METHODIK:
-            1. WÖRTLICHE BEDEUTUNG: Was steht GENAU da? Jedes Wort einzeln betrachten
-            2. GRAMMATIK & SYNTAX: Präpositionen, Wortstellung, Satzbau korrekt interpretieren  
-            3. SPRACHHISTORISCHER KONTEXT: Goethes Sprachgebrauch um 1780, nicht modern
-            4. DRAMATISCHE SITUATION: Wer spricht zu wem? In welchem Zustand? Warum?
-            5. HANDLUNGSKONTEXT: Was ist vorher passiert? Was folgt daraus?
+            🎯 UNIVERSELLE TEXTANALYSE-METHODIK:
+            1. WÖRTLICHE BEDEUTUNG: Was steht GENAU da? Jedes Wort im historischen Kontext
+            2. GRAMMATIK & SYNTAX: Satzstrukturen, Wortstellung, sprachliche Besonderheiten
+            3. EPOCHENKONTEXT: Sprachgebrauch und literarische Konventionen der Zeit
+            4. GATTUNGSKONTEXT: Drama, Lyrik, Epik - gattungsspezifische Merkmale
+            5. HANDLUNG/SITUATION: Was passiert? Wer spricht? Welche Umstände?
             
             💡 QUALITÄTSKONTROLLE:
             - Überprüfe JEDE Aussage gegen den Originaltext
-            - Bei unklaren Stellen: ehrlich zugeben statt erfinden
-            - Literaturwissenschaftliche Präzision mit schülerverständlicher Sprache
+            - Bei Unklarheiten: ehrlich zugeben statt spekulieren
+            - Literaturwissenschaftliche Präzision mit verständlicher Sprache
             - Konkrete Textbelege für jede Interpretation
             
-            📚 GOETHE-EXPERTISE:
-            - Klassische Mythologie und deren Adaptation
-            - Blankvers-Technik und dramatische Sprache  
-            - Humanitätsideal der Weimarer Klassik
-            - Charakterpsychologie basierend auf Textgrundlage
+            📚 UNIVERSELLE LITERATUR-EXPERTISE:
+            - Alle literarischen Epochen (Barock bis Moderne)
+            - Alle Gattungen (Drama, Lyrik, Epik)
+            - Metrische Systeme und Versmaße
+            - Rhetorische Figuren und Stilmittel
+            - Charakterisierungstechniken
             
-            QUALITÄTSKONTROLLE:
-            - Überprüfe JEDE Interpretation auf Textgenauigkeit
-            - Erkläre komplexe Satzkonstruktionen Schritt für Schritt
-            - Berücksichtige poetische Sprache vs. normale Wortbedeutung
-            - Nutze den bereitgestellten Kontext für präzise Situationsanalyse
-            - KEINE Spekulationen oder freie Assoziationen
+            ANPASSUNG AN WERKKONTEXT:
+            - Erkenne automatisch die Epoche und passe Analysemethoden an
+            - Berücksichtige gattungsspezifische Besonderheiten
+            - Nutze epochentypische literarische Kategorien
+            - Arbeite mit bereitgestelltem Kontext (Szene, Figuren, etc.)
             
             PFLICHTSTRUKTUR (Antworte IMMER in diesem exakten JSON-Format):
             {
-              "explanation": "WAS PASSIERT HIER? Erkläre die konkrete Situation: Was sagt/tut die Figur gerade und warum? Erkläre schwere Wörter sofort. Dann literaturwissenschaftliche Einordnung (4-5 Sätze)",
+              "explanation": "WAS PASSIERT HIER? Erkläre die konkrete Situation: Was wird gesagt/getan und warum? Erkläre schwere/veraltete Wörter sofort. Dann literaturwissenschaftliche Einordnung (4-5 Sätze)",
               "summary": "Prägnante Zusammenfassung: Was ist der Kern dieser Textpassage? (1-2 Sätze)",
-              "background": "EIN zusammenhängender Hintergrund-Text: Vereine historischen und mythologischen Kontext zu EINER umfassenden Erklärung (4-5 Sätze)",
-              "historicalContext": "ENTFÄLLT - wird in 'background' integriert",
-              "mythologicalBackground": "ENTFÄLLT - wird in 'background' integriert", 
+              "background": "EINE zusammenhängende Kontextualisierung: Historischer, kultureller oder mythologischer Hintergrund je nach Werk (4-5 Sätze)",
               "literaryDevices": [
                 {
-                  "name": "NUR TATSÄCHLICH VORHANDENES Stilmittel - wenn keines eindeutig identifizierbar ist, gib leere Liste [] zurück",
+                  "name": "NUR tatsächlich vorhandene Stilmittel - wenn keine eindeutig identifizierbar sind, gib leere Liste [] zurück",
                   "example": "Exaktes wörtliches Zitat aus dem analysierten Text",
-                  "effect": "Spezifische Wirkung auf Leser/Zuschauer und dramatische Funktion",
+                  "effect": "Spezifische Wirkung auf Leser und textuelle Funktion",
                   "category": "rhetoric|sound|structure|imagery|syntax"
                 }
               ],
-              "themes": ["Zentrales Thema mit Bezug zum Humanitätsideal", "Weiteres relevantes Motiv"],
-              "characterAnalysis": "Charakterpsychologische Einordnung (falls Figurenrede)",
-              "dramaticFunction": "Funktion für Handlungsfortschritt/Spannungsaufbau",
-              "metricAnalysis": "Analyse von Blankvers, Rhythmus und metrischen Besonderheiten (falls relevant)"
+              "themes": ["Hauptthema der Textpassage", "Weiteres relevantes Motiv falls vorhanden"],
+              "characterAnalysis": "Charakterpsychologische Einordnung (nur bei Figurenrede/Figurenbeschreibung)",
+              "dramaticFunction": "Funktion für Handlung/Struktur des Werks (bei narrativen/dramatischen Texten)",
+              "metricAnalysis": "Analyse von Versmaß, Rhythmus und metrischen Besonderheiten (nur bei gebundener Rede)"
             }`
           },
           {
@@ -359,7 +388,7 @@ export class OpenAIService {
     const contextType = request.context === 'verse' ? 'EINZELVERS' : 
                        request.context === 'stanza' ? 'STROPHE/TEXTABSCHNITT' : 'SZENE';
 
-    const dramaticContext = this.getDramaticContext(request.actNumber, request.sceneNumber);
+    const dramaticContext = this.getUniversalContext(request.actNumber, request.sceneNumber);
 
     // Erweiterte Kontextinformationen aufbauen
     let contextSection = '';
@@ -388,69 +417,46 @@ ${request.surroundingText}`;
 
     return `ANALYSE-AUFTRAG: Literaturwissenschaftliche Textanalyse
 
-TEXTQUELLE: Goethes "Iphigenie auf Tauris" (${contextInfo})
+TEXTQUELLE: ${this.determineWorkInfo(request)} (${contextInfo})
 ANALYSEEBENE: ${contextType}
-DRAMATISCHER KONTEXT: ${dramaticContext}${contextSection}
+KONTEXT: ${dramaticContext}${contextSection}
 
 TEXTPASSAGE ZU ANALYSIEREN:
 "${request.text}"
 
-PRÄZISIONS-ANALYSE FÜR GOETHE-TEXTE:
-1. EXAKTE WORTANALYSE: "Heraus in eure Schatten" = hinein/hinaus IN die Schatten (nicht aus den Schatten)
-2. SPRACHLICHE KONSTRUKTION: Alte deutsche Syntax und Wortstellung genau beachten
-3. KONTEXT-INTEGRATION: Sprecher, Situation, emotionale Lage präzise erfassen
-4. HANDLUNGSEBENE: Was tut/sagt die Figur konkret in diesem Moment?
-5. TEXTUELLE BEWEISE: Nur das analysieren, was wortwörtlich im Text steht
-6. GOETHE-SPEZIFISCH: Typische Konstruktionen und poetische Wendungen berücksichtigen
+UNIVERSELLE PRÄZISIONS-ANALYSE:
+1. WÖRTLICHE BEDEUTUNG: Was steht exakt da? Jedes Wort im epochenspezifischen Kontext
+2. SPRACHLICHE KONSTRUKTION: Syntax, Wortstellung und sprachliche Besonderheiten der Zeit
+3. SITUATIVER KONTEXT: Sprecher, Situation, emotionale/dramatische Lage
+4. TEXTEBENE: Was geschieht konkret in diesem Moment des Werks?
+5. BELEGBARE INTERPRETATION: Nur analysieren, was textlich nachweisbar ist
+6. GATTUNGSKONTEXT: Genre-spezifische Konventionen berücksichtigen
 
-FEHLER-VERMEIDUNGS-PROTOKOLL:
-⚠️ PRÄPOSITIONEN genau beachten: "in", "aus", "zu", "von" - jede hat präzise Bedeutung
-⚠️ WORTSTELLUNG in poetischer Sprache richtig interpretieren
-⚠️ KEINE modernen Bedeutungen auf alte Konstruktionen übertragen
-⚠️ SYNTAX vor Semantik: Erst Grammatik verstehen, dann interpretieren
-⚠️ KONTEXT ist KING: Wer spricht wo wann warum?
+METHODISCHES VORGEHEN:
+⚠️ WORTEBENE: Historische Wortbedeutungen vs. moderne Interpretationen
+⚠️ SYNTAXEBENE: Poetische/archaische Konstruktionen korrekt verstehen  
+⚠️ KONTEXTEBENE: Wer spricht zu wem in welcher Situation?
+⚠️ FUNKTIONSEBENE: Welche Rolle hat die Passage im Gesamtwerk?
+⚠️ EPOCHENEBENE: Zeitgenössische literarische Konventionen beachten
 
 ANALYSE-STRUKTUR:
-1. WÖRTLICHE BEDEUTUNG: Jedes Wort in seinem grammatischen Kontext
-2. SPRECHERSITUATION: Wer sagt das? In welcher emotionalen Lage?
-3. HANDLUNGSKONTEXT: Was passiert gerade in der Szene?
-4. LITERARISCHE EINORDNUNG: Warum wählt Goethe diese Formulierung?
-5. TEXTFUNKTION: Welche Rolle spielt diese Stelle für die Gesamthandlung?
+1. WÖRTLICHE BEDEUTUNG: Jedes Wort/jede Wendung in seinem sprachhistorischen Kontext
+2. KOMMUNIKATIONSSITUATION: Wer spricht/denkt/handelt? Unter welchen Umständen?
+3. WERKKONTEXT: Was passiert an dieser Stelle? Wie fügt es sich in die Handlung?
+4. LITERARISCHE GESTALTUNG: Warum wählt der Autor diese spezielle Formulierung?
+5. GESAMTFUNKTION: Welche Bedeutung hat diese Stelle für das gesamte Werk?
 
-QUALITÄTS-CHECKPOINTS:
-✓ Stimmt die Wortbedeutung mit dem Original überein?
-✓ Ist die grammatische Analyse korrekt?
-✓ Entspricht die Interpretation dem Textkontext?
-✓ Werden bereitgestellte Szenen-/Charakterinfos genutzt?
-✓ Bleibt die Erklärung bei dem, was tatsächlich im Text steht?
+QUALITÄTS-VALIDIERUNG:
+✓ Stimmen alle Wortinterpretationen mit dem historischen Sprachgebrauch überein?
+✓ Ist die grammatische/syntaktische Analyse korrekt?
+✓ Entspricht die Deutung dem bereitgestellten Kontext?
+✓ Werden verfügbare Zusatzinformationen (Szene, Figuren) genutzt?
+✓ Bleibt die Analyse bei nachweisbaren Textaussagen?
 
 Antworte ausschließlich im vorgegebenen JSON-Format.`;
   }
 
-  private static getDramaticContext(actNumber?: number, sceneNumber?: number): string {
-    const contexts: Record<string, string> = {
-      '1-1': 'Exposition - Iphigenies Sehnsucht nach der Heimat, Einführung in ihre Situation',
-      '1-2': 'König Thoas\' Werbung um Iphigenie, Konflikt zwischen Dankbarkeit und Sehnsucht',
-      '1-3': 'Arkas als Vermittler, politische Spannungen im Königreich',
-      '2-1': 'Orests und Pylades\' Ankunft, Beginn der Verwicklung',
-      '2-2': 'Gefangennahme der Griechen, Iphigenies Dilemma',
-      '3-1': 'Wiedererkennung zwischen Geschwistern, emotionaler Höhepunkt',
-      '3-2': 'Orests Wahnsinn und Iphigenies Heilungsversuch',
-      '3-3': 'Pylades\' Plan zur Flucht, moralisches Dilemma',
-      '4-1': 'Iphigenies innerer Konflikt zwischen Wahrheit und List',
-      '4-2': 'Konfrontation mit Thoas, Vertrauenskrise',
-      '4-3': 'Orests Heilung durch Iphigenies reine Menschlichkeit',
-      '4-4': 'Vorbereitung der Flucht, wachsende Spannung',
-      '5-1': 'Thoas\' Zorn und Enttäuschung',
-      '5-2': 'Arkas\' Loyalitätskonflikt',
-      '5-3': 'Iphigenies Wahrheitsbekenntnis, moralische Läuterung',
-      '5-4': 'Versöhnung und Lösung durch Humanität',
-      '5-6': 'Thoas\' Großmut, harmonischer Schluss'
-    };
-    
-    const key = `${actNumber}-${sceneNumber}`;
-    return contexts[key] || 'Allgemeiner dramatischer Kontext von Goethes klassischem Drama';
-  }
+
 
   static async answerCustomQuestion(selectedText: string, question: string, contextInfo?: {
     actNumber?: number;
@@ -484,34 +490,36 @@ Antworte ausschließlich im vorgegebenen JSON-Format.`;
         messages: [
           {
             role: "system",
-            content: `Du bist ein renommierter Germanistik-Professor mit Expertise in Goethes "Iphigenie auf Tauris". 
-            Beantworte Fragen zum ausgewählten Text präzise und wissenschaftlich fundiert.
+            content: `Du bist ein erfahrener Literaturwissenschaftler mit breiter Expertise in deutscher Literatur aller Epochen. 
+            Beantworte Fragen zu ausgewählten Texten präzise und wissenschaftlich fundiert.
             
-            ANTWORT-RICHTLINIEN:
-            - Nutze den bereitgestellten Kontext für präzisere Antworten
+            UNIVERSELLE ANTWORT-RICHTLINIEN:
+            - Nutze bereitgestellten Kontext für präzisere Antworten
             - Beziehe dich direkt auf den ausgewählten Text  
-            - Verwende literaturwissenschaftliche Terminologie
-            - Erkläre verständlich für Schüler/Studenten
+            - Verwende angemessene literaturwissenschaftliche Terminologie
+            - Erkläre verständlich für Schüler und Studenten
             - Gib konkrete Textbelege und Beispiele
-            - Berücksichtige den dramatischen Kontext und die Szeneninformation
-            - Beziehe umgebende Handlung und Charakterentwicklung ein
-            - Erkläre literarische Stilmittel und deren Wirkung
+            - Berücksichtige Gattung, Epoche und Kontext
+            - Erkläre literarische Gestaltungsmittel und deren Wirkung
+            - Passe Analysemethoden an das jeweilige Werk an
             
-            EXPERTISE-SCHWERPUNKTE:
-            - Weimarer Klassik und Goethes Humanitätsideal
-            - Blankvers-Technik und dramatische Sprache
-            - Antike Mythologie und deren moderne Adaptation
-            - Charakterpsychologie und Figurenentwicklung`
+            BREITE EXPERTISE-BEREICHE:
+            - Alle literarischen Epochen (Mittelalter bis Gegenwart)
+            - Alle Gattungen (Epik, Lyrik, Drama)
+            - Versmaße, Metrik und sprachliche Gestaltung
+            - Rhetorische Figuren und Stilmittel
+            - Charakterisierungs- und Erzähltechniken
+            - Historische und kulturelle Kontexte`
           },
           {
             role: "user",
             content: `AUSGEWÄHLTER TEXT:
 "${selectedText}"
 
-FRAGE:
+BENUTZERFRAGE:
 ${question}${additionalContext}
 
-Bitte beantworte die Frage präzise und wissenschaftlich fundiert, bezogen auf diesen Textausschnitt aus Goethes "Iphigenie auf Tauris". Nutze den bereitgestellten Kontext für eine bessere Einordnung.`
+Bitte beantworte die Frage präzise und wissenschaftlich fundiert, bezogen auf diesen Textausschnitt. Erkenne automatisch das literarische Werk und die Epoche, und passe deine Analysemethoden entsprechend an. Nutze den bereitgestellten Kontext für eine präzise Einordnung.`
           }
         ],
         max_tokens: 1000,
