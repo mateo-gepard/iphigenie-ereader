@@ -929,7 +929,7 @@
 
 .character-section h4 {
   margin: 0 0 0.5rem 0;
-  color: #92400e;
+  color: var(--text-primary);
   font-size: 1rem;
   font-weight: 600;
   display: flex;
@@ -939,7 +939,7 @@
 
 .character-section p {
   margin: 0;
-  color: #451a03;
+  color: var(--text-secondary);
   line-height: 1.5;
   font-size: 0.95rem;
 }
@@ -951,13 +951,13 @@
 }
 
 .trait-tag {
-  background: rgba(245, 158, 11, 0.2);
-  color: #92400e;
+  background: var(--bg-secondary);
+  color: var(--text-accent);
   padding: 0.25rem 0.75rem;
   border-radius: 20px;
   font-size: 0.8rem;
   font-weight: 500;
-  border: 1px solid rgba(245, 158, 11, 0.3);
+  border: 1px solid var(--border-accent);
 }
 
 .character-actions {
