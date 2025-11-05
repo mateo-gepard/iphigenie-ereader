@@ -14,11 +14,12 @@
   left: 0;
   right: 0;
   height: 56px;
-  background: rgba(var(--bg-primary-rgb, 0, 0, 0), 0.95);
+  background: linear-gradient(135deg, rgba(30, 58, 138, 0.95), rgba(29, 78, 216, 0.95));
   backdrop-filter: blur(20px) saturate(180%);
-  border-bottom: 0.5px solid rgba(255, 255, 255, 0.08);
+  border-bottom: 0.5px solid rgba(59, 130, 246, 0.3);
   z-index: 100;
   transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 20px rgba(29, 78, 216, 0.15);
 }
 
 .app-header.hidden {
@@ -142,9 +143,9 @@
   right: 0;
   bottom: 0;
   width: min(400px, 85vw);
-  background: var(--bg-primary);
-  border-left: 0.5px solid rgba(255, 255, 255, 0.1);
-  box-shadow: -10px 0 40px rgba(0, 0, 0, 0.3);
+  background: linear-gradient(180deg, rgba(30, 58, 138, 0.98), rgba(17, 24, 39, 0.98));
+  border-left: 0.5px solid rgba(59, 130, 246, 0.2);
+  box-shadow: -10px 0 40px rgba(29, 78, 216, 0.3);
   display: flex;
   flex-direction: column;
   animation: slideInRight 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -167,8 +168,8 @@
   align-items: center;
   justify-content: space-between;
   padding: 20px 24px;
-  border-bottom: 0.5px solid rgba(255, 255, 255, 0.1);
-  background: linear-gradient(135deg, rgba(139, 92, 246, 0.05), rgba(59, 130, 246, 0.05));
+  border-bottom: 0.5px solid rgba(59, 130, 246, 0.2);
+  background: rgba(30, 58, 138, 0.3);
 }
 
 .menu-header h3 {
