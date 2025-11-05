@@ -1,6 +1,14 @@
 import type { WorkConfig, Act } from '../types';
 import { iphigenieText } from './iphigenieText';
 import { characters } from './characters';
+import { faust1Text } from './faust1Text';
+import { faust1Characters } from './faust1Characters';
+import { nathanText } from './nathanText';
+import { nathanCharacters } from './nathanCharacters';
+import { derZerbrocheneKrugText } from './derZerbrocheneKrugText';
+import { derZerbrocheneKrugCharacters } from './derZerbrocheneKrugCharacters';
+import { dieRaeuberText } from './dieRaeuberText';
+import { dieRaeuberCharacters } from './dieRaeuberCharacters';
 
 // ============== WERK-REGISTRY ==============
 
@@ -25,7 +33,7 @@ export const availableWorks: WorkConfig[] = [
     }
   },
 
-  // Faust I (Geplant)
+  // Faust I (Sample)
   {
     id: 'faust1',
     title: 'Faust I',
@@ -34,8 +42,8 @@ export const availableWorks: WorkConfig[] = [
     genre: 'drama',
     language: 'de',
     year: 1808,
-    content: [], // TODO: Implementierung
-    characters: [], // TODO: Implementierung
+    content: faust1Text as Act[],
+    characters: faust1Characters,
     metadata: {
       subtitle: 'Der Tragödie erster Teil',
       themes: ['Erkenntnisdrang', 'Pakt mit dem Teufel', 'Liebe und Schuld', 'Rettung durch Liebe'],
@@ -53,8 +61,8 @@ export const availableWorks: WorkConfig[] = [
     genre: 'drama',
     language: 'de',
     year: 1779,
-    content: [], // TODO: Implementierung
-    characters: [], // TODO: Implementierung
+    content: nathanText as Act[],
+    characters: nathanCharacters,
     metadata: {
       subtitle: 'Ein dramatisches Gedicht',
       themes: ['Religionstoleranz', 'Humanität', 'Ringparabel', 'Aufklärung', 'Weisheit'],
@@ -72,8 +80,8 @@ export const availableWorks: WorkConfig[] = [
     genre: 'drama',
     language: 'de',
     year: 1808,
-    content: [], // TODO: Implementierung
-    characters: [], // TODO: Implementierung
+    content: derZerbrocheneKrugText as Act[],
+    characters: derZerbrocheneKrugCharacters,
     metadata: {
       subtitle: 'Ein Lustspiel',
       themes: ['Gerechtigkeit', 'Korruption', 'Komik', 'Dorfgemeinschaft', 'Richter und Recht'],
@@ -91,8 +99,8 @@ export const availableWorks: WorkConfig[] = [
     genre: 'drama',
     language: 'de',
     year: 1781,
-    content: [], // TODO: Implementierung
-    characters: [], // TODO: Implementierung
+    content: dieRaeuberText as Act[],
+    characters: dieRaeuberCharacters,
     metadata: {
       subtitle: 'Ein Schauspiel',
       themes: ['Brüderkonflikt', 'Tyrannei', 'Freiheit', 'Recht und Gerechtigkeit'],
@@ -153,8 +161,8 @@ export class WorkManager {
   }
 
   static isWorkImplemented(workId: string): boolean {
-    // Nur Iphigenie ist derzeit vollständig implementiert
-    return workId === 'iphigenie';
+    // Alle Werke sind jetzt mit Sample-Inhalten implementiert
+    return ['iphigenie', 'faust1', 'nathan-der-weise', 'der-zerbrochene-krug', 'die-raeuber'].includes(workId);
   }
 
   static getImplementedWorks(): WorkConfig[] {
@@ -174,13 +182,13 @@ export class WorkFactory {
       case 'iphigenie':
         return (await import('./iphigenieText')).iphigenieText;
       case 'faust1':
-        throw new Error('Faust I ist noch nicht implementiert');
+        return (await import('./faust1Text')).faust1Text;
       case 'nathan-der-weise':
-        throw new Error('Nathan der Weise ist noch nicht implementiert');
+        return (await import('./nathanText')).nathanText;
       case 'der-zerbrochene-krug':
-        throw new Error('Der zerbrochene Krug ist noch nicht implementiert');
+        return (await import('./derZerbrocheneKrugText')).derZerbrocheneKrugText;
       case 'die-raeuber':
-        throw new Error('Die Räuber sind noch nicht implementiert');
+        return (await import('./dieRaeuberText')).dieRaeuberText;
       default:
         throw new Error(`Unbekanntes Werk: ${workId}`);
     }
@@ -191,13 +199,13 @@ export class WorkFactory {
       case 'iphigenie':
         return (await import('./characters')).characters;
       case 'faust1':
-        throw new Error('Faust I Charaktere sind noch nicht implementiert');
+        return (await import('./faust1Characters')).faust1Characters;
       case 'nathan-der-weise':
-        throw new Error('Nathan der Weise Charaktere sind noch nicht implementiert');
+        return (await import('./nathanCharacters')).nathanCharacters;
       case 'der-zerbrochene-krug':
-        throw new Error('Der zerbrochene Krug Charaktere sind noch nicht implementiert');
+        return (await import('./derZerbrocheneKrugCharacters')).derZerbrocheneKrugCharacters;
       case 'die-raeuber':
-        throw new Error('Die Räuber Charaktere sind noch nicht implementiert');
+        return (await import('./dieRaeuberCharacters')).dieRaeuberCharacters;
       default:
         throw new Error(`Unbekannte Charaktere für Werk: ${workId}`);
     }

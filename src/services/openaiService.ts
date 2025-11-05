@@ -1,8 +1,7 @@
 import OpenAI from 'openai';
-import type { ExplanationRequest, ExplanationResponse } from '../types';
+import type { ExplanationRequest, ExplanationResponse, Act, WorkConfig } from '../types';
 import { CacheService } from './cacheService';
 import { GlobalCacheService } from './globalCacheService';
-import { iphigenieText } from '../data/iphigenieText';
 
 // Note: In a production app, you should use environment variables and a backend API
 // to keep your API key secure. This is for demonstration purposes only.
@@ -12,10 +11,19 @@ const openai = new OpenAI({
 });
 
 export class OpenAIService {
+  private static currentWork: WorkConfig | null = null;
+  private static currentWorkText: Act[] | null = null;
 
-  // Hilfsfunktion um eine Szene zu finden
+  // Setze das aktuelle Werk für Kontext
+  static setCurrentWork(work: WorkConfig | null, workText: Act[] | null) {
+    this.currentWork = work;
+    this.currentWorkText = workText;
+  }
+
+  // Hilfsfunktion um eine Szene zu finden (werk-agnostisch)
   private static getSceneByNumbers(actNumber: number, sceneNumber: number) {
-    const act = iphigenieText.find(act => act.number === actNumber);
+    if (!this.currentWorkText) return null;
+    const act = this.currentWorkText.find(act => act.number === actNumber);
     return act?.scenes.find(scene => scene.number === sceneNumber);
   }
 
@@ -25,13 +33,24 @@ export class OpenAIService {
     sceneContext?: string; 
     characterContext?: string;
     surroundingText?: string;
+    workInfo?: string;
   }> {
-    // Keine dynamischen Imports mehr nötig - direkter Import oben
-    
     let textualContext = '';
     let sceneContext = '';
     let characterContext = '';
     let surroundingText = '';
+    let workInfo = '';
+
+    // Werk-Information hinzufügen
+    if (this.currentWork) {
+      const workMeta = this.currentWork.metadata;
+      workInfo = `WERK: "${this.currentWork.title}" von ${this.currentWork.author} (${this.currentWork.year})
+EPOCHE: ${this.currentWork.epoch}
+GENRE: ${this.currentWork.genre === 'drama' ? 'Drama' : this.currentWork.genre}
+${workMeta?.subtitle ? `UNTERTITEL: ${workMeta.subtitle}` : ''}
+HAUPTTHEMEN: ${workMeta?.themes?.join(', ') || 'Nicht verfügbar'}
+KONTEXT: ${workMeta?.historicalContext || 'Nicht verfügbar'}`;
+    }
 
     try {
       if (request.actNumber && request.sceneNumber) {
@@ -50,30 +69,31 @@ export class OpenAIService {
             surroundingText = this.extractSurroundingStanzas(scene, request.text, 1);
           }
 
-          // 3. CHARAKTERKONTEXT - Informationen zu sprechenden Charakteren
-          const { characters } = await import('../data/characters');
-          const findCharacterByName = (name: string) => {
-            const normalizedName = name.toLowerCase().trim();
-            return characters.find(char => 
-              char.name.toLowerCase() === normalizedName || 
-              char.aliases.some(alias => alias.toLowerCase() === normalizedName)
-            );
-          };
+          // 3. CHARAKTERKONTEXT - Informationen zu sprechenden Charakteren (wenn verfügbar)
+          if (this.currentWork?.characters && Array.isArray(this.currentWork.characters)) {
+            const findCharacterByName = (name: string) => {
+              const normalizedName = name.toLowerCase().trim();
+              return this.currentWork!.characters?.find((char: any) => 
+                char.name.toLowerCase() === normalizedName || 
+                char.aliases?.some((alias: string) => alias.toLowerCase() === normalizedName)
+              );
+            };
 
-          const currentSpeakers = (speakers as string[]).map((speaker: string) => {
-            const cleanName = speaker.replace(':', '').trim();
-            return findCharacterByName(cleanName);
-          }).filter(Boolean);
+            const currentSpeakers = (speakers as string[]).map((speaker: string) => {
+              const cleanName = speaker.replace(':', '').trim();
+              return findCharacterByName(cleanName);
+            }).filter(Boolean);
 
-          if (currentSpeakers.length > 0) {
-            characterContext = currentSpeakers.map(char => 
-              `${char?.name}: ${char?.role} - ${char?.description?.substring(0, 100)}...`
-            ).join('; ');
+            if (currentSpeakers.length > 0) {
+              characterContext = currentSpeakers.map((char: any) => 
+                `${char?.name}: ${char?.role} - ${char?.description?.substring(0, 100)}...`
+              ).join('; ');
+            }
           }
 
           // 4. TEXTKONTEXT - Dramaturgie und Handlungsposition
           const actProgress = ((request.sceneNumber - 1) / Math.max(scene.number, 1)) * 100;
-          textualContext = `Handlungsposition: ${actProgress.toFixed(0)}% des ${request.actNumber}. Aufzugs. ${this.getDramaticMoment(request.actNumber, request.sceneNumber)}`;
+          textualContext = `Handlungsposition: ${actProgress.toFixed(0)}% des ${request.actNumber}. Aufzugs/Teils. ${this.getDramaticMoment(request.actNumber, request.sceneNumber)}`;
         }
       }
     } catch (error) {
@@ -85,7 +105,8 @@ export class OpenAIService {
       textualContext: textualContext.trim(),
       sceneContext: sceneContext.trim(),
       characterContext: characterContext.trim(),
-      surroundingText: surroundingText.trim()
+      surroundingText: surroundingText.trim(),
+      workInfo: workInfo.trim()
     };
   }
 
@@ -132,24 +153,6 @@ export class OpenAIService {
         return `${stanza.title}\n${verses.join('\n')}${stanza.verses.length > 3 ? '\n...' : ''}`;
       })
       .join('\n\n');
-  }
-
-  // Bestimmt das Werk basierend auf verfügbaren Informationen
-  private static determineWorkInfo(request: ExplanationRequest): string {
-    // TODO: Hier könnte später eine dynamische Werkerkennung implementiert werden
-    // basierend auf einer Werk-Konfiguration oder Metadaten
-    
-    // Für jetzt universelle Kategorisierung für alle Werke
-    if (request.actNumber && request.sceneNumber) {
-      return "Dramatisches Werk";
-    }
-    
-    // Hier könnten weitere Erkennungslogiken hinzugefügt werden:
-    // - Strophen-basierte Werke (Lyrik)
-    // - Kapitel-basierte Werke (Epik)
-    // - etc.
-    
-    return "Literarisches Werk";
   }
 
   // Universelle Kontext-Bestimmung für alle Werke
@@ -375,6 +378,7 @@ export class OpenAIService {
     sceneContext?: string; 
     characterContext?: string;
     surroundingText?: string;
+    workInfo?: string;
   }): string {
     // Spezielle Behandlung für Charaktervergleiche
     if (request.isCharacterComparison && request.character1 && request.character2) {
@@ -382,7 +386,7 @@ export class OpenAIService {
     }
 
     const contextInfo = request.actNumber && request.sceneNumber 
-      ? `${request.actNumber}. Aufzug, ${request.sceneNumber}. Szene` 
+      ? `${request.actNumber}. Aufzug/Teil, ${request.sceneNumber}. Szene/Abschnitt` 
       : '';
     
     const contextType = request.context === 'verse' ? 'EINZELVERS' : 
@@ -392,8 +396,12 @@ export class OpenAIService {
 
     // Erweiterte Kontextinformationen aufbauen
     let contextSection = '';
-    if (request.textualContext || request.sceneContext || request.characterContext || request.surroundingText) {
-      contextSection = '\n--- ERWEITERTER KONTEXT FÜR PRÄZISERE ANALYSE ---\n';
+    if (request.workInfo || request.textualContext || request.sceneContext || request.characterContext || request.surroundingText) {
+      contextSection = '\n--- ERWEIT ERTER WERK- UND TEXTKONTEXT FÜR PRÄZISERE ANALYSE ---\n';
+      
+      if (request.workInfo) {
+        contextSection += `\n${request.workInfo}\n`;
+      }
       
       if (request.textualContext) {
         contextSection += `\nDRAMATURGISCHE EINORDNUNG: ${request.textualContext}`;
@@ -417,20 +425,29 @@ ${request.surroundingText}`;
 
     return `ANALYSE-AUFTRAG: Literaturwissenschaftliche Textanalyse
 
-TEXTQUELLE: ${this.determineWorkInfo(request)} (${contextInfo})
+TEXTQUELLE: ${this.currentWork?.title || 'Literarisches Werk'} (${contextInfo || 'Kontext nicht verfügbar'})
+AUTOR: ${this.currentWork?.author || 'Unbekannt'}
+EPOCHE: ${this.currentWork?.epoch || 'Zu bestimmen'}
 ANALYSEEBENE: ${contextType}
-KONTEXT: ${dramaticContext}${contextSection}
+STRUKTURKONTEXT: ${dramaticContext}${contextSection}
 
 TEXTPASSAGE ZU ANALYSIEREN:
 "${request.text}"
 
 UNIVERSELLE PRÄZISIONS-ANALYSE:
-1. WÖRTLICHE BEDEUTUNG: Was steht exakt da? Jedes Wort im epochenspezifischen Kontext
+1. WÖRTLICHE BEDEUTUNG: Was steht exakt da? Jedes Wort im epochenspezifischen Kontext des Werks
 2. SPRACHLICHE KONSTRUKTION: Syntax, Wortstellung und sprachliche Besonderheiten der Zeit
-3. SITUATIVER KONTEXT: Sprecher, Situation, emotionale/dramatische Lage
+3. SITUATIVER KONTEXT: Sprecher, Situation, emotionale/dramatische Lage IM KONTEXT DIESES WERKS
 4. TEXTEBENE: Was geschieht konkret in diesem Moment des Werks?
 5. BELEGBARE INTERPRETATION: Nur analysieren, was textlich nachweisbar ist
-6. GATTUNGSKONTEXT: Genre-spezifische Konventionen berücksichtigen
+6. WERK-SPEZIFISCH: Berücksichtige die speziellen Themen und den Kontext dieses spezifischen Werks
+
+ANALYSE IM WERKKONTEXT:
+⚠️ Nutze alle bereitgestellten Informationen über das Werk (Titel, Autor, Epoche, Themen, Kontext)
+⚠️ Beziehe die spezifischen Charaktere und deren Beziehungen ein (falls verfügbar)
+⚠️ Berücksichtige die dramaturgische Position im Gesamtwerk
+⚠️ Erkenne werkspezifische Motive und Themen
+⚠️ Passe die Analysemethoden an Genre und Epoche des Werks an
 
 METHODISCHES VORGEHEN:
 ⚠️ WORTEBENE: Historische Wortbedeutungen vs. moderne Interpretationen
@@ -442,15 +459,15 @@ METHODISCHES VORGEHEN:
 ANALYSE-STRUKTUR:
 1. WÖRTLICHE BEDEUTUNG: Jedes Wort/jede Wendung in seinem sprachhistorischen Kontext
 2. KOMMUNIKATIONSSITUATION: Wer spricht/denkt/handelt? Unter welchen Umständen?
-3. WERKKONTEXT: Was passiert an dieser Stelle? Wie fügt es sich in die Handlung?
-4. LITERARISCHE GESTALTUNG: Warum wählt der Autor diese spezielle Formulierung?
-5. GESAMTFUNKTION: Welche Bedeutung hat diese Stelle für das gesamte Werk?
+3. WERKKONTEXT: Was passiert an dieser Stelle? Wie fügt es sich in die Handlung DIESES WERKS?
+4. LITERARISCHE GESTALTUNG: Warum wählt ${this.currentWork?.author || 'der Autor'} diese spezielle Formulierung?
+5. GESAMTFUNKTION: Welche Bedeutung hat diese Stelle für ${this.currentWork?.title || 'das gesamte Werk'}?
 
 QUALITÄTS-VALIDIERUNG:
 ✓ Stimmen alle Wortinterpretationen mit dem historischen Sprachgebrauch überein?
 ✓ Ist die grammatische/syntaktische Analyse korrekt?
-✓ Entspricht die Deutung dem bereitgestellten Kontext?
-✓ Werden verfügbare Zusatzinformationen (Szene, Figuren) genutzt?
+✓ Entspricht die Deutung dem bereitgestellten Werk- und Szenenkontext?
+✓ Werden verfügbare Zusatzinformationen (Werk, Szene, Figuren, Themen) genutzt?
 ✓ Bleibt die Analyse bei nachweisbaren Textaussagen?
 
 Antworte ausschließlich im vorgegebenen JSON-Format.`;

@@ -160,12 +160,6 @@ export function Library({ onClose, onWorkSelect, currentWorkId }: LibraryProps) 
             </div>
           </div>
         </div>
-
-        <div className="library-footer">
-          <p className="library-stats">
-            📊 {WorkManager.getImplementedWorks().length} von {allWorks.length} Werken verfügbar
-          </p>
-        </div>
       </div>
     </div>
   );

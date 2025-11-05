@@ -7,7 +7,7 @@ import { SearchBox } from './components/SearchBox';
 import { Library } from './components/Library';
 import { iphigenieText } from './data/iphigenieText';
 import { WorkManager } from './data/works';
-import type { ExplanationResponse, WorkConfig } from './types';
+import type { ExplanationResponse, WorkConfig, Act } from './types';
 import type { Character } from './data/characters';
 import { OpenAIService } from './services/openaiService';
 import { analyticsService } from './services/analyticsService';
@@ -35,6 +35,8 @@ function App() {
   // Library & Work Management
   const [isLibraryOpen, setIsLibraryOpen] = useState(false);
   const [currentWorkId, setCurrentWorkId] = useState<string>('iphigenie');
+  const [currentWorkText, setCurrentWorkText] = useState<Act[]>(iphigenieText);
+  const [currentWorkConfig, setCurrentWorkConfig] = useState<WorkConfig | null>(null);
   
   // Panel states
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
@@ -48,7 +50,16 @@ function App() {
   // Load initial work
   useEffect(() => {
     const loadWork = async () => {
-      await WorkManager.setCurrentWork(currentWorkId);
+      const work = await WorkManager.setCurrentWork(currentWorkId);
+      if (work) {
+        setCurrentWorkConfig(work);
+        if (work.content && Array.isArray(work.content) && work.content.length > 0) {
+          const workText = work.content as Act[];
+          setCurrentWorkText(workText);
+          // Setze Werk-Kontext für OpenAI Service
+          OpenAIService.setCurrentWork(work, workText);
+        }
+      }
     };
     loadWork();
   }, [currentWorkId]);
@@ -273,8 +284,8 @@ function App() {
           >
             <span className="header-book-icon">📚</span>
             <div className="header-book-text">
-              <span className="header-book-title">Iphigenie auf Tauris</span>
-              <span className="header-book-author">Johann Wolfgang von Goethe</span>
+              <span className="header-book-title">{currentWorkConfig?.title || 'Iphigenie auf Tauris'}</span>
+              <span className="header-book-author">{currentWorkConfig?.author || 'Johann Wolfgang von Goethe'}</span>
             </div>
           </button>
 
@@ -317,7 +328,7 @@ function App() {
               {/* Search */}
               <div className="menu-section">
                 <SearchBox 
-                  text={iphigenieText}
+                  text={currentWorkText}
                   onResultSelect={(result) => {
                     setIsSettingsOpen(false);
                     setIsNavigationOpen(false);
@@ -394,7 +405,7 @@ function App() {
 
       {/* Navigation Panel (separate overlay) */}
       <QuickNavigation 
-        acts={iphigenieText.map(act => ({
+        acts={currentWorkText.map(act => ({
           id: act.id,
           title: act.title,
           number: act.number
@@ -416,7 +427,7 @@ function App() {
       <main className="app-main">
         <div className="reader-container">
           <EReader 
-            text={iphigenieText} 
+            text={currentWorkText} 
             onTextSelection={handleTextSelection}
             onCharacterComparison={handleCharacterComparison}
             characterForComparison={characterForComparison}
