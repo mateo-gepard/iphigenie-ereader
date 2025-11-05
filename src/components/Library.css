@@ -31,17 +31,14 @@
   align-items: center;
   padding: 24px 32px;
   border-bottom: 1px solid var(--border-color);
-  background: linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(59, 130, 246, 0.1));
+  background: var(--bg-primary);
 }
 
 .library-header h2 {
   margin: 0;
   font-size: 28px;
   font-weight: 700;
-  background: linear-gradient(135deg, #8b5cf6, #3b82f6);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: var(--text-primary);
 }
 
 .library-content {
@@ -79,12 +76,10 @@
   transform: translateY(-50%);
   width: 50px;
   height: 50px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(20px) saturate(180%);
-  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: none;
+  border: none;
   color: var(--text-primary);
-  font-size: 32px;
+  font-size: 48px;
   font-weight: 200;
   cursor: pointer;
   z-index: 100;
@@ -92,17 +87,25 @@
   align-items: center;
   justify-content: center;
   transition: all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  opacity: 0.6;
+  outline: none;
+  padding: 0;
 }
 
 .carousel-arrow:hover {
-  background: rgba(255, 255, 255, 0.2);
-  transform: translateY(-50%) scale(1.05);
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+  opacity: 1;
+  transform: translateY(-50%) scale(1.08);
+  background: none;
 }
 
 .carousel-arrow:active {
-  transform: translateY(-50%) scale(0.95);
+  transform: translateY(-50%) scale(0.98);
+  opacity: 0.8;
+}
+
+.carousel-arrow:focus {
+  outline: none;
+  background: none;
 }
 
 .carousel-arrow-left {
