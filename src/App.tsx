@@ -34,7 +34,6 @@ function App() {
   
   // Library & Work Management
   const [isLibraryOpen, setIsLibraryOpen] = useState(false);
-  const [currentWork, setCurrentWork] = useState<WorkConfig | null>(null);
   const [currentWorkId, setCurrentWorkId] = useState<string>('iphigenie');
   
   // Panel states
@@ -49,10 +48,7 @@ function App() {
   // Load initial work
   useEffect(() => {
     const loadWork = async () => {
-      const work = await WorkManager.setCurrentWork(currentWorkId);
-      if (work) {
-        setCurrentWork(work);
-      }
+      await WorkManager.setCurrentWork(currentWorkId);
     };
     loadWork();
   }, [currentWorkId]);
