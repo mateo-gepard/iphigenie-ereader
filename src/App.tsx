@@ -4,9 +4,10 @@ import { ExplanationPanel } from './components/ExplanationPanel';
 import { SettingsPanel } from './components/SettingsPanel';
 import { QuickNavigation } from './components/QuickNavigation';
 import { SearchBox } from './components/SearchBox';
-
+import { Library } from './components/Library';
 import { iphigenieText } from './data/iphigenieText';
-import type { ExplanationResponse } from './types';
+import { WorkManager } from './data/works';
+import type { ExplanationResponse, WorkConfig } from './types';
 import type { Character } from './data/characters';
 import { OpenAIService } from './services/openaiService';
 import { analyticsService } from './services/analyticsService';
@@ -31,6 +32,11 @@ function App() {
   const [isGeneratingComparison, setIsGeneratingComparison] = useState(false);
   const [currentAct, setCurrentAct] = useState<number>(1);
   
+  // Library & Work Management
+  const [isLibraryOpen, setIsLibraryOpen] = useState(false);
+  const [currentWork, setCurrentWork] = useState<WorkConfig | null>(null);
+  const [currentWorkId, setCurrentWorkId] = useState<string>('iphigenie');
+  
   // Panel states
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isNavigationOpen, setIsNavigationOpen] = useState(false);
@@ -39,6 +45,17 @@ function App() {
   // Header auto-hide
   const [isHeaderVisible, setIsHeaderVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
+
+  // Load initial work
+  useEffect(() => {
+    const loadWork = async () => {
+      const work = await WorkManager.setCurrentWork(currentWorkId);
+      if (work) {
+        setCurrentWork(work);
+      }
+    };
+    loadWork();
+  }, [currentWorkId]);
 
   // Analytics Setup
   useEffect(() => {
@@ -224,6 +241,22 @@ function App() {
     }
   };
 
+  const handleWorkSelect = async (work: WorkConfig) => {
+    analyticsService.trackEvent('work_changed', {
+      from: currentWorkId,
+      to: work.id,
+      title: work.title
+    });
+    
+    setCurrentWorkId(work.id);
+    setCurrentAct(1);
+    setSelectedText('');
+    setExplanation(null);
+    
+    // Scroll to top
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   return (
         <div className="app" onClick={(e) => {
           // Close panels when clicking outside
@@ -242,6 +275,19 @@ function App() {
           <p className="subtitle">Ein interaktiver eReader mit KI-unterstützter Analyse</p>
         </div>
         <div className="app-header-controls">
+          <button 
+            className="library-btn"
+            onClick={() => {
+              setIsLibraryOpen(true);
+              setIsSettingsOpen(false);
+              setIsNavigationOpen(false);
+              setIsAnalyticsOpen(false);
+              analyticsService.trackEvent('library_opened');
+            }}
+            title="📚 Bibliothek öffnen"
+          >
+            📚 Bibliothek
+          </button>
           <SearchBox 
             text={iphigenieText}
             onResultSelect={(result) => {
@@ -341,6 +387,15 @@ function App() {
         </div>
 
       </main>
+
+      {/* Library Modal */}
+      {isLibraryOpen && (
+        <Library 
+          onClose={() => setIsLibraryOpen(false)}
+          onWorkSelect={handleWorkSelect}
+          currentWorkId={currentWorkId}
+        />
+      )}
 
       {/* Simple Secure Analytics Dashboard */}
       {isAnalyticsOpen && (

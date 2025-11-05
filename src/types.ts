@@ -67,3 +67,23 @@ export interface ExplanationResponse {
   historicalContext?: string;
   mythologicalBackground?: string;
 }
+
+export interface WorkConfig {
+  id: string;
+  title: string;
+  author: string;
+  year: number;
+  epoch: string;
+  genre: string;
+  language: string;
+  content: Act[];
+  characters: any[];
+  metadata?: {
+    subtitle?: string;
+    cover?: string;
+    description?: string;
+    themes?: string[];
+    historicalContext?: string;
+    notes?: string;
+  };
+}
