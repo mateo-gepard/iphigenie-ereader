@@ -18,14 +18,16 @@ export function QuickNavigation({ acts, currentAct, isExpanded = false, onToggle
 
   return (
     <div className="quick-navigation">
-      <button 
-        className="quick-nav-toggle"
-        onClick={handleToggle}
-        title="Schnelle Navigation"
-      >
-        <span className="nav-icon">📚</span>
-        <span className="nav-text">Aufzüge</span>
-      </button>
+      {!onToggle && (
+        <button 
+          className="quick-nav-toggle"
+          onClick={handleToggle}
+          title="Schnelle Navigation"
+        >
+          <span className="nav-icon">📚</span>
+          <span className="nav-text">Aufzüge</span>
+        </button>
+      )}
       
       {expanded && (
         <div className="quick-nav-menu">

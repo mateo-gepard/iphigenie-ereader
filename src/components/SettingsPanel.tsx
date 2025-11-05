@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { ThemeToggle } from './ThemeToggle';
 import { TypographyControls } from './TypographyControls';
 import './SettingsPanel.css';
 
@@ -17,23 +16,20 @@ export function SettingsPanel({ isOpen = false, onToggle }: SettingsPanelProps) 
 
   return (
     <div className="settings-panel">
-      <button 
-        className="settings-toggle"
-        onClick={handleToggle}
-        title="Einstellungen"
-        aria-label="Einstellungen öffnen"
-      >
-        <span className="settings-icon">⚙️</span>
-        <span className="settings-label">Einstellungen</span>
-      </button>
+      {onToggle && (
+        <button 
+          className="settings-toggle"
+          onClick={handleToggle}
+          title="Einstellungen"
+          aria-label="Einstellungen öffnen"
+        >
+          <span className="settings-icon">⚙️</span>
+          <span className="settings-label">Einstellungen</span>
+        </button>
+      )}
       
-      {open && (
+      {(open || !onToggle) && (
         <div className="settings-dropdown">
-          <div className="settings-section">
-            <h3>Design</h3>
-            <ThemeToggle />
-          </div>
-          
           <div className="settings-section">
             <h3>Typografie</h3>
             <TypographyControls />

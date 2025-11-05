@@ -105,13 +105,6 @@ function App() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, [lastScrollY, isHeaderVisible]);
 
-  const handleSettingsToggle = () => {
-    setIsSettingsOpen(!isSettingsOpen);
-    if (!isSettingsOpen) {
-      setIsNavigationOpen(false); // Close navigation when opening settings
-    }
-  };
-
   const handleNavigationToggle = () => {
     setIsNavigationOpen(!isNavigationOpen);
     if (!isNavigationOpen) {
@@ -258,101 +251,171 @@ function App() {
   };
 
   return (
-        <div className="app" onClick={(e) => {
-          // Close panels when clicking outside
-          const target = e.target as HTMLElement;
-          const isSettingsClick = target.closest('.settings-panel');
-          const isNavigationClick = target.closest('.quick-navigation');
-          
-          if (!isSettingsClick && !isNavigationClick) {
-            setIsSettingsOpen(false);
-            setIsNavigationOpen(false);
-          }
-        }}>
+    <div className="app" onClick={(e) => {
+      // Close panels when clicking outside
+      const target = e.target as HTMLElement;
+      const isSettingsClick = target.closest('.settings-panel');
+      const isNavigationClick = target.closest('.quick-navigation');
+      const isMenuClick = target.closest('.menu-toggle') || target.closest('.menu-panel') || target.closest('.menu-overlay');
+      
+      if (!isSettingsClick && !isNavigationClick && !isMenuClick) {
+        setIsSettingsOpen(false);
+        setIsNavigationOpen(false);
+      }
+    }}>
       <header className={`app-header ${isHeaderVisible ? 'visible' : 'hidden'}`}>
-        <div className="app-header-content">
-          <h1>Iphigenie auf Tauris</h1>
-          <p className="subtitle">Ein interaktiver eReader mit KI-unterstützter Analyse</p>
-        </div>
-        <div className="app-header-controls">
+        <div className="header-content">
+          {/* Left: Logo + Book Title */}
           <button 
-            className="library-btn"
-            onClick={() => {
+            className="header-book-info"
+            onClick={(e) => {
+              e.stopPropagation();
               setIsLibraryOpen(true);
-              setIsSettingsOpen(false);
-              setIsNavigationOpen(false);
-              setIsAnalyticsOpen(false);
               analyticsService.trackEvent('library_opened');
             }}
-            title="📚 Bibliothek öffnen"
+            title="Bibliothek öffnen"
           >
-            📚 Bibliothek
+            <span className="header-book-icon">📚</span>
+            <div className="header-book-text">
+              <span className="header-book-title">Iphigenie auf Tauris</span>
+              <span className="header-book-author">Johann Wolfgang von Goethe</span>
+            </div>
           </button>
-          <SearchBox 
-            text={iphigenieText}
-            onResultSelect={(result) => {
-              // Close panels when searching
-              setIsSettingsOpen(false);
-              setIsNavigationOpen(false);
-              setIsAnalyticsOpen(false);
-              
-              analyticsService.trackEvent('search_result_selected', {
-                resultId: result.id,
-                resultText: result.text.substring(0, 50)
-              });
-              
-              // Scroll to the selected element
-              const element = document.getElementById(result.id);
-              if (element) {
-                element.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                // Highlight the element briefly
-                element.style.backgroundColor = 'var(--accent-color)';
-                element.style.color = 'white';
-                setTimeout(() => {
-                  element.style.backgroundColor = '';
-                  element.style.color = '';
-                }, 2000);
-              }
-            }}
-          />
-          <QuickNavigation 
-            acts={iphigenieText.map(act => ({
-              id: act.id,
-              title: act.title,
-              number: act.number
-            }))}
-            currentAct={currentAct}
-            isExpanded={isNavigationOpen}
-            onToggle={handleNavigationToggle}
-            onActSelect={(actNumber) => {
-              setCurrentAct(actNumber);
-              setIsNavigationOpen(false); // Close navigation after selection
-              analyticsService.trackEvent('act_navigation', { actNumber });
-              // Scroll to act
-              const actElement = document.getElementById(`act-${actNumber}`);
-              if (actElement) {
-                actElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
-              }
-            }}
-          />
+
+          {/* Right: Menu Toggle */}
           <button 
-            className="analytics-btn"
-            onClick={() => {
-              setIsAnalyticsOpen(!isAnalyticsOpen);
-              setIsSettingsOpen(false);
-              setIsNavigationOpen(false);
-              analyticsService.trackEvent('analytics_dashboard_opened');
+            className={`menu-toggle ${isSettingsOpen ? 'active' : ''}`}
+            onClick={(e) => {
+              e.stopPropagation();
+              setIsSettingsOpen(!isSettingsOpen);
+              // Close other panels when opening menu
+              if (!isSettingsOpen) {
+                setIsNavigationOpen(false);
+                setIsAnalyticsOpen(false);
+              }
             }}
-            title="🔐 Secure Analytics (Passwort erforderlich)"
+            title="Menü"
           >
-            📊
+            <span className="menu-icon"></span>
+            <span className="menu-icon"></span>
+            <span className="menu-icon"></span>
           </button>
-          <SettingsPanel 
-            isOpen={isSettingsOpen}
-            onToggle={handleSettingsToggle}
-          />
         </div>
       </header>
+
+      {/* Slide-out Menu Panel */}
+      {isSettingsOpen && (
+        <div className="menu-overlay" onClick={() => setIsSettingsOpen(false)}>
+          <div className="menu-panel" onClick={(e) => e.stopPropagation()}>
+            <div className="menu-header">
+              <h3>Menü</h3>
+              <button 
+                className="menu-close"
+                onClick={() => setIsSettingsOpen(false)}
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="menu-content">
+              {/* Search */}
+              <div className="menu-section">
+                <SearchBox 
+                  text={iphigenieText}
+                  onResultSelect={(result) => {
+                    setIsSettingsOpen(false);
+                    setIsNavigationOpen(false);
+                    setIsAnalyticsOpen(false);
+                    
+                    analyticsService.trackEvent('search_result_selected', {
+                      resultId: result.id,
+                      resultText: result.text.substring(0, 50)
+                    });
+                    
+                    const element = document.getElementById(result.id);
+                    if (element) {
+                      element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                      element.style.backgroundColor = 'var(--accent-color)';
+                      element.style.color = 'white';
+                      setTimeout(() => {
+                        element.style.backgroundColor = '';
+                        element.style.color = '';
+                      }, 2000);
+                    }
+                  }}
+                />
+              </div>
+
+              {/* Menu Items */}
+              <div className="menu-section">
+                <button 
+                  className="menu-item"
+                  onClick={() => {
+                    setIsLibraryOpen(true);
+                    setIsSettingsOpen(false);
+                    analyticsService.trackEvent('library_opened');
+                  }}
+                >
+                  <span className="menu-item-icon">📚</span>
+                  <span className="menu-item-text">Bibliothek</span>
+                </button>
+
+                <button 
+                  className="menu-item"
+                  onClick={() => {
+                    setIsNavigationOpen(true);
+                    setIsSettingsOpen(false);
+                  }}
+                >
+                  <span className="menu-item-icon">🧭</span>
+                  <span className="menu-item-text">Navigation</span>
+                </button>
+
+                <button 
+                  className="menu-item"
+                  onClick={() => {
+                    setIsAnalyticsOpen(!isAnalyticsOpen);
+                    setIsSettingsOpen(false);
+                    analyticsService.trackEvent('analytics_dashboard_opened');
+                  }}
+                >
+                  <span className="menu-item-icon">📊</span>
+                  <span className="menu-item-text">Analytics</span>
+                </button>
+              </div>
+
+              {/* Settings Section */}
+              <div className="menu-section menu-section--settings">
+                <h4 className="menu-section-title">Einstellungen</h4>
+                <SettingsPanel 
+                  isOpen={true}
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Navigation Panel (separate overlay) */}
+      <QuickNavigation 
+        acts={iphigenieText.map(act => ({
+          id: act.id,
+          title: act.title,
+          number: act.number
+        }))}
+        currentAct={currentAct}
+        isExpanded={isNavigationOpen}
+        onToggle={handleNavigationToggle}
+        onActSelect={(actNumber) => {
+          setCurrentAct(actNumber);
+          setIsNavigationOpen(false);
+          analyticsService.trackEvent('act_navigation', { actNumber });
+          const actElement = document.getElementById(`act-${actNumber}`);
+          if (actElement) {
+            actElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }
+        }}
+      />
       
       <main className="app-main">
         <div className="reader-container">

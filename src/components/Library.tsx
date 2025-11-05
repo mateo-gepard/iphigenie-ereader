@@ -10,16 +10,15 @@ interface LibraryProps {
 }
 
 export function Library({ onClose, onWorkSelect, currentWorkId }: LibraryProps) {
-  const [selectedFilter, setSelectedFilter] = useState<'all' | 'implemented' | 'planned'>('all');
+  const [currentIndex, setCurrentIndex] = useState(0);
   
   const allWorks = WorkManager.getAllWorks();
-  const implementedWorks = WorkManager.getImplementedWorks();
-  const plannedWorks = WorkManager.getPlaceholderWorks();
-  
-  const worksToDisplay = 
-    selectedFilter === 'all' ? allWorks :
-    selectedFilter === 'implemented' ? implementedWorks :
-    plannedWorks;
+
+  // Set initial index to current work
+  useState(() => {
+    const currentIdx = allWorks.findIndex(w => w.id === currentWorkId);
+    if (currentIdx !== -1) setCurrentIndex(currentIdx);
+  });
 
   const handleWorkClick = (work: WorkConfig) => {
     if (WorkManager.isWorkImplemented(work.id)) {
@@ -30,6 +29,18 @@ export function Library({ onClose, onWorkSelect, currentWorkId }: LibraryProps) 
     }
   };
 
+  const goToNext = () => {
+    setCurrentIndex((prev) => (prev + 1) % allWorks.length);
+  };
+
+  const goToPrev = () => {
+    setCurrentIndex((prev) => (prev - 1 + allWorks.length) % allWorks.length);
+  };
+
+  const goToSlide = (index: number) => {
+    setCurrentIndex(index);
+  };
+
   return (
     <div className="library-overlay" onClick={onClose}>
       <div className="library-modal" onClick={(e) => e.stopPropagation()}>
@@ -38,100 +49,121 @@ export function Library({ onClose, onWorkSelect, currentWorkId }: LibraryProps) 
           <button className="close-btn" onClick={onClose}>✕</button>
         </div>
 
-        <div className="library-filters">
-          <button 
-            className={`filter-btn ${selectedFilter === 'all' ? 'active' : ''}`}
-            onClick={() => setSelectedFilter('all')}
-          >
-            Alle ({allWorks.length})
-          </button>
-          <button 
-            className={`filter-btn ${selectedFilter === 'implemented' ? 'active' : ''}`}
-            onClick={() => setSelectedFilter('implemented')}
-          >
-            ✅ Verfügbar ({implementedWorks.length})
-          </button>
-          <button 
-            className={`filter-btn ${selectedFilter === 'planned' ? 'active' : ''}`}
-            onClick={() => setSelectedFilter('planned')}
-          >
-            🚧 Geplant ({plannedWorks.length})
-          </button>
-        </div>
-
         <div className="library-content">
-          <div className="works-grid">
-            {worksToDisplay.map(work => {
-              const isImplemented = WorkManager.isWorkImplemented(work.id);
-              const isCurrent = work.id === currentWorkId;
-              
-              return (
-                <div 
-                  key={work.id}
-                  className={`work-card ${!isImplemented ? 'work-card--disabled' : ''} ${isCurrent ? 'work-card--current' : ''}`}
-                  onClick={() => handleWorkClick(work)}
-                >
-                  {/* Cover Image */}
-                  <div className="work-cover">
-                    {work.metadata?.cover ? (
-                      <img 
-                        src={work.metadata.cover} 
-                        alt={`Cover: ${work.title}`}
-                        onError={(e) => {
-                          // Fallback wenn Bild nicht geladen werden kann
-                          (e.target as HTMLImageElement).style.display = 'none';
-                          const parent = (e.target as HTMLImageElement).parentElement;
-                          if (parent) {
-                            parent.innerHTML = `<div class="work-cover-fallback">📖</div>`;
-                          }
-                        }}
-                      />
-                    ) : (
-                      <div className="work-cover-fallback">📖</div>
-                    )}
-                    
-                    {/* Status Badge */}
-                    {isCurrent && (
-                      <div className="work-badge work-badge--current">
-                        ✓ Aktuell
-                      </div>
-                    )}
-                    {!isImplemented && (
-                      <div className="work-badge work-badge--planned">
-                        🚧 Geplant
-                      </div>
-                    )}
-                  </div>
+          <div className="carousel-container">
+            {/* Navigation Arrows */}
+            <button className="carousel-arrow carousel-arrow-left" onClick={goToPrev}>
+              ‹
+            </button>
+            <button className="carousel-arrow carousel-arrow-right" onClick={goToNext}>
+              ›
+            </button>
 
-                  {/* Work Info */}
-                  <div className="work-info">
-                    <h3 className="work-title">{work.title}</h3>
-                    {work.metadata?.subtitle && (
-                      <p className="work-subtitle">{work.metadata.subtitle}</p>
-                    )}
-                    <p className="work-author">{getWorkDescription(work)}</p>
-                    <div className="work-meta">
-                      <span className="work-epoch">{work.epoch}</span>
+            {/* 3D Carousel */}
+            <div className="carousel-3d">
+              {allWorks.map((work, index) => {
+                const isImplemented = WorkManager.isWorkImplemented(work.id);
+                const isCurrent = work.id === currentWorkId;
+                const offset = index - currentIndex;
+                
+                return (
+                  <div 
+                    key={work.id}
+                    className={`carousel-card ${offset === 0 ? 'carousel-card--center' : ''} ${!isImplemented ? 'carousel-card--disabled' : ''} ${isCurrent ? 'carousel-card--current' : ''}`}
+                    style={{
+                      transform: `
+                        translateX(${offset * 350}px)
+                        translateZ(${-Math.abs(offset) * 150}px)
+                        rotateY(${offset * -8}deg)
+                        scale(${1 - Math.abs(offset) * 0.1})
+                      `,
+                      opacity: Math.abs(offset) > 2 ? 0 : 1 - Math.abs(offset) * 0.2,
+                      zIndex: 10 - Math.abs(offset),
+                      pointerEvents: Math.abs(offset) > 1 ? 'none' : 'auto',
+                      filter: Math.abs(offset) > 0 ? `brightness(${1 - Math.abs(offset) * 0.15})` : 'none'
+                    }}
+                    onClick={() => {
+                      if (offset === 0) {
+                        handleWorkClick(work);
+                      } else {
+                        goToSlide(index);
+                      }
+                    }}
+                  >
+                    {/* Cover Image */}
+                    <div className="carousel-cover">
+                      {work.metadata?.cover ? (
+                        <img 
+                          src={work.metadata.cover} 
+                          alt={`Cover: ${work.title}`}
+                          onError={(e) => {
+                            (e.target as HTMLImageElement).style.display = 'none';
+                            const parent = (e.target as HTMLImageElement).parentElement;
+                            if (parent) {
+                              parent.innerHTML = `<div class="carousel-cover-fallback">📖</div>`;
+                            }
+                          }}
+                        />
+                      ) : (
+                        <div className="carousel-cover-fallback">📖</div>
+                      )}
+                      
+                      {/* Status Badge */}
+                      {isCurrent && (
+                        <div className="carousel-badge carousel-badge--current">
+                          ✓ Aktuell
+                        </div>
+                      )}
+                      {!isImplemented && (
+                        <div className="carousel-badge carousel-badge--planned">
+                          🚧 Geplant
+                        </div>
+                      )}
                     </div>
-                    
-                    {/* Themes */}
-                    {work.metadata?.themes && work.metadata.themes.length > 0 && (
-                      <div className="work-themes">
-                        {work.metadata.themes.slice(0, 3).map((theme, idx) => (
-                          <span key={idx} className="work-theme">{theme}</span>
-                        ))}
+
+                    {/* Work Info - Only visible when centered */}
+                    {offset === 0 && (
+                      <div className="carousel-info">
+                        <h3 className="carousel-title">{work.title}</h3>
+                        {work.metadata?.subtitle && (
+                          <p className="carousel-subtitle">{work.metadata.subtitle}</p>
+                        )}
+                        <p className="carousel-author">{getWorkDescription(work)}</p>
+                        <div className="carousel-meta">
+                          <span className="carousel-epoch">{work.epoch}</span>
+                        </div>
+                        
+                        {/* Themes */}
+                        {work.metadata?.themes && work.metadata.themes.length > 0 && (
+                          <div className="carousel-themes">
+                            {work.metadata.themes.slice(0, 3).map((theme, idx) => (
+                              <span key={idx} className="carousel-theme">{theme}</span>
+                            ))}
+                          </div>
+                        )}
                       </div>
                     )}
                   </div>
-                </div>
-              );
-            })}
+                );
+              })}
+            </div>
+
+            {/* Dots Navigation */}
+            <div className="carousel-dots">
+              {allWorks.map((_, index) => (
+                <button
+                  key={index}
+                  className={`carousel-dot ${index === currentIndex ? 'carousel-dot--active' : ''}`}
+                  onClick={() => goToSlide(index)}
+                />
+              ))}
+            </div>
           </div>
         </div>
 
         <div className="library-footer">
           <p className="library-stats">
-            📊 {implementedWorks.length} von {allWorks.length} Werken verfügbar
+            📊 {WorkManager.getImplementedWorks().length} von {allWorks.length} Werken verfügbar
           </p>
         </div>
       </div>
