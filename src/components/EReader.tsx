@@ -1,13 +1,15 @@
 import { useState, useRef } from 'react';
-import type { Act, ExplanationResponse } from '../types';
+import type { Act, ExplanationResponse, WorkType, DialogBlock, Verse } from '../types';
 import type { Character } from '../data/characters';
 import { OpenAIService } from '../services/openaiService';
 import { findCharactersInText } from '../data/characters';
 import { CharacterPopup } from './CharacterPopup';
+import { SmartDramaRenderer } from './drama-renderers/SmartDramaRenderer';
 import './EReader.css';
 
 interface EReaderProps {
   text: Act[];
+  workType: WorkType;
   onTextSelection: (
     text: string, 
     explanation: ExplanationResponse | null, 
@@ -25,7 +27,8 @@ interface EReaderProps {
 }
 
 export function EReader({ 
-  text, 
+  text,
+  workType,
   onTextSelection, 
   onCharacterComparison,
   characterForComparison,
@@ -523,45 +526,23 @@ export function EReader({
             }}
           >
             {act.title}
-          </h2>            {act.scenes.map((scene: any) => (
-              <div key={scene.id} className="scene" id={scene.id}>
-                <h3 className="scene-title">{scene.title}</h3>
-                
-                {scene.stanzas.map((stanza: any) => (
-                  <div 
-                    key={stanza.id} 
-                    id={stanza.id}
-                    className={`stanza ${selectedStanzaId === stanza.id ? 'selected-stanza' : ''}`}
-                  >
-                    <div className="stanza-header">
-                      <h4 
-                        className="stanza-title clickable"
-                        onClick={() => handleStanzaClick(stanza, act.number, scene.number)}
-                      >
-                        {stanza.title}
-                      </h4>
-                    </div>
-                    
-                    <div className="verses">
-                      {stanza.verses.map((verse: any) => (
-                        <div
-                          key={verse.id}
-                          id={verse.id}
-                          className={`verse ${selectedVerseIds.includes(verse.id) ? 'selected-verse' : ''} clickable`}
-                          onClick={(e) => handleVerseClick(verse, act.number, scene.number, e)}
-                        >
-                          <span className="line-number"></span>
-                          <span className="verse-text">
-                            {renderTextWithCharacters(verse.text)}
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ))}
-          </div>
+          </h2>
+          
+          {act.scenes.map((scene: any) => (
+            <SmartDramaRenderer
+              key={scene.id}
+              scene={scene}
+              workType={workType}
+              onVerseClick={(verse, speaker, e) => handleVerseClick(verse, act.number, scene.number, e)}
+              onDialogBlockClick={(block, e) => handleStanzaClick(block, act.number, scene.number)}
+              selectedVerseIds={selectedVerseIds}
+              selectedDialogBlockId={selectedStanzaId}
+              isCharacterHighlightingEnabled={isCharacterHighlightingEnabled}
+              actNumber={act.number}
+              sceneNumber={scene.number}
+            />
+          ))}
+        </div>
         ))}
 
 

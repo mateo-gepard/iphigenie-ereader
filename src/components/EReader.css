@@ -264,14 +264,7 @@
   }
 }
 
-/* Sequential verse numbering across all acts */
-.text-content {
-  counter-reset: verse-counter;
-}
-
-.verse {
-  counter-increment: verse-counter;
-}
+/* Verse numbering now handled by individual drama renderers */
 
 .line-number {
   color: var(--text-muted);
@@ -285,8 +278,9 @@
   transition: all 0.3s ease;
 }
 
+/* Line numbers are now handled by individual drama renderers */
 .line-number::before {
-  content: counter(verse-counter) ": ";
+  content: none;
 }
 
 .verse.selected-verse .line-number {

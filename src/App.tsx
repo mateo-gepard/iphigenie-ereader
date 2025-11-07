@@ -428,6 +428,7 @@ function App() {
         <div className="reader-container">
           <EReader 
             text={currentWorkText} 
+            workType={currentWorkConfig?.workType || 'iphigenie'}
             onTextSelection={handleTextSelection}
             onCharacterComparison={handleCharacterComparison}
             characterForComparison={characterForComparison}

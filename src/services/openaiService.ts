@@ -5,10 +5,11 @@ import { GlobalCacheService } from './globalCacheService';
 
 // Note: In a production app, you should use environment variables and a backend API
 // to keep your API key secure. This is for demonstration purposes only.
-const openai = new OpenAI({
-  apiKey: import.meta.env.VITE_OPENAI_API_KEY,
+const API_KEY = import.meta.env.VITE_OPENAI_API_KEY;
+const openai = API_KEY ? new OpenAI({
+  apiKey: API_KEY,
   dangerouslyAllowBrowser: true // Only for demo - use backend in production
-});
+}) : null;
 
 export class OpenAIService {
   private static currentWork: WorkConfig | null = null;
@@ -57,10 +58,15 @@ KONTEXT: ${workMeta?.historicalContext || 'Nicht verfügbar'}`;
         const scene = this.getSceneByNumbers(request.actNumber, request.sceneNumber);
         
         if (scene) {
+          // Handle both legacy stanzas and new dialogBlocks
+          const stanzas = (scene as any).stanzas || [];
+          const dialogBlocks = (scene as any).dialogBlocks || [];
+          const textBlocks = stanzas.length > 0 ? stanzas : dialogBlocks;
+          
           // 1. SZENENKONTEXT - Grundlegende Szeneninformationen
-          const totalStanzas = scene.stanzas.length;
-          const speakers = [...new Set(scene.stanzas.map((s: any) => s.title))].filter(Boolean);
-          sceneContext = `Szene: ${scene.title} (${totalStanzas} Textabschnitte). Aktive Sprecher: ${speakers.join(', ').replace(/:/g, '')}`;
+          const totalBlocks = textBlocks.length;
+          const speakers = [...new Set(textBlocks.map((s: any) => s.title || s.speaker))].filter(Boolean);
+          sceneContext = `Szene: ${scene.title} (${totalBlocks} Textabschnitte). Aktive Sprecher: ${speakers.join(', ').replace(/:/g, '')}`;
 
           // 2. UMGEBUNGSTEXT - 2-3 Verse vor und nach dem ausgewählten Text
           if (request.context === 'verse') {
@@ -113,15 +119,30 @@ KONTEXT: ${workMeta?.historicalContext || 'Nicht verfügbar'}`;
   // Extrahiert umgebende Verse für besseren Kontext
   private static extractSurroundingVerses(scene: any, targetText: string, contextRange: number): string {
     const allVerses: any[] = [];
-    scene.stanzas.forEach((stanza: any) => {
-      stanza.verses.forEach((verse: any) => {
-        allVerses.push({ ...verse, speaker: stanza.title });
+    
+    // Handle both legacy stanzas and new dialogBlocks
+    const stanzas = scene.stanzas || [];
+    const dialogBlocks = scene.dialogBlocks || [];
+    
+    if (stanzas.length > 0) {
+      stanzas.forEach((stanza: any) => {
+        stanza.verses?.forEach((verse: any) => {
+          allVerses.push({ ...verse, speaker: stanza.title });
+        });
       });
-    });
+    } else if (dialogBlocks.length > 0) {
+      dialogBlocks.forEach((block: any) => {
+        block.content?.forEach((item: any) => {
+          if (item.text) {
+            allVerses.push({ ...item, speaker: block.speaker });
+          }
+        });
+      });
+    }
 
     // Finde den Zielvers
     const targetIndex = allVerses.findIndex(verse => 
-      verse.text.trim() === targetText.trim() || targetText.includes(verse.text.trim())
+      verse.text?.trim() === targetText.trim() || targetText.includes(verse.text?.trim() || '')
     );
 
     if (targetIndex === -1) return '';
@@ -131,26 +152,48 @@ KONTEXT: ${workMeta?.historicalContext || 'Nicht verfügbar'}`;
     const end = Math.min(allVerses.length, targetIndex + contextRange + 1);
     
     return allVerses.slice(start, end)
-      .map(verse => `${verse.lineNumber}: ${verse.text}`)
+      .map(verse => `${verse.lineNumber || ''}: ${verse.text || ''}`)
       .join('\n');
   }
 
   // Extrahiert umgebende Strophen für besseren Kontext
   private static extractSurroundingStanzas(scene: any, targetText: string, contextRange: number): string {
-    const targetStanzaIndex = scene.stanzas.findIndex((stanza: any) => {
-      const stanzaText = stanza.verses.map((v: any) => v.text).join('\n');
-      return targetText.includes(stanzaText) || stanzaText.includes(targetText);
+    const stanzas = scene.stanzas || [];
+    const dialogBlocks = scene.dialogBlocks || [];
+    const textBlocks = stanzas.length > 0 ? stanzas : dialogBlocks;
+    
+    if (textBlocks.length === 0) return '';
+    
+    const targetBlockIndex = textBlocks.findIndex((block: any) => {
+      if (block.verses) {
+        // Legacy stanza format
+        const blockText = block.verses.map((v: any) => v.text).join('\n');
+        return targetText.includes(blockText) || blockText.includes(targetText);
+      } else if (block.content) {
+        // New dialogBlock format
+        const blockText = block.content.map((c: any) => c.text || '').join('\n');
+        return targetText.includes(blockText) || blockText.includes(targetText);
+      }
+      return false;
     });
 
-    if (targetStanzaIndex === -1) return '';
+    if (targetBlockIndex === -1) return '';
 
-    const start = Math.max(0, targetStanzaIndex - contextRange);
-    const end = Math.min(scene.stanzas.length, targetStanzaIndex + contextRange + 1);
+    const start = Math.max(0, targetBlockIndex - contextRange);
+    const end = Math.min(textBlocks.length, targetBlockIndex + contextRange + 1);
     
-    return scene.stanzas.slice(start, end)
-      .map((stanza: any) => {
-        const verses = stanza.verses.map((v: any) => `${v.lineNumber}: ${v.text}`).slice(0, 3);
-        return `${stanza.title}\n${verses.join('\n')}${stanza.verses.length > 3 ? '\n...' : ''}`;
+    return textBlocks.slice(start, end)
+      .map((block: any) => {
+        if (block.verses) {
+          // Legacy stanza format
+          const verses = block.verses.map((v: any) => `${v.lineNumber}: ${v.text}`).slice(0, 3);
+          return `${block.title}\n${verses.join('\n')}${block.verses.length > 3 ? '\n...' : ''}`;
+        } else if (block.content) {
+          // New dialogBlock format
+          const content = block.content.map((c: any) => `${c.lineNumber || ''}: ${c.text || ''}`).slice(0, 3);
+          return `${block.speaker}\n${content.join('\n')}${block.content.length > 3 ? '\n...' : ''}`;
+        }
+        return '';
       })
       .join('\n\n');
   }
@@ -195,6 +238,20 @@ KONTEXT: ${workMeta?.historicalContext || 'Nicht verfügbar'}`;
 
   static async getExplanation(request: ExplanationRequest): Promise<ExplanationResponse> {
     try {
+      // Check if OpenAI is available
+      if (!openai) {
+        return {
+          explanation: "OpenAI-Service ist nicht verfügbar. Bitte konfigurieren Sie einen API-Schlüssel in der .env-Datei, um KI-gestützte Erklärungen zu erhalten.",
+          summary: "Service nicht verfügbar",
+          background: "OpenAI API-Schlüssel fehlt",
+          literaryDevices: [],
+          themes: [],
+          characterAnalysis: "Nicht verfügbar ohne OpenAI-Service",
+          dramaticFunction: "Nicht verfügbar ohne OpenAI-Service",
+          metricAnalysis: "Nicht verfügbar ohne OpenAI-Service"
+        };
+      }
+
       // Erweiterte Kontextgenerierung für bessere Antwortqualität
       const enrichedRequest = await this.enrichRequestWithContext(request);
       
@@ -480,6 +537,11 @@ Antworte ausschließlich im vorgegebenen JSON-Format.`;
     sceneNumber?: number;
   }): Promise<string> {
     try {
+      // Check if OpenAI is available
+      if (!openai) {
+        return "OpenAI-Service ist nicht verfügbar. Bitte konfigurieren Sie einen API-Schlüssel in der .env-Datei, um KI-gestützte Antworten zu erhalten.";
+      }
+
       // Erweiterten Kontext für Custom Questions generieren
       let additionalContext = '';
       
@@ -488,7 +550,12 @@ Antworte ausschließlich im vorgegebenen JSON-Format.`;
           const scene = this.getSceneByNumbers(contextInfo.actNumber, contextInfo.sceneNumber);
           
           if (scene) {
-            const speakers = [...new Set(scene.stanzas.map((s: any) => s.title))].filter(Boolean);
+            // Handle both legacy stanzas and new dialogBlocks
+            const stanzas = (scene as any).stanzas || [];
+            const dialogBlocks = (scene as any).dialogBlocks || [];
+            const textBlocks = stanzas.length > 0 ? stanzas : dialogBlocks;
+            
+            const speakers = [...new Set(textBlocks.map((s: any) => s.title || s.speaker))].filter(Boolean);
             const dramaticMoment = this.getDramaticMoment(contextInfo.actNumber, contextInfo.sceneNumber);
             
             additionalContext = `\n\nKONTEXT ZUR BESSEREN EINORDNUNG:

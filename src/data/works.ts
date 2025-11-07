@@ -22,6 +22,7 @@ export const availableWorks: WorkConfig[] = [
     genre: 'drama',
     language: 'de',
     year: 1787,
+    workType: 'iphigenie',  // Very regular verse, : speaker, minimal directions
     content: iphigenieText as Act[],
     characters: characters,
     metadata: {
@@ -29,7 +30,12 @@ export const availableWorks: WorkConfig[] = [
       themes: ['Humanität', 'Wahrheit', 'Versöhnung', 'Götter und Menschen'],
       historicalContext: 'Goethes Bearbeitung des antiken Euripides-Stoffs im Geiste der Weimarer Klassik',
       notes: 'Paradigmatisches Werk des deutschen Klassizismus mit Fokus auf sittliche Läuterung',
-      cover: '/iphigenie-auf-tauris-1-auflage-hamburger-lesehefte.jpeg'
+      cover: '/iphigenie-auf-tauris-1-auflage-hamburger-lesehefte.jpeg',
+      acts: 5,
+      subdivision: 'Auftritte',
+      textFormat: 'Vers',
+      speakerPunctuation: ':',
+      hasFrequentDirections: false
     }
   },
 
@@ -42,6 +48,7 @@ export const availableWorks: WorkConfig[] = [
     genre: 'drama',
     language: 'de',
     year: 1808,
+    workType: 'faust',  // Mixed verse/prose, : speaker, many directions, location
     content: faust1Text as Act[],
     characters: faust1Characters,
     metadata: {
@@ -49,7 +56,12 @@ export const availableWorks: WorkConfig[] = [
       themes: ['Erkenntnisdrang', 'Pakt mit dem Teufel', 'Liebe und Schuld', 'Rettung durch Liebe'],
       historicalContext: 'Goethes Lebenswerk, vereint Gelehrten- und Gretchen-Tragödie',
       notes: 'Eines der bedeutendsten Werke der Weltliteratur',
-      cover: '/faust-i-hamburger-lesehefte.jpeg'
+      cover: '/faust-i-hamburger-lesehefte.jpeg',
+      acts: undefined,  // No act structure
+      subdivision: 'Szenen',
+      textFormat: 'gemischt',
+      speakerPunctuation: ':',
+      hasFrequentDirections: true
     }
   },
 
@@ -61,6 +73,7 @@ export const availableWorks: WorkConfig[] = [
     genre: 'drama',
     language: 'de',
     year: 1779,
+    workType: 'nathan',  // Verse, . speaker, frequent directions
     content: nathanText as Act[],
     characters: nathanCharacters,
     metadata: {
@@ -68,7 +81,12 @@ export const availableWorks: WorkConfig[] = [
       themes: ['Religionstoleranz', 'Humanität', 'Ringparabel', 'Aufklärung', 'Weisheit'],
       historicalContext: 'Lessings Plädoyer für religiöse Toleranz im Zeitalter der Aufklärung',
       notes: 'Eines der wichtigsten deutschen Dramen der Aufklärung',
-      cover: '/nathan-der-weise-hamburger-lesehefte.jpg'
+      cover: '/nathan-der-weise-hamburger-lesehefte.jpg',
+      acts: 5,
+      subdivision: 'Auftritte',
+      textFormat: 'Vers',
+      speakerPunctuation: '.',
+      hasFrequentDirections: true
     }
   },
 
@@ -80,6 +98,7 @@ export const availableWorks: WorkConfig[] = [
     genre: 'drama',
     language: 'de',
     year: 1808,
+    workType: 'zerbrochner-krug',  // Prose, . speaker, very many directions (line-level)
     content: derZerbrocheneKrugText as Act[],
     characters: derZerbrocheneKrugCharacters,
     metadata: {
@@ -87,7 +106,12 @@ export const availableWorks: WorkConfig[] = [
       themes: ['Gerechtigkeit', 'Korruption', 'Komik', 'Dorfgemeinschaft', 'Richter und Recht'],
       historicalContext: 'Kleists Komödie über einen korrupten Dorfrichter, inspiriert von einem niederländischen Kupferstich',
       notes: 'Klassisches deutsches Lustspiel der Romantik',
-      cover: '/der-zerbrochne-krug-hamburger-lesehefte.jpg'
+      cover: '/der-zerbrochne-krug-hamburger-lesehefte.jpg',
+      acts: 1,
+      subdivision: 'Auftritte',
+      textFormat: 'Prosa',
+      speakerPunctuation: '.',
+      hasFrequentDirections: true
     }
   },
 
@@ -99,6 +123,7 @@ export const availableWorks: WorkConfig[] = [
     genre: 'drama',
     language: 'de',
     year: 1781,
+    workType: 'raeuber',  // Prose, . speaker, many directions, narrator, location
     content: dieRaeuberText as Act[],
     characters: dieRaeuberCharacters,
     metadata: {
@@ -106,7 +131,12 @@ export const availableWorks: WorkConfig[] = [
       themes: ['Brüderkonflikt', 'Tyrannei', 'Freiheit', 'Recht und Gerechtigkeit'],
       historicalContext: 'Erstes Drama Schillers, Sturm und Drang Manifest gegen Despotismus',
       notes: 'Schillers revolutionäres Erstlingsdrama',
-      cover: '/die-raeuber-hamburger-lesehefte.jpeg'
+      cover: '/die-raeuber-hamburger-lesehefte.jpeg',
+      acts: 5,
+      subdivision: 'Szenen',
+      textFormat: 'Prosa',
+      speakerPunctuation: '.',
+      hasFrequentDirections: true
     }
   }
 ];
