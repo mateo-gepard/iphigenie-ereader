@@ -35,7 +35,9 @@ export const getSceneByNumbers = (actNumber: number, sceneNumber: number): Scene
 export const getStanzaById = (stanzaId: string): Stanza | undefined => {
     for (const act of iphigenieText) {
         for (const scene of act.scenes) {
-            const stanza = scene.stanzas.find(s => s.id === stanzaId);
+            // Support both legacy stanzas and new dialogBlocks
+            const stanzas = scene.stanzas || [];
+            const stanza = stanzas.find((s: any) => s.id === stanzaId);
             if (stanza) return stanza;
         }
     }
@@ -45,8 +47,10 @@ export const getStanzaById = (stanzaId: string): Stanza | undefined => {
 export const getVerseById = (verseId: string): Verse | undefined => {
     for (const act of iphigenieText) {
         for (const scene of act.scenes) {
-            for (const stanza of scene.stanzas) {
-                const verse = stanza.verses.find(v => v.id === verseId);
+            // Support both legacy stanzas and new dialogBlocks
+            const stanzas = scene.stanzas || [];
+            for (const stanza of stanzas) {
+                const verse = stanza.verses?.find((v: any) => v.id === verseId);
                 if (verse) return verse;
             }
         }
@@ -63,9 +67,11 @@ export const getDramaStats = () => {
     iphigenieText.forEach(act => {
         totalScenes += act.scenes.length;
         act.scenes.forEach(scene => {
-            totalStanzas += scene.stanzas.length;
-            scene.stanzas.forEach(stanza => {
-                totalVerses += stanza.verses.length;
+            // Support both legacy stanzas and new dialogBlocks
+            const stanzas = scene.stanzas || [];
+            totalStanzas += stanzas.length;
+            stanzas.forEach((stanza: any) => {
+                totalVerses += stanza.verses?.length || 0;
             });
         });
     });

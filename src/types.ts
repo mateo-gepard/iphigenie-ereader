@@ -17,12 +17,13 @@ export interface StageDirection {
   lineNumber?: number;
 }
 
-// Dialog Block - replaces generic "Stanza"
+// Dialog Block - replaces generic "Stanza" - supports legacy format
 export interface DialogBlock {
   id: string;
   speaker?: string;  // Character name without punctuation: "Nathan", "Iphigenie", "Faust"
+  title?: string;    // Legacy format support (same as speaker with punctuation)
   speakerPunctuation?: ':' | '.';  // How the speaker is marked in original text
-  verses: Verse[];
+  verses?: Verse[];  // Legacy and new format support
   directions?: StageDirection[];  // Stage directions within this dialog block
   act?: number;
   scene?: number;
@@ -33,12 +34,13 @@ export interface DialogBlock {
 // Legacy alias for backward compatibility
 export type Stanza = DialogBlock;
 
-// Scene structure (Auftritt/Szene)
+// Scene structure (Auftritt/Szene) - supports both old and new format
 export interface Scene {
   id: string;
   title: string;  // "Erster Auftritt", "Erste Szene", etc.
   number: number;
-  dialogBlocks: DialogBlock[];
+  dialogBlocks?: DialogBlock[];  // New format
+  stanzas?: Stanza[];  // Legacy format - keep for backward compatibility
   location?: string;  // "Ein Zimmer", "Garten", etc. (for Faust, Die Räuber)
   directions?: StageDirection[];  // Scene-level stage directions
 }
@@ -66,7 +68,8 @@ export interface FaustPrelude {
   id: string;
   type: 'zueignung' | 'vorspiel' | 'prolog';
   title: string;
-  dialogBlocks: DialogBlock[];
+  dialogBlocks?: DialogBlock[];
+  stanzas?: Stanza[];  // Legacy support
   location?: string;
 }
 
@@ -76,7 +79,8 @@ export interface FaustScene {
   number: number;
   title: string;
   location: string;  // "Nacht. Faust in einem hochgewölbten..." - important for Faust
-  dialogBlocks: DialogBlock[];
+  dialogBlocks?: DialogBlock[];
+  stanzas?: Stanza[];  // Legacy support
   directions?: StageDirection[];
 }
 
@@ -92,7 +96,8 @@ export interface ZerbrochnerKrugEntrance {
   id: string;
   title: string;  // "Erster Auftritt", "Zweiter Auftritt", etc.
   number: number;
-  dialogBlocks: DialogBlock[];
+  dialogBlocks?: DialogBlock[];
+  stanzas?: Stanza[];  // Legacy support
   directions?: StageDirection[];  // Very important for this work
 }
 

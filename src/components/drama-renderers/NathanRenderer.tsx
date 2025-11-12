@@ -24,10 +24,7 @@ export function NathanRenderer({
   onVerseClick,
   onDialogBlockClick,
   selectedVerseIds,
-  selectedDialogBlockId,
-  isCharacterHighlightingEnabled,
-  actNumber,
-  sceneNumber
+  selectedDialogBlockId
 }: NathanRendererProps) {
   
   const getDialogBlocks = () => {
@@ -45,7 +42,8 @@ export function NathanRenderer({
     if (!firstBlock || !firstBlock.verses) return null;
     
     // Only show directions from the very first block
-    const directions = firstBlock.verses.filter((v: Verse) => isStageDirection(v));
+    const firstBlockVerses = firstBlock.verses || [];
+    const directions = firstBlockVerses.filter((v: Verse) => isStageDirection(v));
     if (directions.length === 0) return null;
 
     return (
@@ -70,7 +68,8 @@ export function NathanRenderer({
         const isSelected = selectedDialogBlockId === block.id;
         
         // Skip the first block if it only contains scene directions (already shown at top)
-        const hasOnlyDirections = block.verses.every(v => isStageDirection(v));
+        const verses = block.verses || [];
+        const hasOnlyDirections = verses.every(v => isStageDirection(v));
         if (hasOnlyDirections && blockIndex === 0) {
           return null;
         }
@@ -90,7 +89,7 @@ export function NathanRenderer({
             )}
             
             <div className="verses nathan-verses">
-              {block.verses.map((verse: Verse) => {
+              {verses.map((verse: Verse) => {
                 const isVerseSelected = selectedVerseIds.includes(verse.id);
                 const isDirection = isStageDirection(verse);
                 

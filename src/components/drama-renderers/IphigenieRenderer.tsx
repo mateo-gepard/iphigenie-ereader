@@ -24,10 +24,7 @@ export function IphigenieRenderer({
   onVerseClick,
   onDialogBlockClick,
   selectedVerseIds,
-  selectedDialogBlockId,
-  isCharacterHighlightingEnabled,
-  actNumber,
-  sceneNumber
+  selectedDialogBlockId
 }: IphigenieRendererProps) {
   
   const getDialogBlocks = () => {
@@ -58,7 +55,7 @@ export function IphigenieRenderer({
             )}
             
             <div className="verses iphigenie-verses">
-              {block.verses.map((verse: Verse) => {
+              {(block.verses || []).map((verse: Verse) => {
                 const isVerseSelected = selectedVerseIds.includes(verse.id);
                 
                 return (

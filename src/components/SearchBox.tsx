@@ -54,21 +54,24 @@ export function SearchBox({ text, onResultSelect }: SearchBoxProps) {
           });
         }
 
-        scene.stanzas.forEach(stanza => {
-          // Search in stanza title
-          if (stanza.title.toLowerCase().includes(searchTerm)) {
+        const stanzas = scene.stanzas || [];
+        stanzas.forEach(stanza => {
+          // Search in stanza title (support both legacy title and new speaker format)
+          const stanzaTitle = stanza.title || stanza.speaker || '';
+          if (stanzaTitle.toLowerCase().includes(searchTerm)) {
             results.push({
               type: 'stanza',
               id: stanza.id,
-              text: stanza.title,
+              text: stanzaTitle,
               actNumber: act.number,
               sceneNumber: scene.number,
               context: `Aufzug ${act.number}, Szene ${scene.number}`,
-              matchIndex: stanza.title.toLowerCase().indexOf(searchTerm)
+              matchIndex: stanzaTitle.toLowerCase().indexOf(searchTerm)
             });
           }
 
-          stanza.verses.forEach(verse => {
+          const verses = stanza.verses || [];
+          verses.forEach(verse => {
             // Search in verse text
             if (verse.text.toLowerCase().includes(searchTerm)) {
               results.push({

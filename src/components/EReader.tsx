@@ -1,8 +1,8 @@
 import { useState, useRef } from 'react';
-import type { Act, ExplanationResponse, WorkType, DialogBlock, Verse } from '../types';
+import type { Act, ExplanationResponse, WorkType } from '../types';
 import type { Character } from '../data/characters';
 import { OpenAIService } from '../services/openaiService';
-import { findCharactersInText } from '../data/characters';
+
 import { CharacterPopup } from './CharacterPopup';
 import { SmartDramaRenderer } from './drama-renderers/SmartDramaRenderer';
 import './EReader.css';
@@ -32,7 +32,6 @@ export function EReader({
   onTextSelection, 
   onCharacterComparison,
   characterForComparison,
-  areCharactersVisible,
   isCharacterHighlightingEnabled
 }: EReaderProps) {
   const [selectedVerseIds, setSelectedVerseIds] = useState<string[]>([]);
@@ -43,8 +42,8 @@ export function EReader({
     text: string;
   } | null>(null);
   const [showCharacterPopup, setShowCharacterPopup] = useState(false);
-  const [selectedCharacter, setSelectedCharacter] = useState<Character | null>(null);
-  const [popupPosition, setPopupPosition] = useState({ x: 0, y: 0 });
+  const [selectedCharacter] = useState<Character | null>(null);
+  const [popupPosition] = useState({ x: 0, y: 0 });
   const containerRef = useRef<HTMLDivElement>(null);
 
   // Scrolle zurück zum analysierten Element
@@ -244,126 +243,9 @@ export function EReader({
     }
   };
 
-  const handleCharacterClick = (character: Character, event: React.MouseEvent) => {
-    event.stopPropagation();
-    
-    // Bulletproof positioning: Use page coordinates instead of viewport
-    const target = event.currentTarget as HTMLElement;
-    const rect = target.getBoundingClientRect();
-    
-    // Calculate position with scroll offset for absolute positioning
-    const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-    const scrollLeft = window.pageXOffset || document.documentElement.scrollLeft;
-    
-    // Position popup centered above the clicked element
-    const x = rect.left + scrollLeft + (rect.width / 2);
-    const y = rect.top + scrollTop - 20; // 20px above the element
-    
-    console.log('Character Click (Bulletproof):', {
-      character: character.name,
-      rect: rect,
-      scrollTop,
-      scrollLeft,
-      finalX: x,
-      finalY: y,
-      elementText: target.textContent
-    });
-    
-    setSelectedCharacter(character);
-    setPopupPosition({ x, y });
-    setShowCharacterPopup(true);
-  };
 
-  // Neue Funktion: Rendert Text mit klickbaren Charakternamen als React-Komponenten
-  const renderTextWithCharacters = (text: string): React.ReactNode[] => {
-    if (!areCharactersVisible) {
-      return [text];
-    }
 
-    const foundCharacters = findCharactersInText(text);
-    if (foundCharacters.length === 0) {
-      return [text];
-    }
 
-    // Sammle alle Character-Matches mit Positionen
-    const allMatches: Array<{
-      character: Character;
-      match: string;
-      start: number;
-      end: number;
-    }> = [];
-
-    foundCharacters.forEach(({ character, matches }) => {
-      matches.forEach(match => {
-        const regex = new RegExp(`\\b${match.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'gi');
-        let execResult;
-        while ((execResult = regex.exec(text)) !== null) {
-          allMatches.push({
-            character,
-            match: execResult[0],
-            start: execResult.index,
-            end: execResult.index + execResult[0].length
-          });
-        }
-      });
-    });
-
-    // Sortiere nach Position und entferne Überschneidungen
-    allMatches.sort((a, b) => a.start - b.start);
-    
-    // Entferne überschneidende Matches (behalte den ersten)
-    const nonOverlappingMatches = allMatches.filter((match, index) => {
-      for (let i = 0; i < index; i++) {
-        if (allMatches[i].end > match.start) {
-          return false;
-        }
-      }
-      return true;
-    });
-
-    // Baue React-Elemente auf
-    const elements: React.ReactNode[] = [];
-    let lastIndex = 0;
-
-    nonOverlappingMatches.forEach((match, index) => {
-      // Text vor dem Character-Namen
-      if (match.start > lastIndex) {
-        elements.push(text.slice(lastIndex, match.start));
-      }
-
-      // Character-Name als klickbares Element
-      const isSelected = characterForComparison?.id === match.character.id;
-      elements.push(
-        <span
-          key={`char-${index}`}
-          className={`character-name${isSelected ? ' selected-for-comparison' : ''}`}
-          data-character-id={match.character.id}
-          style={{
-            backgroundColor: isCharacterHighlightingEnabled ? `${match.character.color}20` : 'transparent',
-            borderColor: match.character.color,
-            color: match.character.color,
-            cursor: 'pointer',
-            padding: '1px 3px',
-            borderRadius: '3px',
-            border: '1px solid',
-            textDecoration: 'underline'
-          }}
-          onClick={(e) => handleCharacterClick(match.character, e)}
-        >
-          {match.match}
-        </span>
-      );
-
-      lastIndex = match.end;
-    });
-
-    // Restlicher Text
-    if (lastIndex < text.length) {
-      elements.push(text.slice(lastIndex));
-    }
-
-    return elements;
-  };
 
 
 
@@ -533,8 +415,8 @@ export function EReader({
               key={scene.id}
               scene={scene}
               workType={workType}
-              onVerseClick={(verse, speaker, e) => handleVerseClick(verse, act.number, scene.number, e)}
-              onDialogBlockClick={(block, e) => handleStanzaClick(block, act.number, scene.number)}
+              onVerseClick={(verse, _speaker, e) => handleVerseClick(verse, act.number, scene.number, e)}
+              onDialogBlockClick={(block, _e) => handleStanzaClick(block, act.number, scene.number)}
               selectedVerseIds={selectedVerseIds}
               selectedDialogBlockId={selectedStanzaId}
               isCharacterHighlightingEnabled={isCharacterHighlightingEnabled}
