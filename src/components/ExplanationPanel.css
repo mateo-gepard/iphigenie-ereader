@@ -765,6 +765,44 @@
   font-weight: 600;
 }
 
+.general-question-info {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+.general-question-info p {
+  margin: 0 0 0.75rem 0;
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+.general-question-info ul {
+  margin: 0;
+  padding-left: 1.5rem;
+  color: var(--text-muted);
+}
+
+.general-question-info li {
+  margin-bottom: 0.25rem;
+  line-height: 1.4;
+}
+
+.general-answer-hint {
+  margin-top: 1rem;
+  padding: 0.75rem;
+  background: var(--bg-hover);
+  border-radius: 6px;
+  text-align: center;
+}
+
+.general-answer-hint small {
+  color: var(--text-muted);
+  font-style: italic;
+}
+
 .question-form {
   margin-bottom: 1rem;
 }

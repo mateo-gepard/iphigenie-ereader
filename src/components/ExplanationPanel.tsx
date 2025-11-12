@@ -72,7 +72,10 @@ export function ExplanationPanel({
     
     setIsAnswering(true);
     try {
-      const response = await OpenAIService.answerCustomQuestion(selectedText || '', customQuestion);
+      // Wenn kein Text ausgewählt ist, verwenden wir eine allgemeine Frage-Funktion
+      const response = selectedText ? 
+        await OpenAIService.answerCustomQuestion(selectedText, customQuestion) :
+        await OpenAIService.answerGeneralQuestion(customQuestion);
       setCustomAnswer(response);
     } catch (error) {
       console.error('Fehler beim Stellen der Frage:', error);
@@ -82,29 +85,7 @@ export function ExplanationPanel({
     }
   };
 
-  // Früher Return für Willkommensbildschirm wenn nichts ausgewählt ist
-  if (!selectedText && !explanation && !selectedCharacter && !isLoading && !customAnswer) {
-    return (
-      <div className="explanation-panel">
-        <div className="welcome-screen">
-          <div className="welcome-content">
-            <h2>Willkommen zum interaktiven Iphigenie-Reader</h2>
-            <p>Entdecken Sie Goethes Meisterwerk mit KI-unterstützter Analyse</p>
-            
-            <div className="instructions">
-              <h4>Anleitung:</h4>
-              <ul>
-                <li><strong>Einzelner Vers:</strong> Klicken Sie auf eine Zeile für spezifische Erklärungen</li>
-                <li><strong>Strophe:</strong> Klicken Sie auf den Titel einer Strophe für Kontext und Zusammenfassung</li>
-                <li><strong>Charaktere:</strong> Klicken Sie auf hervorgehobene Namen für Charakterinformationen</li>
-                <li><strong>KI-gestützt:</strong> Alle Erklärungen werden von ChatGPT generiert</li>
-              </ul>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
+  // Panel ist jetzt immer verfügbar, auch für allgemeine Fragen
 
   return (
     <div className="explanation-panel">
@@ -164,11 +145,26 @@ export function ExplanationPanel({
         {activeTab === 'question' && (
           <div className="question-tab">
             <div className="custom-question-section">
-              <h4>Stellen Sie eine Frage zum Text</h4>
+              <h4>Stellen Sie eine Frage {selectedText ? 'zum ausgewählten Text' : 'zum Werk'}</h4>
+              {!selectedText && (
+                <div className="general-question-info">
+                  <p>💡 Sie können allgemeine Fragen zu "Iphigenie auf Tauris" stellen, ohne Text auszuwählen:</p>
+                  <ul>
+                    <li>Fragen zur Handlung und Struktur</li>
+                    <li>Charakteranalysen und Beziehungen</li>
+                    <li>Themen und Motive des Werks</li>
+                    <li>Historischer und mythologischer Kontext</li>
+                    <li>Goethes Schreibstil und Sprache</li>
+                  </ul>
+                </div>
+              )}
               <textarea
                 value={customQuestion}
                 onChange={(e) => setCustomQuestion(e.target.value)}
-                placeholder="Stellen Sie hier Ihre Frage zu Iphigenies Dilema, den Charakteren oder dem Text..."
+                placeholder={selectedText ? 
+                  "Stellen Sie hier Ihre Frage zum ausgewählten Text..." : 
+                  "Fragen Sie z.B.: 'Was ist das zentrale Thema von Iphigenie auf Tauris?' oder 'Wie entwickelt sich Iphigenies Charakter im Verlauf des Dramas?'"
+                }
                 rows={3}
                 className="question-input"
               />
@@ -190,12 +186,17 @@ export function ExplanationPanel({
 
               {customAnswer && (
                 <div className="custom-answer">
-                  <h4>Antwort:</h4>
+                  <h4>{selectedText ? 'Antwort zum ausgewählten Text:' : 'Antwort zur allgemeinen Frage:'}</h4>
                   <div className="answer-content">
                     {customAnswer.split('\n').map((paragraph, index) => (
                       <p key={index}>{paragraph}</p>
                     ))}
                   </div>
+                  {!selectedText && (
+                    <div className="general-answer-hint">
+                      <small>💡 Sie können auch spezifische Textabschnitte auswählen, um detailliertere Analysen zu erhalten.</small>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
@@ -252,7 +253,7 @@ export function ExplanationPanel({
             )}
 
             {/* Hintergrundtext wenn nichts ausgewählt ist */}
-            {!selectedText && !isLoading && !explanation && (
+            {!selectedText && !isLoading && !explanation && !customAnswer && (
               <div className="explanation-background">
                 <div className="background-content">
                   <div className="background-header">

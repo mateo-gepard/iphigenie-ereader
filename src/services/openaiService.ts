@@ -617,6 +617,70 @@ Bitte beantworte die Frage präzise und wissenschaftlich fundiert, bezogen auf d
     }
   }
 
+  static async answerGeneralQuestion(question: string): Promise<string> {
+    try {
+      // Check if OpenAI is available
+      if (!openai) {
+        return "OpenAI-Service ist nicht verfügbar. Bitte konfigurieren Sie einen API-Schlüssel in der .env-Datei, um KI-gestützte Antworten zu erhalten.";
+      }
+
+      // Erweiterten Kontext für das aktuelle Werk generieren
+      let workContext = '';
+      if (this.currentWork) {
+        const workMeta = this.currentWork.metadata;
+        workContext = `\n\nKONTEXT ZUM AKTUELLEN WERK:
+- Werk: "${this.currentWork.title}" von ${this.currentWork.author} (${this.currentWork.year})
+- Epoche: ${this.currentWork.epoch}
+- Genre: ${this.currentWork.genre === 'drama' ? 'Drama' : this.currentWork.genre}
+${workMeta?.subtitle ? `- Untertitel: ${workMeta.subtitle}` : ''}
+- Hauptthemen: ${workMeta?.themes?.join(', ') || 'Humanität, Wahrheit, moralische Konflikte'}
+- Historischer Kontext: ${workMeta?.historicalContext || 'Weimarer Klassik, Aufklärung'}`;
+      }
+
+      const completion = await openai.chat.completions.create({
+        model: "gpt-3.5-turbo",
+        messages: [
+          {
+            role: "system",
+            content: `Du bist ein erfahrener Literaturwissenschaftler mit spezieller Expertise in deutscher Literatur, besonders der Weimarer Klassik und Goethes Werken. 
+            Beantworte allgemeine Fragen zu literarischen Werken präzise und wissenschaftlich fundiert.
+            
+            ANTWORT-RICHTLINIEN:
+            - Gib umfassende, strukturierte Antworten
+            - Verwende angemessene literaturwissenschaftliche Terminologie
+            - Erkläre verständlich für Schüler und Studenten
+            - Beziehe historische und kulturelle Kontexte ein
+            - Gib konkrete Beispiele aus dem Werk (wenn verfügbar)
+            - Erkläre Zusammenhänge zwischen Charakteren, Themen und Struktur
+            - Passe die Antwort an die Komplexität der Frage an
+            
+            EXPERTISE-BEREICHE:
+            - Deutsche Literatur aller Epochen (Schwerpunkt Klassik/Aufklärung)
+            - Dramatik, Lyrik, Epik
+            - Charakteranalyse und Figurenkonstellationen
+            - Themen und Motive (Humanität, Wahrheit, Moral)
+            - Historische und mythologische Kontexte
+            - Goethes Werk und Philosophie`
+          },
+          {
+            role: "user",
+            content: `ALLGEMEINE FRAGE ZUR LITERATUR:
+${question}${workContext}
+
+Bitte beantworte diese Frage umfassend und strukturiert. Wenn die Frage sich auf ein spezifisches Werk bezieht (wie "Iphigenie auf Tauris"), nutze den bereitgestellten Werkkontext für eine präzise Antwort. Bei allgemeinen literaturwissenschaftlichen Fragen gib eine fundierte, beispielreiche Antwort.`
+          }
+        ],
+        max_tokens: 1200,
+        temperature: 0.7
+      });
+
+      return completion.choices[0]?.message?.content || 'Entschuldigung, ich konnte keine Antwort generieren.';
+    } catch (error) {
+      console.error('Fehler beim Beantworten der allgemeinen Frage:', error);
+      throw new Error('Die Frage konnte nicht beantwortet werden.');
+    }
+  }
+
   private static buildCharacterComparisonPrompt(character1: any, character2: any): string {
     return `ANALYSE-AUFTRAG: Charaktervergleich in Goethes "Iphigenie auf Tauris"
 
